@@ -1,0 +1,25 @@
+sudo: false
+language: java
+
+# skip default "install" command
+install: true
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+matrix:
+  include:
+    - name: Tests with OpenJDK 8
+      jdk: openjdk8
+      script:
+        - ./gradlew build
+    - name: Tests with OpenJDK 11
+      jdk: openjdk11
+      script:
+        # https://youtrack.jetbrains.com/issue/KT-31710 Dokka javadoc task fails with JDK 11 reporting missing HtmlDoclet
+        - ./gradlew build -x dokka
