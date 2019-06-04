@@ -20,8 +20,18 @@ Gradle-License-Report is nice (it is), however there are certain pecularities (a
 * It can't generate multiple lists within a single project (e.g. license for source / binary artifacts)
 * The model for imported/discovered licenses is differnet
 * There's no way to override license detection
-* SPDX is not used
+* [SPDX](https://spdx.org/licenses/) is not used
 
+Features
+--------
+
+* LICENSE file generation (TODO)
+* License whitelisting (TODO)
+* The detected licenses can be overriden
+* Support for incremental-builds (discovery does not run in case dependencies do not change)
+* Type-safe license enumeration (based on SPDX):
+
+    com.github.vlsi.gradle.license.api.License#Apache_2_0
 
 Usage
 -----
