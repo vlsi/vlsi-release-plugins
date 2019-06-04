@@ -10,6 +10,19 @@ Note: for now only fuzzy-match is implemented, and by default a similarity thres
 
 License Gather Plugin uses https://github.com/spdx/license-list-data for the list of licenses.
 
+Prior art
+---------
+
+https://github.com/jk1/Gradle-License-Report
+
+Gradle-License-Report is nice (it is), however there are certain pecularities (as of 2019-06-04)
+
+* It can't generate multiple lists within a single project (e.g. license for source / binary artifacts)
+* The model for imported/discovered licenses is differnet
+* There's no way to override license detection
+* SPDX is not used
+
+
 Usage
 -----
 
