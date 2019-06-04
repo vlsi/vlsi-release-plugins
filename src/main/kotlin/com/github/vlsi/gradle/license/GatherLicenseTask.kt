@@ -34,10 +34,12 @@ import org.gradle.maven.MavenPomArtifact
 import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkerExecutor
 import java.io.File
+import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.jar.JarFile
 import javax.inject.Inject
 
+data class LicenseInfo(val license: License?, val licenseFiles: File?)
 
 open class GatherLicenseTask @Inject constructor(
     objectFactory: ObjectFactory,
@@ -150,6 +152,12 @@ open class GatherLicenseTask @Inject constructor(
 
     operator fun GPathResult.get(name: String) = getProperty(name) as GPathResult
 
+    private fun String.trimTextExtensions() = removeSuffix(".txt").removeSuffix(".md")
+
+    private fun URI.looksTheSame(other: URI) =
+        schemeSpecificPart == other.schemeSpecificPart ||
+                schemeSpecificPart.trimTextExtensions() == other.schemeSpecificPart.trimTextExtensions()
+
     private fun findPomLicenses(detectedLicenses: MutableMap<ResolvedArtifact, LicenseInfo>) {
         // TODO: support licenses declared in parent-poms
         val componentIds =
@@ -209,6 +217,7 @@ open class GatherLicenseTask @Inject constructor(
                 l as GPathResult
                 val name = l["name"].toString()
                 val url = l["url"].toString()
+                val uri = URI(url)
                 val guessList = nameGuesser.predict(name)
                     .entries
                     .sortedByDescending { it.value }
@@ -217,10 +226,7 @@ open class GatherLicenseTask @Inject constructor(
                     .asSequence()
                     .take(20)
                     .firstOrNull() {
-                        it.key.seeAlso.any { u ->
-                            u.toString().startsWith(url) ||
-                                    url.startsWith(u.toString())
-                        }
+                        it.key.seeAlso.any { u -> u.looksTheSame(uri) }
                     }
                 if (matchingLicense != null) {
                     logger.debug(
@@ -238,7 +244,7 @@ open class GatherLicenseTask @Inject constructor(
                         "Automatically detected license {} to mean {}. Other possibilities were {}",
                         name,
                         firstLicense.key,
-                        guessList
+                        guessList.take(10)
                     )
                     detectedLicenses.compute(componentIds.getValue(id)) { _, v ->
                         v!!.copy(license = firstLicense.key)
@@ -255,11 +261,12 @@ open class GatherLicenseTask @Inject constructor(
         model: Predictor<License>
     ) {
         for (e in detectedLicenses) {
-            if (e.value.license != null) {
+            val licenseDir = e.value.licenseFiles
+            if (e.value.license != null || licenseDir == null) {
                 continue
             }
             val bestLicenses =
-                project.fileTree(e.value) {
+                project.fileTree(licenseDir) {
                     include("**")
                 }.flatMap { f ->
                     // For each file take best 5 predictions
@@ -288,5 +295,3 @@ open class GatherLicenseTask @Inject constructor(
         }
     }
 }
-
-data class LicenseInfo(val license: License?, val licenseFiles: File?)
