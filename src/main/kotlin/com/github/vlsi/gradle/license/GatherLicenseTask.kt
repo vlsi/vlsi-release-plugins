@@ -20,10 +20,13 @@ package com.github.vlsi.gradle.license
 import com.github.vlsi.gradle.license.api.License
 import groovy.util.XmlSlurper
 import groovy.util.slurpersupport.GPathResult
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.SendChannel
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.component.ComponentIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.api.model.ObjectFactory
@@ -33,13 +36,15 @@ import org.gradle.maven.MavenModule
 import org.gradle.maven.MavenPomArtifact
 import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkerExecutor
+import java.io.Closeable
 import java.io.File
 import java.net.URI
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.jar.JarFile
 import javax.inject.Inject
 
-data class LicenseInfo(val license: License?, val licenseFiles: File?)
+data class LicenseInfo(val license: License?, val file: File?, val licenseFiles: File?)
 
 open class GatherLicenseTask @Inject constructor(
     objectFactory: ObjectFactory,
@@ -66,7 +71,7 @@ open class GatherLicenseTask @Inject constructor(
 
     @TaskAction
     fun run() {
-        val detectedLicenses = mutableMapOf<ResolvedArtifact, LicenseInfo>()
+        val allDependencies = mutableMapOf<ComponentIdentifier, LicenseInfo>()
         val licenseDir = licenseTextDir.get().asFile
 
         for (c in configurations.get()
@@ -75,16 +80,21 @@ open class GatherLicenseTask @Inject constructor(
 
             for (art in c.resolvedConfiguration.resolvedArtifacts) {
                 val compId = art.id.componentIdentifier
+                if (allDependencies.containsKey(compId)) {
+                    continue
+                }
+
                 val artLicenseTexts = File(licenseDir, art.file.name)
-                detectedLicenses[art] = LicenseInfo(
-                    license = licenseOverrides.get()[art.moduleVersion.toString()],
+                allDependencies[compId] = LicenseInfo(
+                    license = licenseOverrides.get()[compId.displayName],
+                    file = art.file,
                     licenseFiles = artLicenseTexts
                 )
                 if (compId is ModuleComponentIdentifier) {
                     workerExecutor.submit(FindLicense::class) {
-                        displayName = "Analyze ${art.moduleVersion}"
+                        displayName = "Extract licenses for ${compId.displayName}"
                         isolationMode = IsolationMode.NONE
-                        params(art.moduleVersion.toString(), art.file, artLicenseTexts)
+                        params(compId.displayName, art.file, artLicenseTexts)
                     }
                 }
             }
@@ -102,11 +112,11 @@ open class GatherLicenseTask @Inject constructor(
         }.build()
         workerExecutor.await()
 
-        findManifestLicenses(detectedLicenses)
-        findPomLicenses(detectedLicenses)
-        findLicenseFromFiles(detectedLicenses, model)
+        findManifestLicenses(allDependencies)
+        findPomLicenses(allDependencies)
+        findLicenseFromFiles(allDependencies, model)
 
-        val missingLicenses = detectedLicenses
+        val missingLicenses = allDependencies
             .filter { it.value.license == null }
             .keys
         if (missingLicenses.isNotEmpty()) {
@@ -117,7 +127,7 @@ open class GatherLicenseTask @Inject constructor(
         val outFile = outputFile.get().asFile
 
         outFile.writer().use { out ->
-            detectedLicenses
+            allDependencies
                 .entries
                 .sortedWith(compareBy { it.value.license })
                 .forEach {
@@ -126,18 +136,35 @@ open class GatherLicenseTask @Inject constructor(
         }
     }
 
-    private fun findManifestLicenses(detectedLicenses: MutableMap<ResolvedArtifact, LicenseInfo>) {
+    private fun findManifestLicenses(detectedLicenses: MutableMap<ComponentIdentifier, LicenseInfo>) {
         for (e in detectedLicenses) {
             if (e.value.license != null) {
                 continue
             }
-            logger.debug("Analyzing {}", e.key)
 
-            if (!e.key.file.endsWith(".jar")) {
+            val file = e.value.file
+            if (file == null) {
+                logger.debug(
+                    "No file is specified for artifact {}. Will skip MANIFEST.MF check",
+                    e.key
+                )
+                continue
+            }
+            if (!file.endsWith(".jar")) {
+                logger.debug(
+                    "File {} for artifact {} does not look like a JAR. Will skip MANIFEST.MF check",
+                    file,
+                    e.key
+                )
                 continue
             }
 
-            JarFile(e.key.file).use { jar ->
+            logger.debug(
+                "Will check if file {} for artifact {} has Bundle-License in MANIFEST.MF",
+                file,
+                e.key
+            )
+            JarFile(file).use { jar ->
                 val bundleLicense = jar.manifest.mainAttributes.getValue("Bundle-License")
                 val license = bundleLicense?.substringBefore(";")?.let {
                     License.fromLicenseIdOrNull(it)
@@ -158,45 +185,100 @@ open class GatherLicenseTask @Inject constructor(
         schemeSpecificPart == other.schemeSpecificPart ||
                 schemeSpecificPart.trimTextExtensions() == other.schemeSpecificPart.trimTextExtensions()
 
-    private fun findPomLicenses(detectedLicenses: MutableMap<ResolvedArtifact, LicenseInfo>) {
+    interface LicenseVisitor {
+        fun license(compId: ComponentIdentifier, license: String, url: String)
+    }
+
+    class PomWalker {
+        fun walk(ids: List<ComponentIdentifier>, out: LicenseVisitor) {
+            // load components
+            //
+        }
+    }
+
+    class LicenseTag(val name: String, val url: String)
+    class LicenseesTag(val licenses: List<LicenseTag>)
+    class PomContents(
+        val parentId: ComponentIdentifier?,
+        val id: ComponentIdentifier,
+        val licenses: LicenseesTag?
+    )
+
+    interface PomLoader {
+        suspend fun load(id: ComponentIdentifier): PomContents
+    }
+
+    class LicenseDetector(private val loader: PomLoader) {
+        fun LicenseTag.parse(): License = License.`0BSD`
+
+        suspend fun detect(id: ComponentIdentifier): License {
+            val pom = loader.load(id)
+            val licenses = pom.licenses
+            if (licenses != null) {
+                return licenses.licenses.first().parse()
+            }
+            val parentId = pom.parentId ?: TODO("License not found for $id, parent pom is missing as well")
+            return detect(parentId)
+        }
+    }
+
+    class BatchingPomLoader {
+        val loadRequests =
+            Channel<Pair<ComponentIdentifier, Deferred<PomContents>>>(Channel.UNLIMITED)
+
+        fun <T> useLoader(loader: (PomLoader)->T): T =
+            object: PomLoader, Closeable {
+                override suspend fun load(id: ComponentIdentifier): PomContents {
+                    val res = CompletableDeferred<PomContents>()
+                    loadRequests.send(id to res)
+                    return res.await()
+                }
+
+                override fun close() {
+
+                }
+            }.use { loader(it) }
+    }
+
+    fun GlobalScope.loadLinceses(ids: List<ComponentIdentifier>) {
+        coroutineScope {
+
+        }
+        val batcher = BatchingPomLoader()
+        for(id in ids) {
+            val res = batcher.useLoader { loader ->
+                async {
+                    LicenseDetector(loader).detect(id)
+                }
+            }
+        }
+
+    }
+
+    private fun findPomLicenses(detectedLicenses: MutableMap<ComponentIdentifier, LicenseInfo>) {
         // TODO: support licenses declared in parent-poms
-        val componentIds =
+        val componentsWithUnknownLicenses =
             detectedLicenses
                 .filter { it.value.license == null }
                 .keys
-                .associateBy { it.id.componentIdentifier }
 
-        if (componentIds.isEmpty()) {
+        if (componentsWithUnknownLicenses.isEmpty()) {
             return
         }
 
+        val nameGuesser = TfIdfBuilder<License>().apply {
+            License.values().forEach { addDocument(it, it.licenseName) }
+        }.build()
+
         // TODO: support customization of project
         val result = project.dependencies.createArtifactResolutionQuery()
-            .forComponents(componentIds.keys)
+            .forComponents(componentsWithUnknownLicenses)
             .withArtifacts(MavenModule::class, MavenPomArtifact::class)
             .execute()
-
-        val nameGuesser = TfIdfBuilder<License>().apply {
-            License.values()
-                .forEach {
-                    addDocument(
-                        it,
-                        it.licenseName
-                    )
-                }
-        }.build()
+        val requiredParents = mutableMapOf<ComponentIdentifier, MutableList<ComponentIdentifier>>()
 
         for (component in result.resolvedComponents) {
             val id = component.id
-            if (id !is ModuleComponentIdentifier) {
-                logger.debug(
-                    "Id {} for component {} is not a ModuleComponentIdentifier. It does not look like a pom file",
-                    id,
-                    component
-                )
-                continue
-            }
-
             val poms = component.getArtifacts(MavenPomArtifact::class)
             if (poms.isEmpty()) {
                 logger.debug("No pom files found for component {}", component)
@@ -204,10 +286,8 @@ open class GatherLicenseTask @Inject constructor(
             }
             val pom = poms.first() as ResolvedArtifactResult
             val parsedPom = XmlSlurper().parse(pom.file)
-            var index = 0
-            for (l in parsedPom["licenses"]["license"]) {
-                index += 1
-                if (index > 1) {
+            for ((index, l) in parsedPom["licenses"]["license"].withIndex()) {
+                if (index > 0) {
                     // TODO: collect all the violations and throw them later
                     throw GradleException(
                         "POM file for component $component declares multiple licenses." +
@@ -233,7 +313,7 @@ open class GatherLicenseTask @Inject constructor(
                         "Automatically detected license name={} url={} to mean {}",
                         name, url, matchingLicense.key
                     )
-                    detectedLicenses.compute(componentIds.getValue(id)) { _, v ->
+                    detectedLicenses.compute(id) { _, v ->
                         v!!.copy(license = matchingLicense.key)
                     }
                     continue
@@ -246,7 +326,7 @@ open class GatherLicenseTask @Inject constructor(
                         firstLicense.key,
                         guessList.take(10)
                     )
-                    detectedLicenses.compute(componentIds.getValue(id)) { _, v ->
+                    detectedLicenses.compute(id) { _, v ->
                         v!!.copy(license = firstLicense.key)
                     }
                     continue
@@ -257,7 +337,7 @@ open class GatherLicenseTask @Inject constructor(
     }
 
     private fun findLicenseFromFiles(
-        detectedLicenses: MutableMap<ResolvedArtifact, LicenseInfo>,
+        detectedLicenses: MutableMap<ComponentIdentifier, LicenseInfo>,
         model: Predictor<License>
     ) {
         for (e in detectedLicenses) {
