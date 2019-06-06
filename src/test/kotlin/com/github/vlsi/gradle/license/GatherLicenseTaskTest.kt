@@ -68,10 +68,12 @@ class GatherLicenseTaskTest {
 
             repositories {
                 mavenCentral()
+                jcenter()
             }
 
             dependencies {
                 runtime("org.junit.jupiter:junit-jupiter:5.4.2")
+                runtime("io.ktor:ktor-server-core:1.2.1")
             }
             
             tasks.register("generateLicense", GatherLicenseTask.class) {

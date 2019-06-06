@@ -42,7 +42,7 @@ repositories {
 }
 
 dependencies {
-    //    implementation("org.spdx:spdx-tools:2.1.16")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.4.2")
 }
 
