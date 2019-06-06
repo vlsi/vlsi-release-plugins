@@ -22,7 +22,7 @@ import groovy.util.XmlSlurper
 import groovy.util.slurpersupport.GPathResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.selects.select
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
@@ -36,11 +36,9 @@ import org.gradle.maven.MavenModule
 import org.gradle.maven.MavenPomArtifact
 import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkerExecutor
-import java.io.Closeable
 import java.io.File
 import java.net.URI
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.jar.JarFile
 import javax.inject.Inject
 
@@ -184,76 +182,6 @@ open class GatherLicenseTask @Inject constructor(
     private fun URI.looksTheSame(other: URI) =
         schemeSpecificPart == other.schemeSpecificPart ||
                 schemeSpecificPart.trimTextExtensions() == other.schemeSpecificPart.trimTextExtensions()
-
-    interface LicenseVisitor {
-        fun license(compId: ComponentIdentifier, license: String, url: String)
-    }
-
-    class PomWalker {
-        fun walk(ids: List<ComponentIdentifier>, out: LicenseVisitor) {
-            // load components
-            //
-        }
-    }
-
-    class LicenseTag(val name: String, val url: String)
-    class LicenseesTag(val licenses: List<LicenseTag>)
-    class PomContents(
-        val parentId: ComponentIdentifier?,
-        val id: ComponentIdentifier,
-        val licenses: LicenseesTag?
-    )
-
-    interface PomLoader {
-        suspend fun load(id: ComponentIdentifier): PomContents
-    }
-
-    class LicenseDetector(private val loader: PomLoader) {
-        fun LicenseTag.parse(): License = License.`0BSD`
-
-        suspend fun detect(id: ComponentIdentifier): License {
-            val pom = loader.load(id)
-            val licenses = pom.licenses
-            if (licenses != null) {
-                return licenses.licenses.first().parse()
-            }
-            val parentId = pom.parentId ?: TODO("License not found for $id, parent pom is missing as well")
-            return detect(parentId)
-        }
-    }
-
-    class BatchingPomLoader {
-        val loadRequests =
-            Channel<Pair<ComponentIdentifier, Deferred<PomContents>>>(Channel.UNLIMITED)
-
-        fun <T> useLoader(loader: (PomLoader)->T): T =
-            object: PomLoader, Closeable {
-                override suspend fun load(id: ComponentIdentifier): PomContents {
-                    val res = CompletableDeferred<PomContents>()
-                    loadRequests.send(id to res)
-                    return res.await()
-                }
-
-                override fun close() {
-
-                }
-            }.use { loader(it) }
-    }
-
-    fun GlobalScope.loadLinceses(ids: List<ComponentIdentifier>) {
-        coroutineScope {
-
-        }
-        val batcher = BatchingPomLoader()
-        for(id in ids) {
-            val res = batcher.useLoader { loader ->
-                async {
-                    LicenseDetector(loader).detect(id)
-                }
-            }
-        }
-
-    }
 
     private fun findPomLicenses(detectedLicenses: MutableMap<ComponentIdentifier, LicenseInfo>) {
         // TODO: support licenses declared in parent-poms
