@@ -18,10 +18,8 @@
 package com.github.vlsi.gradle.license
 
 import com.github.vlsi.gradle.license.api.License
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.selects.select
 import org.gradle.api.artifacts.component.ComponentIdentifier
 
@@ -50,21 +48,56 @@ class LicenseDetector(
     }
 }
 
-class BatchProcessor<Request, Response>(
-    private val initialClients: Int,
-    private val handler: (List<Pair<Request, CompletableDeferred<Response>>>) -> Unit
-) {
-    private val loadRequests =
-        Channel<Pair<Request, CompletableDeferred<Response>>>(Channel.UNLIMITED)
-    private val totalClients = Channel<Int>()
+class BatchBuilder<Request, Response, Result> {
+    private lateinit var handler: (List<Pair<Request, CompletableDeferred<Response>>>) -> Unit
+    private val tasks = mutableListOf<suspend (suspend (Request) -> Response) -> Result>()
 
-    suspend fun processLoadRequests() {
+    fun handleBatch(handler: (List<Pair<Request, CompletableDeferred<Response>>>) -> Unit) {
+        this.handler = handler
+    }
+
+    fun task(action: suspend (suspend (Request) -> Response) -> Result) {
+        tasks.add(action)
+    }
+
+    suspend fun getResult(): List<Deferred<Result>> = coroutineScope {
+        val loadRequests = Channel<Pair<Request, CompletableDeferred<Response>>>()
+        val disconnects = Channel<Unit>()
+        launch {
+            startHandler(tasks.size, loadRequests, disconnects)
+        }
+
+        supervisorScope {
+            val results = mutableListOf<Deferred<Result>>()
+            for (action in tasks) {
+                val res = async {
+                    try {
+                        action {
+                            val res = CompletableDeferred<Response>()
+                            loadRequests.send(it to res)
+                            res.await()
+                        }
+                    } finally {
+                        disconnects.send(Unit)
+                    }
+                }
+                results.add(res)
+            }
+            results
+        }
+    }
+
+    private suspend fun startHandler(
+        initialClients: Int,
+        loadRequests: Channel<Pair<Request, CompletableDeferred<Response>>>,
+        disconnects: Channel<Unit>
+    ) {
         var activeClients = initialClients
         val requests = mutableListOf<Pair<Request, CompletableDeferred<Response>>>()
         while (true) {
             select<Unit> {
-                totalClients.onReceive {
-                    activeClients += it
+                disconnects.onReceive {
+                    activeClients -= 1
                 }
                 loadRequests.onReceive {
                     requests.add(it)
@@ -80,28 +113,22 @@ class BatchProcessor<Request, Response>(
             }
         }
     }
-
-    suspend fun <T> useLoader(action: suspend (suspend (Request) -> Response) -> T): T =
-        try {
-//            totalClients.send(+1)
-            action {
-                val res = CompletableDeferred<Response>()
-                loadRequests.send(it to res)
-                res.await()
-            }
-        } finally {
-            totalClients.send(-1)
-        }
 }
 
-suspend fun loadLinceses(ids: List<ComponentIdentifier>) = coroutineScope {
-    val batcher = BatchProcessor<ComponentIdentifier, PomContents>(ids.size) {
-        println("Loading $it")
-    }
+suspend fun <U, V, K> batch(builder: BatchBuilder<U, V, K>.() -> Unit): List<Deferred<K>> {
+    val scope = BatchBuilder<U, V, K>()
+    builder(scope)
+    return scope.getResult()
+}
 
-    for (id in ids) {
-        val res = batcher.useLoader { loader ->
-            async {
+suspend fun loadLicenses(ids: List<ComponentIdentifier>) = coroutineScope {
+    batch<ComponentIdentifier, PomContents, Unit> {
+        handleBatch {
+
+        }
+
+        for (id in ids) {
+            task { loader ->
                 LicenseDetector(loader).detect(id)
             }
         }

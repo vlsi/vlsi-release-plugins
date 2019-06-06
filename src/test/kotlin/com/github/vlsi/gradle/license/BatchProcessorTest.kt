@@ -17,30 +17,27 @@
 
 package com.github.vlsi.gradle.license
 
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 
 class BatchProcessorTest {
     @Test
-    fun name() {
+    fun name2() {
         runBlocking {
-            val batcher = BatchProcessor<Int, Int>(5) {
-                println("Arrived batch of ${it.size} values: ${it.map { it.first }}")
-                it.forEach { req ->
-                    val input = req.first
-                    req.second.complete(if ((input and 1) == 1) input - 1 else input / 2)
+            val batchResults = batch<Int, Int, String> {
+                handleBatch {
+                    println("Arrived batch of ${it.size} values: ${it.map { it.first }}")
+                    it.forEach { req ->
+                        val input = req.first
+                        if (input == 4) {
+                            req.second.completeExceptionally(IllegalArgumentException("4 is not supported yet"))
+                            return@forEach
+                        }
+                        req.second.complete(if ((input and 1) == 1) input - 1 else input / 2)
+                    }
                 }
-            }
-
-            launch {
-                batcher.processLoadRequests()
-            }
-
-            for (i in 1..5) {
-                println("i: $i")
-                launch {
-                    batcher.useLoader { loader ->
+                for (i in 1..5) {
+                    task { loader ->
                         println("Started $i")
                         var v = i
                         val sb = StringBuilder("$i")
@@ -49,7 +46,17 @@ class BatchProcessorTest {
                             sb.append(" => $v")
                             println(sb)
                         }
+                        sb.toString()
                     }
+                }
+            }
+
+            println("batch results: ")
+            for (r in batchResults) {
+                try {
+                    println(" ${r.await()}")
+                } catch (e: Exception) {
+                    println(" exception: $e")
                 }
             }
         }
