@@ -15,12 +15,13 @@
  *
  */
 
-rootProject.name = "vlsi-release-plugins"
+repositories {
+    jcenter()
+    gradlePluginPortal()
+}
 
-include(
-    "plugins",
-    "plugins:crlf-plugin",
-    "plugins:ide-plugin",
-    "plugins:license-gather-plugin",
-    "plugins:stage-vote-release-plugin"
-)
+dependencies {
+    val ideaExt = create("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:0.5")
+    compileOnly(ideaExt)
+    testImplementation(ideaExt)
+}

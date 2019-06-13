@@ -25,10 +25,11 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
+import java.io.File
 import java.net.URI
 import javax.inject.Inject
 
@@ -37,8 +38,8 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
     val packageName =
         objectFactory.property<String>().convention("com.github.vlsi.gradle.license.api")
 
-    @InputFile
-    val licenses = objectFactory.fileProperty()
+    @InputDirectory
+    val licenses = objectFactory.directoryProperty()
 
     @OutputDirectory
     val outputDir = objectFactory.directoryProperty()
@@ -53,38 +54,81 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
     fun run() {
         val mapper = ObjectMapper().registerModule(KotlinModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        val licenses = mapper.readValue(licenses.get().asFile, LicensesDto::class.java)
 
-        val className = ClassName(packageName.get(), "License")
+        generate("SpdxLicense", "StandardLicense",
+            mapper.readValue(File(licenses.get().asFile, "licenses.json"), LicensesDto::class.java)
+                .licenses
+                .filter { !it.isDeprecatedLicenseId }
+                .map {
+                    EnumItem(
+                        id = it.licenseId,
+                        name = it.name,
+                        detailsUrl = it.detailsUrl,
+                        seeAlso = it.seeAlso
+                    )
+                })
+
+        generate("SpdxLicenseException", "StandardLicenseException",
+            mapper.readValue(
+                File(licenses.get().asFile, "exceptions.json"),
+                LicenseExceptionsDto::class.java
+            )
+                .exceptions
+                .map {
+                    EnumItem(
+                        id = it.licenseExceptionId,
+                        name = it.name,
+                        detailsUrl = it.detailsUrl,
+                        seeAlso = it.seeAlso
+                    )
+                }
+        )
+    }
+
+    private fun generate(
+        enumName: String,
+        interfaceName: String,
+        items: List<EnumItem>
+    ) {
+        val className = ClassName(packageName.get(), enumName)
+        val licenseInterface = ClassName(packageName.get(), interfaceName)
         val enumCode =
             TypeSpec.enumBuilder(className)
                 .addModifiers(KModifier.PUBLIC)
+                .addSuperinterface(licenseInterface)
                 .primaryConstructor(
                     FunSpec.constructorBuilder()
                         .addModifiers(KModifier.PRIVATE)
-                        .addParameter("licenseId", String::class)
-                        .addParameter("licenseName", String::class)
-                        .addParameter("detailsUrl", String::class)
-                        .addParameter("seeAlso", Array<Any>::class.parameterizedBy(String::class))
+                        .addParameter("id", String::class)
+                        .addParameter("title", String::class)
+                        .addParameter("detailsUri", String::class)
+                        .addParameter(
+                            "seeAlso",
+                            Array<String>::class.parameterizedBy(String::class)
+                        )
                         .build()
                 )
                 .addProperty(
-                    PropertySpec.builder("licenseId", String::class)
-                        .initializer("licenseId")
+                    PropertySpec.builder("id", String::class, KModifier.OVERRIDE)
+                        .initializer("id")
                         .build()
                 )
                 .addProperty(
-                    PropertySpec.builder("licenseName", String::class)
-                        .initializer("licenseName")
+                    PropertySpec.builder("detailsUri", URI::class)
+                        .initializer("URI(detailsUri)")
                         .build()
                 )
                 .addProperty(
-                    PropertySpec.builder("detailsUrl", URI::class)
-                        .initializer("URI(detailsUrl)")
+                    PropertySpec.builder("title", String::class, KModifier.OVERRIDE)
+                        .initializer("title")
                         .build()
                 )
                 .addProperty(
-                    PropertySpec.builder("seeAlso", List::class.parameterizedBy(URI::class))
+                    PropertySpec.builder(
+                        "uri",
+                        List::class.parameterizedBy(URI::class),
+                        KModifier.OVERRIDE
+                    )
                         .initializer("seeAlso.map { URI(it) }")
                         .build()
                 )
@@ -92,36 +136,45 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
                     TypeSpec.companionObjectBuilder()
                         .addProperty(
                             PropertySpec.builder(
-                                "licenseIds",
+                                "idToInstance",
                                 Map::class.asClassName()
-                                    .parameterizedBy(String::class.asClassName(), className)
+                                    .parameterizedBy(String::class.asClassName(), className),
+                                KModifier.PRIVATE
                             )
-                                .initializer("values().associateBy { it.licenseId }")
+                                .initializer("values().associateBy { it.id }")
                                 .build()
                         )
                         .addFunction(
-                            FunSpec.builder("fromLicenseId")
-                                .addParameter("licenseId", String::class)
-                                .addStatement("return licenseIds.getValue(licenseId)")
+                            FunSpec.builder("fromId")
+                                .addParameter("id", String::class)
+                                .addStatement("return idToInstance.getValue(id)")
                                 .build()
                         )
                         .addFunction(
-                            FunSpec.builder("fromLicenseIdOrNull")
-                                .addParameter("licenseId", String::class)
-                                .addStatement("return licenseIds[licenseId]")
+                            FunSpec.builder("fromIdOrNull")
+                                .addParameter("id", String::class)
+                                .addStatement("return idToInstance[id]")
+                                .build()
+                        )
+                        .build()
+                )
+                .addProperty(
+                    PropertySpec.builder("providerId", String::class, KModifier.OVERRIDE)
+                        .getter(
+                            FunSpec.getterBuilder()
+                                .addCode("return %S", "SPDX")
                                 .build()
                         )
                         .build()
                 )
                 .apply {
-                    licenses.licenses
-                        .filter { !it.isDeprecatedLicenseId }
-                        .sortedBy { it.licenseId }
+                    items
+                        .sortedBy { it.id }
                         .forEach {
                             addEnumConstant(
-                                it.licenseId.toKotlinId(),
+                                it.id.toKotlinId(),
                                 TypeSpec.anonymousClassBuilder()
-                                    .addSuperclassConstructorParameter("%S", it.licenseId)
+                                    .addSuperclassConstructorParameter("%S", it.id)
                                     .addSuperclassConstructorParameter("%S", it.name)
                                     .addSuperclassConstructorParameter("%S", it.detailsUrl)
                                     .addSuperclassConstructorParameter("arrayOf(%L)",
@@ -151,4 +204,25 @@ data class License(
 data class LicensesDto(
     val licenseListVersion: String,
     val licenses: MutableList<License> = mutableListOf()
+)
+
+data class LicenseException(
+    val isDeprecatedLicenseId: Boolean,
+    val detailsUrl: String,
+    val referenceNumber: Int,
+    val name: String,
+    val licenseExceptionId: String,
+    val seeAlso: MutableList<String> = mutableListOf()
+)
+
+data class LicenseExceptionsDto(
+    val licenseListVersion: String,
+    val exceptions: MutableList<LicenseException> = mutableListOf()
+)
+
+class EnumItem(
+    val id: String,
+    val name: String,
+    val detailsUrl: String,
+    val seeAlso: MutableList<String> = mutableListOf()
 )

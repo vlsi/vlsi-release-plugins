@@ -15,12 +15,22 @@
  *
  */
 
-rootProject.name = "vlsi-release-plugins"
+package com.github.vlsi.gradle.buildtools
 
-include(
-    "plugins",
-    "plugins:crlf-plugin",
-    "plugins:ide-plugin",
-    "plugins:license-gather-plugin",
-    "plugins:stage-vote-release-plugin"
-)
+import org.apache.tools.ant.filters.FixCrLfFilter
+import org.gradle.api.file.CopySpec
+import org.gradle.kotlin.dsl.filter
+
+/**
+ * We can't use [crlf] plugin while developing it, so it is a small shim.
+ */
+fun CopySpec.filterEolSimple(eol: String) {
+    filteringCharset = "UTF-8"
+    filter(
+        FixCrLfFilter::class, mapOf(
+            "eol" to FixCrLfFilter.CrLf.newInstance(eol),
+            "fixlast" to true,
+            "ctrlz" to FixCrLfFilter.AddAsisRemove.newInstance("asis")
+        )
+    )
+}

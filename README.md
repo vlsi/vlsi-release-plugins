@@ -1,4 +1,22 @@
-[![Build Status](https://travis-ci.org/vlsi/license-gather-plugin.svg?branch=master)](https://travis-ci.org/vlsi/license-gather-plugin)
+[![Build Status](https://travis-ci.org/vlsi/vlsi-release-plugins.svg?branch=master)](https://travis-ci.org/vlsi/vlsi-release-plugins)
+
+About
+=====
+
+This is a set of Gradle plugins to simplify release tasks
+
+
+CRLF Plugin
+===========
+
+Adds Kotlin DSL to specify CRLF/LF filtering for `CopySpec`
+
+IDE Plugin
+==========
+
+* Configures copyright profile
+* Configures "generated sources"
+* Enables to configure "post import" tasks (== call task on project import to generate sources)
 
 License Gather Plugin
 =====================
@@ -63,6 +81,11 @@ tasks.register("generateLicense", GatherLicenseTask::class) {
     }
 }
 ```
+
+Stage Vote Release Plugin
+=========================
+
+Enables to stage and vote on release artifacts before they are released.
 
 License
 -------

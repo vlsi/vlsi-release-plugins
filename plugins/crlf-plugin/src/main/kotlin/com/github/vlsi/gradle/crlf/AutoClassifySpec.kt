@@ -14,13 +14,27 @@
  * limitations under the License.
  *
  */
+package com.github.vlsi.gradle.crlf
 
-rootProject.name = "vlsi-release-plugins"
+class AutoClassifySpec {
+    val text = mutableListOf<String>()
+    val binary = mutableListOf<String>()
+    val shell = mutableListOf<String>()
+    val exclude = mutableListOf(".DS_Store") // default excludes
 
-include(
-    "plugins",
-    "plugins:crlf-plugin",
-    "plugins:ide-plugin",
-    "plugins:license-gather-plugin",
-    "plugins:stage-vote-release-plugin"
-)
+    fun text(vararg fileName: String) {
+        text.addAll(fileName)
+    }
+
+    fun binary(vararg fileName: String) {
+        binary.addAll(fileName)
+    }
+
+    fun shell(vararg fileName: String) {
+        shell.addAll(fileName)
+    }
+
+    fun exclude(vararg fileName: String) {
+        exclude.addAll(fileName)
+    }
+}

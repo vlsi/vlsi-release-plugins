@@ -15,12 +15,10 @@
  *
  */
 
-rootProject.name = "vlsi-release-plugins"
-
-include(
-    "plugins",
-    "plugins:crlf-plugin",
-    "plugins:ide-plugin",
-    "plugins:license-gather-plugin",
-    "plugins:stage-vote-release-plugin"
-)
+dependencies {
+    implementation(project(":plugins:license-gather-plugin"))
+    implementation("org.ajoberstar.grgit:grgit-gradle:3.1.1")
+    implementation("org.ajoberstar.grgit:grgit-core:3.1.1")
+    implementation("de.marcphilipp.gradle:nexus-publish-plugin:0.2.0")
+    implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.20.0")
+}

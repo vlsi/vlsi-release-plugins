@@ -14,19 +14,14 @@
  * limitations under the License.
  *
  */
-import com.github.vlsi.gradle.license.EnumGeneratorTask
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.plugins.ide.idea.model.IdeaProject
-import org.jetbrains.dokka.gradle.PackageOptions
 import org.jetbrains.gradle.ext.CopyrightConfiguration
 import org.jetbrains.gradle.ext.ProjectSettings
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
     `maven-publish`
-    buildplugins.`license-texts`
-    id("com.gradle.plugin-publish") version "0.10.1"
+    id("com.gradle.plugin-publish") version "0.10.1" apply false
     id("com.diffplug.gradle.spotless") version "3.23.0"
     id("com.github.johnrengelman.shadow") version "5.0.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "0.5"
@@ -34,52 +29,34 @@ plugins {
     id("org.jetbrains.dokka") version "0.9.17"
 }
 
-group = "com.github.vlsi.gradle"
-version = "1.0.0-SNAPSHOT"
+description = "A set of plugins to simplify Gradle release tasks"
+val repoUrl = "https://github.com/vlsi/vlsi-release-plugins"
 
-repositories {
-    mavenCentral()
-}
+allprojects {
+    group = "com.github.vlsi.gradle"
+    version = "1.0.0"
 
-dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.4.2")
-}
-
-val readableName = "License Gather Plugin"
-description = "Gradle Plugin for gathering license for dependencies"
-val repoUrl = "https://github.com/vlsi/license-gather-plugin"
-
-pluginBundle {
-    description = project.description
-    website = repoUrl
-    vcsUrl = repoUrl
-    tags = listOf("license", "gradle", "dependencies")
-}
-
-gradlePlugin {
-    plugins {
-        create("license-gather") {
-            id = "com.github.vlsi.license-gather"
-            displayName = readableName
-            implementationClass = "com.github.vlsi.gradle.license.LicenseGatherPlugin"
+    plugins.withType<KotlinDslPlugin> {
+        configure<KotlinDslPluginOptions> {
+            experimentalWarning.set(false)
         }
     }
 }
 
-kotlinDslPluginOptions {
-    experimentalWarning.set(false)
-}
-
 val licenseHeaderFile = file("gradle/license-header.txt")
-spotless {
-    kotlin {
-        // Generated build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
-        // has wrong indentation, and it is not clear how to exclude it
-        // ktlint()
-        // It prints errors regarding build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
-        // so comment it for now :(
-        // licenseHeaderFile(licenseHeaderFile)
+allprojects {
+    if (project.path != ":plugins:license-gather-plugin") {
+        apply(plugin = "com.diffplug.gradle.spotless")
+        spotless {
+            kotlin {
+                // Generated build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
+                // has wrong indentation, and it is not clear how to exclude it
+                ktlint()
+                // It prints errors regarding build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
+                // so comment it for now :(
+                licenseHeaderFile(licenseHeaderFile)
+            }
+        }
     }
 }
 
@@ -96,6 +73,7 @@ idea {
                 useDefault = "Apache-2.0"
                 profiles {
                     create("Apache-2.0") {
+                        keyword = "Copyright"
                         notice = """
         Copyright 2019 Vladimir Sitnikov <sitnikov.vladimir@gmail.com>
 
@@ -112,136 +90,6 @@ idea {
         limitations under the License.
 
     """.trimIndent()
-                        keyword = "Copyright"
-                    }
-                }
-            }
-        }
-    }
-}
-
-tasks {
-    val saveLicenses by registering(EnumGeneratorTask::class) {
-        licenses.set(File(rootDir, "license-list-data/json/licenses.json"))
-        outputDir.set(File(buildDir, "generated-sources/licenses"))
-
-        sourceSets {
-            main {
-                java.srcDir(outputDir.get())
-            }
-        }
-    }
-
-    val copyLicenses by registering(Sync::class) {
-        val output = "$buildDir/licenses"
-        into(output)
-        into("com/github/vlsi/gradle/license/api") {
-            into("text") {
-                from("$rootDir/license-list-data/text") {
-                    include("*.txt")
-                }
-            }
-        }
-        sourceSets {
-            main {
-                resources.srcDir(output)
-            }
-        }
-    }
-
-    jar {
-        into("com/github/vlsi/gradle/license/api") {
-            into("text") {
-                from("$rootDir/license-list-data/text") {
-                    include("*.txt")
-                }
-            }
-        }
-    }
-
-    compileKotlin {
-        dependsOn(saveLicenses, copyLicenses)
-    }
-
-    withType<KotlinCompile>().configureEach {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-    withType<JavaCompile>().configureEach {
-        options.encoding = "UTF-8"
-    }
-    withType<Jar>().configureEach {
-        manifest {
-            attributes["Specification-Title"] = "License Gather Plugin"
-            attributes["Specification-Vendor"] = "Vladimir Sitnikov"
-            attributes["Implementation-Vendor"] = "Vladimir Sitnikov"
-            attributes["Implementation-Vendor-Id"] = "com.github.vlsi"
-            attributes["Implementation-Version"] = rootProject.version
-        }
-    }
-    withType<Test>().configureEach {
-        testLogging {
-            exceptionFormat = TestExceptionFormat.FULL
-        }
-    }
-
-    test {
-        useJUnitPlatform()
-        maxParallelForks = 8
-    }
-
-    dokka {
-        outputFormat = "javadoc"
-        outputDirectory = "$buildDir/javadoc"
-        reportUndocumented = false
-        jdkVersion = 8
-        packageOptions(delegateClosureOf<PackageOptions> {
-            prefix = "com.github.vlsi.gradle"
-            suppress = true
-        })
-    }
-}
-
-val sourcesJar by tasks.creating(Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets.main.map { it.allSource })
-}
-
-val javadocJar by tasks.creating(Jar::class) {
-    archiveClassifier.set("javadoc")
-    from(tasks.dokka)
-}
-
-// used by plugin-publish plugin
-val archives by configurations.getting
-//archives.artifacts.clear()
-artifacts {
-    //    add(archives.name, tasks.shadowJar)
-    add(archives.name, sourcesJar)
-    add(archives.name, javadocJar)
-}
-
-publishing {
-    publications {
-        afterEvaluate {
-            named<MavenPublication>("pluginMaven") {
-                artifact(sourcesJar)
-                artifact(javadocJar)
-                pom {
-                    name.set(readableName)
-                    description.set(project.description)
-                    inceptionYear.set("2019")
-                    url.set(repoUrl)
-                    developers {
-                        developer {
-                            name.set("Vladimir Sitnikov")
-                            id.set("vlsi")
-                        }
-                    }
-                    licenses {
-                        license {
-                            name.set("Apache License, Version 2.0")
-                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                        }
                     }
                 }
             }

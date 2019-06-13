@@ -17,9 +17,9 @@ matrix:
     - name: Tests with OpenJDK 8
       jdk: openjdk8
       script:
-        - ./gradlew build
+        - ./gradlew validateTaskProperties build
     - name: Tests with OpenJDK 11
       jdk: openjdk11
       script:
         # https://youtrack.jetbrains.com/issue/KT-31710 Dokka javadoc task fails with JDK 11 reporting missing HtmlDoclet
-        - ./gradlew build -x dokka
+        - ./gradlew validateTaskProperties build -x dokka

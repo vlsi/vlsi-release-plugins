@@ -14,13 +14,12 @@
  * limitations under the License.
  *
  */
+package com.github.vlsi.gradle.crlf
 
-rootProject.name = "vlsi-release-plugins"
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 
-include(
-    "plugins",
-    "plugins:crlf-plugin",
-    "plugins:ide-plugin",
-    "plugins:license-gather-plugin",
-    "plugins:stage-vote-release-plugin"
-)
+class CrlfPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+    }
+}

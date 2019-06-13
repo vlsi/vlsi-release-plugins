@@ -4,6 +4,10 @@
 /buildSrc/build/
 /buildSrc/subprojects/*/build/**
 /buildSrc/subprojects/*/out/**
+/plugins/build/
+/plugins/*/build/
+/plugins/out/
+/plugins/*/out/
 
 # Ignore Gradle project-specific cache directory
 .gradle

@@ -15,12 +15,17 @@
  *
  */
 
-rootProject.name = "vlsi-release-plugins"
+package com.github.vlsi.gradle.license.api
 
-include(
-    "plugins",
-    "plugins:crlf-plugin",
-    "plugins:ide-plugin",
-    "plugins:license-gather-plugin",
-    "plugins:stage-vote-release-plugin"
-)
+interface LicenseParser {
+    fun parseLicense(value: String): License
+    fun parseException(value: String): LicenseException
+}
+
+object DefaultLicenseParser: LicenseParser {
+    override fun parseLicense(value: String) =
+        SpdxLicense.fromIdOrNull(value) ?: SimpleLicense(value)
+
+    override fun parseException(value: String) =
+        SpdxLicenseException.fromIdOrNull(value) ?: SimpleException(value)
+}

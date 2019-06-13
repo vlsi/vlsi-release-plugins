@@ -14,13 +14,15 @@
  * limitations under the License.
  *
  */
+package com.github.vlsi.gradle.release
 
-rootProject.name = "vlsi-release-plugins"
+import com.github.vlsi.gradle.license.api.SimpleLicense
+import java.net.URI
 
-include(
-    "plugins",
-    "plugins:crlf-plugin",
-    "plugins:ide-plugin",
-    "plugins:license-gather-plugin",
-    "plugins:stage-vote-release-plugin"
-)
+object ExtraLicense {
+    val Indiana_University_1_1_1 =
+        SimpleLicense(
+            "Indiana University Extreme! Lab Software License, version 1.1.1",
+            URI("http://www.extreme.indiana.edu/viewcvs/~checkout~/XPP3/java/LICENSE.txt")
+        )
+}

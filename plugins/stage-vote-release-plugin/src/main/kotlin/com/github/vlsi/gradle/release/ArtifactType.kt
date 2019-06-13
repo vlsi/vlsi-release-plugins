@@ -14,13 +14,8 @@
  * limitations under the License.
  *
  */
+package com.github.vlsi.gradle.release
 
-rootProject.name = "vlsi-release-plugins"
-
-include(
-    "plugins",
-    "plugins:crlf-plugin",
-    "plugins:ide-plugin",
-    "plugins:license-gather-plugin",
-    "plugins:stage-vote-release-plugin"
-)
+enum class ArtifactType {
+    BINARY, SOURCE
+}
