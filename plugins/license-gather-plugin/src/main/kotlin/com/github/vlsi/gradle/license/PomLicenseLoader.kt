@@ -29,6 +29,7 @@ import kotlinx.coroutines.runBlocking
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.component.ComponentIdentifier
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.kotlin.dsl.getArtifacts
 import org.gradle.kotlin.dsl.withArtifacts
@@ -57,7 +58,7 @@ class LicenseDetector(
             return licenseCache[id]
         }
 
-        val licenseOverride = overrides[id.displayName]
+        val licenseOverride = overrides[id as ModuleComponentIdentifier]
         if (licenseOverride?.expectedLicense == null) {
             // Expected license is null => we can just return effective one
             // Otherwise we need to check effective license
