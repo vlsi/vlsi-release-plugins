@@ -16,14 +16,7 @@
  */
 package com.github.vlsi.gradle.release
 
-import com.github.vlsi.gradle.release.jgit.dsl.branchCreate
-import com.github.vlsi.gradle.release.jgit.dsl.checkout
-import com.github.vlsi.gradle.release.jgit.dsl.fetch
-import com.github.vlsi.gradle.release.jgit.dsl.gitInit
-import com.github.vlsi.gradle.release.jgit.dsl.remoteAdd
-import com.github.vlsi.gradle.release.jgit.dsl.remoteSetUrl
-import com.github.vlsi.gradle.release.jgit.dsl.reset
-import com.github.vlsi.gradle.release.jgit.dsl.setCredentials
+import com.github.vlsi.gradle.release.jgit.dsl.* // ktlint-disable
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.ResetCommand
 import org.eclipse.jgit.transport.URIish
@@ -43,37 +36,37 @@ abstract class GitPrepareRepo : DefaultTask() {
         val repoDir = File(project.buildDir, repo.name)
         gitInit {
             setDirectory(repoDir)
-        }.use {
+        }.useRun {
             val remoteName = repo.remote.get()
-            if (remoteName !in it.repository.remoteNames) {
-                it.remoteAdd {
+            if (remoteName !in repository.remoteNames) {
+                remoteAdd {
                     setName(remoteName)
                     setUri(URIish(repo.urls.get().pushUrl))
                 }
             } else {
-                it.remoteSetUrl {
+                remoteSetUrl {
                     setRemoteName(remoteName)
                     setRemoteUri(URIish(repo.urls.get().pushUrl))
                 }
             }
-            it.fetch {
+            fetch {
                 setCredentials(repo)
                 setRemote(remoteName)
                 setForceUpdate(true)
             }
             val branchName = repo.branch.get()
-            val ref = it.branchCreate {
+            val ref = branchCreate {
                 setForce(true)
                 setName(branchName)
                 setStartPoint("$remoteName/$branchName")
                 setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
             }
-            it.reset {
+            reset {
                 // jgit fails with NPE when performing checkout in case some files are deleted
                 // So we just discard all local changes here
                 setMode(ResetCommand.ResetType.HARD)
             }
-            it.checkout {
+            checkout {
                 setForced(true)
                 setName(ref.name)
             }

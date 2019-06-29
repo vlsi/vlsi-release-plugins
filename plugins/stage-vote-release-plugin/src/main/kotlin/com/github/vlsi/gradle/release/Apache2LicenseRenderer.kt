@@ -20,21 +20,16 @@ import com.github.vlsi.gradle.license.LicenseInfo
 import com.github.vlsi.gradle.license.MetadataStore
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.SpdxLicense
-import com.github.vlsi.gradle.license.api.asExpression
 import com.github.vlsi.gradle.license.api.text
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.* // ktlint-disable
 import org.gradle.kotlin.dsl.mapProperty
 import org.gradle.kotlin.dsl.property
-import java.util.TreeMap
+import java.util.* // ktlint-disable
 import javax.inject.Inject
 
 /**
@@ -44,19 +39,6 @@ open class Apache2LicenseRenderer @Inject constructor(
     objectFactory: ObjectFactory,
     layout: ProjectLayout
 ) : DefaultTask() {
-
-    companion object {
-        private val asfGroups = setOf(
-            "org.codehaus.groovy",
-            "oro",
-            "xalan",
-            "xerces"
-        )
-    }
-
-    enum class LicenseGroup {
-        UNCLEAR, ASF_AL2, ASF_OTHER, AL2, OTHER
-    }
 
     @Input
     val artifactType = objectFactory.property<ArtifactType>()
@@ -89,31 +71,14 @@ open class Apache2LicenseRenderer @Inject constructor(
             out.appendln(SpdxLicense.Apache_2_0.text)
 
             dependencies
-                .map {
-                    it.key to it.value.license
+                .map { (id, licenseInfo) ->
+                    id to licenseInfo.license
                 }
                 .groupByTo(TreeMap()) { (id, license) ->
-                    when {
-                        license == null -> LicenseGroup.UNCLEAR
-                        id.group.startsWith("org.apache") or (id.group in asfGroups) or
-                                ((id.group == id.module) and (id.group.startsWith("commons-"))) ->
-                            if (license == SpdxLicense.Apache_2_0.asExpression())
-                                LicenseGroup.ASF_AL2
-                            else
-                                LicenseGroup.ASF_OTHER
-                        license == SpdxLicense.Apache_2_0.asExpression() -> LicenseGroup.AL2
-                        else -> LicenseGroup.OTHER
-                    }
-                }.forEach { (licenseGroup, components) ->
-                    out.appendln(
-                        when (licenseGroup) {
-                            LicenseGroup.UNCLEAR -> "- Software with unclear license. Please analyze the license and specify manually"
-                            LicenseGroup.ASF_AL2 -> "- Software produced at the ASF which is available under AL 2.0 (as above)"
-                            LicenseGroup.ASF_OTHER -> "- Software produced at the ASF which is available under other licenses (not AL 2.0)"
-                            LicenseGroup.AL2 -> "- Software produced outside the ASF which is available under AL 2.0 (as above)"
-                            LicenseGroup.OTHER -> "- Software produced outside the ASF which is available under other licenses (not AL 2.0)"
-                        }
-                    )
+                    licenseGroupOf(id, license)
+                }
+                .forEach { (licenseGroup, components) ->
+                    out.appendln(licenseGroup.title)
                     out.appendComponents(components)
 
                     if (licenseGroup != LicenseGroup.OTHER) {

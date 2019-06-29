@@ -58,7 +58,8 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
         generate("SpdxLicense", "StandardLicense",
             mapper.readValue(File(licenses.get().asFile, "licenses.json"), LicensesDto::class.java)
                 .licenses
-                .filter { !it.isDeprecatedLicenseId }
+                .asSequence()
+                .filterNot { it.isDeprecatedLicenseId }
                 .map {
                     EnumItem(
                         id = it.licenseId,
@@ -66,7 +67,8 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
                         detailsUrl = it.detailsUrl,
                         seeAlso = it.seeAlso
                     )
-                })
+                }
+                .toList())
 
         generate("SpdxLicenseException", "StandardLicenseException",
             mapper.readValue(
@@ -74,6 +76,8 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
                 LicenseExceptionsDto::class.java
             )
                 .exceptions
+                .asSequence()
+                .filterNot { it.isDeprecatedLicenseId }
                 .map {
                     EnumItem(
                         id = it.licenseExceptionId,
@@ -82,112 +86,113 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
                         seeAlso = it.seeAlso
                     )
                 }
+                .toList()
         )
     }
 
     private fun generate(
         enumName: String,
         interfaceName: String,
-        items: List<EnumItem>
+        items: Iterable<EnumItem>
     ) {
         val className = ClassName(packageName.get(), enumName)
         val licenseInterface = ClassName(packageName.get(), interfaceName)
-        val enumCode =
-            TypeSpec.enumBuilder(className)
-                .addModifiers(KModifier.PUBLIC)
-                .addSuperinterface(licenseInterface)
-                .primaryConstructor(
-                    FunSpec.constructorBuilder()
-                        .addModifiers(KModifier.PRIVATE)
-                        .addParameter("id", String::class)
-                        .addParameter("title", String::class)
-                        .addParameter("detailsUri", String::class)
-                        .addParameter(
-                            "seeAlso",
-                            Array<String>::class.parameterizedBy(String::class)
-                        )
-                        .build()
-                )
-                .addProperty(
-                    PropertySpec.builder("id", String::class, KModifier.OVERRIDE)
-                        .initializer("id")
-                        .build()
-                )
-                .addProperty(
-                    PropertySpec.builder("detailsUri", URI::class)
-                        .initializer("URI(detailsUri)")
-                        .build()
-                )
-                .addProperty(
-                    PropertySpec.builder("title", String::class, KModifier.OVERRIDE)
-                        .initializer("title")
-                        .build()
-                )
-                .addProperty(
-                    PropertySpec.builder(
-                        "uri",
-                        List::class.parameterizedBy(URI::class),
-                        KModifier.OVERRIDE
+        TypeSpec.enumBuilder(className)
+            .addModifiers(KModifier.PUBLIC)
+            .addSuperinterface(licenseInterface)
+            .primaryConstructor(
+                FunSpec.constructorBuilder()
+                    .addModifiers(KModifier.PRIVATE)
+                    .addParameter("id", String::class)
+                    .addParameter("title", String::class)
+                    .addParameter("detailsUri", String::class)
+                    .addParameter(
+                        "seeAlso",
+                        Array<String>::class.parameterizedBy(String::class)
                     )
-                        .initializer("seeAlso.map { URI(it) }")
-                        .build()
+                    .build()
+            )
+            .addProperty(
+                PropertySpec.builder("id", String::class, KModifier.OVERRIDE)
+                    .initializer("id")
+                    .build()
+            )
+            .addProperty(
+                PropertySpec.builder("detailsUri", URI::class)
+                    .initializer("URI(detailsUri)")
+                    .build()
+            )
+            .addProperty(
+                PropertySpec.builder("title", String::class, KModifier.OVERRIDE)
+                    .initializer("title")
+                    .build()
+            )
+            .addProperty(
+                PropertySpec.builder(
+                    "uri",
+                    List::class.parameterizedBy(URI::class),
+                    KModifier.OVERRIDE
                 )
-                .addType(
-                    TypeSpec.companionObjectBuilder()
-                        .addProperty(
-                            PropertySpec.builder(
-                                "idToInstance",
-                                Map::class.asClassName()
-                                    .parameterizedBy(String::class.asClassName(), className),
-                                KModifier.PRIVATE
-                            )
-                                .initializer("values().associateBy { it.id }")
+                    .initializer("seeAlso.map { URI(it) }")
+                    .build()
+            )
+            .addType(
+                TypeSpec.companionObjectBuilder()
+                    .addProperty(
+                        PropertySpec.builder(
+                            "idToInstance",
+                            Map::class.asClassName()
+                                .parameterizedBy(String::class.asClassName(), className),
+                            KModifier.PRIVATE
+                        )
+                            .initializer("values().associateBy { it.id }")
+                            .build()
+                    )
+                    .addFunction(
+                        FunSpec.builder("fromId")
+                            .addParameter("id", String::class)
+                            .addStatement("return idToInstance.getValue(id)")
+                            .build()
+                    )
+                    .addFunction(
+                        FunSpec.builder("fromIdOrNull")
+                            .addParameter("id", String::class)
+                            .addStatement("return idToInstance[id]")
+                            .build()
+                    )
+                    .build()
+            )
+            .addProperty(
+                PropertySpec.builder("providerId", String::class, KModifier.OVERRIDE)
+                    .getter(
+                        FunSpec.getterBuilder()
+                            .addCode("return %S", "SPDX")
+                            .build()
+                    )
+                    .build()
+            )
+            .apply {
+                items
+                    .sortedBy { it.id }
+                    .forEach {
+                        addEnumConstant(
+                            it.id.toKotlinId(),
+                            TypeSpec.anonymousClassBuilder()
+                                .addSuperclassConstructorParameter("%S", it.id)
+                                .addSuperclassConstructorParameter("%S", it.name)
+                                .addSuperclassConstructorParameter("%S", it.detailsUrl)
+                                .addSuperclassConstructorParameter("arrayOf(%L)",
+                                    it.seeAlso.map { url -> CodeBlock.of("%S", url.trim()) }
+                                        .joinToCode(", "))
                                 .build()
                         )
-                        .addFunction(
-                            FunSpec.builder("fromId")
-                                .addParameter("id", String::class)
-                                .addStatement("return idToInstance.getValue(id)")
-                                .build()
-                        )
-                        .addFunction(
-                            FunSpec.builder("fromIdOrNull")
-                                .addParameter("id", String::class)
-                                .addStatement("return idToInstance[id]")
-                                .build()
-                        )
-                        .build()
-                )
-                .addProperty(
-                    PropertySpec.builder("providerId", String::class, KModifier.OVERRIDE)
-                        .getter(
-                            FunSpec.getterBuilder()
-                                .addCode("return %S", "SPDX")
-                                .build()
-                        )
-                        .build()
-                )
-                .apply {
-                    items
-                        .sortedBy { it.id }
-                        .forEach {
-                            addEnumConstant(
-                                it.id.toKotlinId(),
-                                TypeSpec.anonymousClassBuilder()
-                                    .addSuperclassConstructorParameter("%S", it.id)
-                                    .addSuperclassConstructorParameter("%S", it.name)
-                                    .addSuperclassConstructorParameter("%S", it.detailsUrl)
-                                    .addSuperclassConstructorParameter("arrayOf(%L)",
-                                        it.seeAlso.map { url -> CodeBlock.of("%S", url.trim()) }
-                                            .joinToCode(", "))
-                                    .build()
-                            )
-                        }
-                }.build()
-
-        val enumFile = FileSpec.get(packageName.get(), enumCode)
-
-        enumFile.writeTo(outputDir.get().asFile)
+                    }
+            }
+            .build()
+            .also { enumCode ->
+                FileSpec.get(packageName.get(), enumCode)
+                    .writeTo(outputDir.get().asFile)
+            }
     }
 }
 
@@ -197,7 +202,7 @@ data class License(
     val referenceNumber: Int,
     val name: String,
     val licenseId: String,
-    val seeAlso: MutableList<String> = mutableListOf(),
+    val seeAlso: List<String>,
     val isOsiApproved: Boolean
 )
 
@@ -212,7 +217,7 @@ data class LicenseException(
     val referenceNumber: Int,
     val name: String,
     val licenseExceptionId: String,
-    val seeAlso: MutableList<String> = mutableListOf()
+    val seeAlso: List<String>
 )
 
 data class LicenseExceptionsDto(
@@ -224,5 +229,5 @@ class EnumItem(
     val id: String,
     val name: String,
     val detailsUrl: String,
-    val seeAlso: MutableList<String> = mutableListOf()
+    val seeAlso: List<String>
 )

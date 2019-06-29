@@ -16,11 +16,7 @@
  */
 package com.github.vlsi.gradle.release
 
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.SkipWhenEmpty
+import org.gradle.api.tasks.* // ktlint-disable
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
@@ -45,13 +41,15 @@ abstract class StageToSvnTask() : SvnmuccTask() {
             "Uploading release candidate ${tlp.get()} ${tag.get()} to dev area"
         }
 
-    override fun operations(inputChanges: InputChanges): List<SvnOperation> {
-        return mutableListOf<SvnOperation>().apply {
+    private val extensions = listOf("", ".sha512", ".asc")
+
+    override fun operations(inputChanges: InputChanges): List<SvnOperation> =
+        mutableListOf<SvnOperation>().apply {
             val folderName = folder.get()
             add(SvnMkdir(folderName))
             for (f in inputChanges.getFileChanges(files)) {
                 val destinationName = "$folderName/${f.file.name}"
-                for (ext in listOf("", ".sha512", ".asc")) {
+                for (ext in extensions) {
                     add(
                         when (f.changeType) {
                             ChangeType.REMOVED -> SvnRm(destinationName + ext)
@@ -64,5 +62,4 @@ abstract class StageToSvnTask() : SvnmuccTask() {
                 }
             }
         }
-    }
 }

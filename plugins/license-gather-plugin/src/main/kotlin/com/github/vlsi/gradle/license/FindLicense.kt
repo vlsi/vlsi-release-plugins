@@ -21,21 +21,20 @@ import java.io.File
 import java.util.zip.ZipFile
 import javax.inject.Inject
 
+val LICENSE_FILES =
+    listOf("LICENSE", "NOTICE", "COPYING", "COPYING.LESSER")
+
+fun looksLiceLicense(name: String) =
+    LICENSE_FILES.any { name.startsWith(it, ignoreCase = true) }
+
+private fun String.looksLikeLicense() =
+    !endsWith(".class") && looksLiceLicense(substringAfterLast('/'))
+
 class FindLicense @Inject constructor(
     private val id: String,
     private val file: File,
     private val outputDir: File
 ) : Runnable {
-    companion object {
-        val LICENSE_FILES =
-            listOf("LICENSE", "NOTICE", "COPYING", "COPYING.LESSER")
-
-        fun looksLiceLicense(name: String) =
-            LICENSE_FILES.any { name.startsWith(it, ignoreCase = true) }
-    }
-
-    private fun String.looksLikeLicense() =
-        !endsWith(".class") && looksLiceLicense(substringAfterLast('/'))
 
     override fun run() {
         if (file.extension !in arrayOf("zip", "jar")) {

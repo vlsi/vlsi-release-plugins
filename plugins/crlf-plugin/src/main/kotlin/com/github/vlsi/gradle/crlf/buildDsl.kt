@@ -25,6 +25,8 @@ enum class LineEndings(val value: String) {
     CRLF("dos"), LF("unix");
 
     companion object {
+        val SYSTEM: LineEndings get() = current()
+
         fun current() = when (val sep = System.lineSeparator()) {
             "\n" -> LF
             "\r\n" -> CRLF
@@ -99,7 +101,7 @@ fun CopySpec.from(sourcePath: Any, textEol: LineEndings, action: AutoClassifySpe
     }
 }
 
-class CrLfSpec(val textEol: LineEndings = LineEndings.current()) {
+class CrLfSpec(val textEol: LineEndings = LineEndings.SYSTEM) {
     fun CopySpec.textFrom(o: Any, eol: LineEndings = textEol) =
         from(o) {
             filter(eol)

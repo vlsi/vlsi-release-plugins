@@ -20,11 +20,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
 import org.gradle.api.model.ObjectFactory
-import org.gradle.kotlin.dsl.container
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.mapProperty
-import org.gradle.kotlin.dsl.newInstance
-import org.gradle.kotlin.dsl.property
+import org.gradle.kotlin.dsl.* // ktlint-disable
 import java.net.URI
 import javax.inject.Inject
 
@@ -86,17 +82,17 @@ open class ReleaseExtension @Inject constructor(
         })
     }
 
-    val source = git.register("source") {
+    val source by git.registering {
         branch.convention("master")
         gitUrlConvention()
     }
 
-    val sitePreview = git.register("sitePreview") {
+    val sitePreview by git.registering {
         branch.convention("asf-site")
         gitUrlConvention("-site")
     }
 
-    val site = git.register("site") {
+    val site by git.registering {
         branch.convention("asf-site")
         gitUrlConvention("-preview")
     }

@@ -21,6 +21,10 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 
+inline fun <T : AutoCloseable?, R> T.useRun(block: T.() -> R): R = use {
+    it.run(block)
+}
+
 fun TransportCommand<*, *>.setCredentials(repo: GitConfig) =
     setCredentialsProvider(
         repo.credentials.run {
