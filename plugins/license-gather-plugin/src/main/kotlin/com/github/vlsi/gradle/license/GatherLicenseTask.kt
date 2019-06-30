@@ -185,6 +185,16 @@ open class GatherLicenseTask @Inject constructor(
         }
     }
 
+    fun expectLicense(module: String, license: License) {
+        expectLicense(module, license.asExpression())
+    }
+
+    fun expectLicense(module: String, licenseExpression: LicenseExpression) {
+        overrideLicense(module) {
+            expectedLicense = licenseExpression
+        }
+    }
+
     fun overrideLicense(module: String, license: License) {
         overrideLicense(module, license.asExpression())
     }
