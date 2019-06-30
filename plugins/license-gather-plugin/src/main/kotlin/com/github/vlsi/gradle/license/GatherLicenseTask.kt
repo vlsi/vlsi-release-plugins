@@ -222,7 +222,7 @@ open class GatherLicenseTask @Inject constructor(
         s.expectedLicense?.let { expectedLicenses.put(id, it.toString()) }
         s.effectiveLicense?.let { effectiveLicenses.put(id, it.toString()) }
         // TODO: add property for o.licenseFiles
-        licenseOverrides[id] = LicenseOverride(
+        val override = LicenseOverride(
             expectedLicense = s.expectedLicense?.toLicenseExpression(),
             effectiveLicense = s.effectiveLicense?.toLicenseExpression(),
             licenseFiles = s.licenseFiles?.let {
@@ -233,6 +233,10 @@ open class GatherLicenseTask @Inject constructor(
                 }
             }
         )
+        licenseOverrides[id]?.let { prev ->
+            logger.warn("Duplicate license override for {}. prev={}, new={}", id, prev, override)
+        }
+        licenseOverrides[id] = override
     }
 
     fun configuration(conf: Configuration) =
@@ -247,6 +251,8 @@ open class GatherLicenseTask @Inject constructor(
     fun run() {
         val allDependencies = mutableMapOf<ComponentIdentifier, LicenseInfo>()
         val licenseTextDir = licenseDir.dir("texts").get().asFile
+
+        licenseOverrides.configurationComplete()
 
         for (c in nonResolvableConfigurations.get()) {
             logger.debug("Analyzing configuration $c")
@@ -387,6 +393,11 @@ open class GatherLicenseTask @Inject constructor(
                     sb.appendln(license ?: "Unknown license")
                     ids.map { it.displayName }.forEach { sb.appendln("* $it") }
                 }
+        }
+        val unusedOverrides = licenseOverrides.unusedOverrides
+        if (unusedOverrides.isNotEmpty()) {
+            logger.warn("License overrides were declared but unused" +
+                    " for the following dependencies: {}", unusedOverrides.sorted())
         }
         if (sb.isNotEmpty()) {
             throw GradleException(sb.toString())

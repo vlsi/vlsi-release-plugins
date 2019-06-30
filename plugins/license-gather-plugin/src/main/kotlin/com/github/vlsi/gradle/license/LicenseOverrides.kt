@@ -22,8 +22,15 @@ import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 
 class LicenseOverrides {
     private val map = mutableMapOf<String, LicenseOverride>()
+    private val usedOverrides = mutableSetOf<String>()
 
-    operator fun get(id: String): LicenseOverride? = map[id]
+    val unusedOverrides: Set<String> get() = map.keys.minus(usedOverrides)
+
+    fun configurationComplete() {
+        usedOverrides.clear()
+    }
+
+    operator fun get(id: String): LicenseOverride? = map[id]?.also { usedOverrides.add(id) }
 
     operator fun get(compId: ModuleComponentIdentifier): LicenseOverride? =
         get(compId.displayName) ?: get("${compId.module}:${compId.version}")
