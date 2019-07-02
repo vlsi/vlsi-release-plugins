@@ -52,7 +52,7 @@ open class Apache2LicenseRenderer @Inject constructor(
         .convention(layout.buildDirectory.file("license/$name/LICENSE"))
 
     @Input
-    protected fun licenseCategories(): Map<String, AsfLicenseCategory> =
+    protected fun getLicenseCategories(): Map<String, AsfLicenseCategory> =
         licenseCategory.get().mapKeys { it.toString() }
 
     @Input

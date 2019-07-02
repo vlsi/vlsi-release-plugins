@@ -30,7 +30,7 @@ import javax.inject.Inject
 
 abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
     @Input
-    var repository = project.objects.property<URI>()
+    val repository = project.objects.property<URI>()
         .convention(project.provider {
             project.the<ReleaseExtension>().svnDist.url.get()
         })

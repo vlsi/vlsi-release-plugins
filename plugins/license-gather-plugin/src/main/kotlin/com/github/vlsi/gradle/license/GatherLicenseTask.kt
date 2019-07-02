@@ -93,7 +93,7 @@ open class GatherLicenseTask @Inject constructor(
     val configurations = objectFactory.setProperty<Configuration>()
 
     @Input
-    protected fun extraArtifacts() =
+    protected fun getExtraArtifacts() =
         nonResolvableConfigurations.get().flatMapTo(mutableSetOf()) { conf ->
             conf.allDependencies.map { it.toString() }
         }
@@ -114,7 +114,7 @@ open class GatherLicenseTask @Inject constructor(
 
     @Input
     @Optional
-    protected fun includeDefaultTextFor(): Set<String> =
+    protected fun getIncludeDefaultTextFor(): Set<String> =
         defaultTextFor.get().mapTo(mutableSetOf()) { it.toString() }
 
     @Internal
@@ -129,7 +129,7 @@ open class GatherLicenseTask @Inject constructor(
 
     @Input
     @Optional
-    protected fun ignoreMissingLicenseFor(): Set<String> =
+    protected fun getIgnoreMissingLicenseFor(): Set<String> =
         ignoreMissingLicenseFor.get().mapTo(mutableSetOf()) { it.toString() }
 
     @Internal

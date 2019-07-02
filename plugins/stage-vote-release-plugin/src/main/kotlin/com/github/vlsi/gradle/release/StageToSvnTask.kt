@@ -24,7 +24,6 @@ import org.gradle.work.InputChanges
 
 abstract class StageToSvnTask() : SvnmuccTask() {
     @Incremental
-    @SkipWhenEmpty
     @InputFiles
     @PathSensitive(PathSensitivity.NAME_ONLY)
     val files = project.files()
