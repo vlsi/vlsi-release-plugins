@@ -20,6 +20,7 @@ import com.github.vlsi.gradle.release.jgit.dsl.* // ktlint-disable
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.ResetCommand
 import org.eclipse.jgit.transport.URIish
+import org.eclipse.jgit.util.FileUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
@@ -34,21 +35,24 @@ abstract class GitPrepareRepo : DefaultTask() {
     fun execute() {
         val repo = repository.get()
         val repoDir = File(project.buildDir, repo.name)
+        FileUtils.mkdirs(repoDir, true)
         gitInit {
             setDirectory(repoDir)
         }.useRun {
             val remoteName = repo.remote.get()
+            val pushUrl = repo.urls.get().pushUrl
             if (remoteName !in repository.remoteNames) {
                 remoteAdd {
                     setName(remoteName)
-                    setUri(URIish(repo.urls.get().pushUrl))
+                    setUri(URIish(pushUrl))
                 }
             } else {
                 remoteSetUrl {
                     setRemoteName(remoteName)
-                    setRemoteUri(URIish(repo.urls.get().pushUrl))
+                    setRemoteUri(URIish(pushUrl))
                 }
             }
+            logger.info("Fetching commits from {}, {}", remoteName, pushUrl)
             fetch {
                 setCredentials(repo)
                 setRemote(remoteName)
@@ -61,6 +65,7 @@ abstract class GitPrepareRepo : DefaultTask() {
                 setStartPoint("$remoteName/$branchName")
                 setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
             }
+            logger.info("Resetting git state to {}/{}", remoteName, branchName)
             reset {
                 // jgit fails with NPE when performing checkout in case some files are deleted
                 // So we just discard all local changes here
