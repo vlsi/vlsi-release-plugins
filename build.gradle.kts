@@ -34,7 +34,7 @@ val repoUrl = "https://github.com/vlsi/vlsi-release-plugins"
 
 allprojects {
     group = "com.github.vlsi.gradle"
-    version = "1.0.1-SNAPSHOT"
+    version = "1.1.0"
 
     plugins.withType<KotlinDslPlugin> {
         configure<KotlinDslPluginOptions> {
