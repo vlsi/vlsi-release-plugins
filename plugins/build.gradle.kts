@@ -147,6 +147,7 @@ subprojects {
                                 developer {
                                     name.set("Vladimir Sitnikov")
                                     id.set("vlsi")
+                                    email.set("sitnikov.vladmir@gmail.com")
                                 }
                             }
                             licenses {
