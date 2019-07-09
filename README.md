@@ -38,27 +38,31 @@ Gradle-License-Report is nice (it is), however there are certain pecularities (a
 * It can't generate multiple lists within a single project (e.g. license for source / binary artifacts)
 * The model for imported/discovered licenses is differnet
 * There's no way to override license detection
+
+https://github.com/eskatos/honker-gradle
+
+* There's no way to override license files
 * [SPDX](https://spdx.org/licenses/) is not used
 
 Features
 --------
 
-* LICENSE file generation (TODO)
-* License whitelisting (TODO)
-* The detected licenses can be overriden
+* LICENSE file generation
+* License whitelisting
+* The detected licenses can be overridden
 * Support for incremental-builds (discovery does not run in case dependencies do not change)
 * Type-safe license enumeration (based on SPDX):
 
-    com.github.vlsi.gradle.license.api.License#Apache_2_0
+    com.github.vlsi.gradle.license.api.SpdxLicense#Apache_2_0
 
 Usage
 -----
 
 Gradle (Groovy DSL):
 ```groovy
-id('com.github.vlsi.license-gather') version "1.0.0"
+id('com.github.vlsi.license-gather') version '1.0.0'
 
-tasks.register("generateLicense", GatherLicenseTask.class) {
+tasks.register('generateLicense', GatherLicenseTask.class) {
     configurations.add(project.configurations.runtime)
     outputFile.set(file("$buildDir/result.txt"))
 
@@ -70,7 +74,7 @@ tasks.register("generateLicense", GatherLicenseTask.class) {
 
 Gradle (Kotlin DSL):
 ```groovy
-id('com.github.vlsi.license-gather') version "1.0.0"
+id("com.github.vlsi.license-gather") version "1.0.0"
 
 tasks.register("generateLicense", GatherLicenseTask::class) {
     configurations.add(project.configurations.runtime)
@@ -86,6 +90,39 @@ Stage Vote Release Plugin
 =========================
 
 Enables to stage and vote on release artifacts before they are released.
+Enables to use `.gitignore` and `.gitattributes` for building `CopySpec`.
+
+Usage
+-----
+
+```groovy
+// Loads .gitattributes and .gitignore from rootDir (and subdirs)
+val gitProps by tasks.registering(FindGitAttributes::class) {
+    // Scanning for .gitignore and .gitattributes files in a task avoids doing that
+    // when distribution build is not required (e.g. code is just compiled)
+    root.set(rootDir)
+}
+
+fun CrLfSpec.sourceLayout() = copySpec {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    gitattributes(this, gitProps)
+    into(baseFolder) {
+        // Note: license content is taken from "/build/..", so gitignore should not be used
+        // Note: this is a "license + third-party licenses", not just Apache-2.0
+        dependencyLicenses(sourceLicense)
+        // Include all the source files
+        from(rootDir) {
+            gitignore(gitProps)
+        }
+    }
+}
+
+tasks.register("distZip", Zip::class) {
+  CrLfSpec(LineEndings.CRLF).run {
+    with(sourceLayout())
+  }
+}
+```
 
 License
 -------
@@ -93,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.2.0
+* stage-vote-release-plugin: support `.gitignore` and `.gitattributes` in building `CopySpec`
+
 v1.0.0
 * Initial release: basic license gathering
 

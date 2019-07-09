@@ -14,12 +14,18 @@
  * limitations under the License.
  *
  */
+package com.github.vlsi.gradle.crlf
 
-dependencies {
-    implementation(project(":plugins:crlf-plugin"))
-    implementation(project(":plugins:license-gather-plugin"))
-    implementation("org.ajoberstar.grgit:grgit-gradle:3.1.1")
-    implementation("org.ajoberstar.grgit:grgit-core:3.1.1")
-    implementation("de.marcphilipp.gradle:nexus-publish-plugin:0.2.0")
-    implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.20.0")
+import org.gradle.api.file.CopySpec
+
+class CrLfSpec(val textEol: LineEndings = LineEndings.SYSTEM) {
+    fun CopySpec.textFrom(o: Any, eol: LineEndings = textEol) =
+        from(o) {
+            filter(eol)
+        }
+
+    fun CopySpec.textFrom(o: Any, action: AutoClassifySpec.() -> Unit) =
+        from(o, textEol) {
+            action()
+        }
 }

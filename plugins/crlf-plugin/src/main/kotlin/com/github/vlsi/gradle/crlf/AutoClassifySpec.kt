@@ -16,11 +16,15 @@
  */
 package com.github.vlsi.gradle.crlf
 
+import org.gradle.api.file.FileTreeElement
+import org.gradle.api.specs.Spec
+
 class AutoClassifySpec {
     val text = mutableListOf<String>()
     val binary = mutableListOf<String>()
     val shell = mutableListOf<String>()
     val exclude = mutableListOf(".DS_Store") // default excludes
+    val excludeSpecs= mutableListOf<Spec<FileTreeElement>>()
 
     fun text(vararg fileName: String) {
         text.addAll(fileName)
@@ -36,5 +40,9 @@ class AutoClassifySpec {
 
     fun exclude(vararg fileName: String) {
         exclude.addAll(fileName)
+    }
+
+    fun exclude(spec: Spec<FileTreeElement>) {
+        excludeSpecs.add(spec)
     }
 }

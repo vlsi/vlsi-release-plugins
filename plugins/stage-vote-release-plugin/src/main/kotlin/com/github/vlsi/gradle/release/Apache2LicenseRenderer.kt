@@ -24,11 +24,16 @@ import com.github.vlsi.gradle.license.api.text
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.file.CopySpec
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.* // ktlint-disable
-import org.gradle.kotlin.dsl.mapProperty
-import org.gradle.kotlin.dsl.property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.* // ktlint-disable
 import java.util.* // ktlint-disable
 import javax.inject.Inject
 
@@ -52,6 +57,10 @@ open class Apache2LicenseRenderer @Inject constructor(
         .convention(layout.buildDirectory.file("license/$name/LICENSE"))
 
     @Input
+    @Optional
+    val dependencySubfoder = objectFactory.property<String>().convention("licenses")
+
+    @Input
     protected fun getLicenseCategories(): Map<String, AsfLicenseCategory> =
         licenseCategory.get().mapKeys { it.toString() }
 
@@ -62,14 +71,38 @@ open class Apache2LicenseRenderer @Inject constructor(
     val licenseCategory =
         objectFactory.mapProperty<LicenseExpression, AsfLicenseCategory>()
 
+    private val dependencyLicenses = objectFactory.property<CopySpec>()
+        .convention(project.copySpec())
+
+    @get:Internal
+    val dependencyLicensesCopySpec: CopySpec by lazy {
+        if (!didWork) {
+            // When the task was "up-to-date", reload metadata from cache
+            val dependencies = MetadataStore.load(metadata).dependencies
+            buildDependencyCopySpec(dependencies)
+        }
+        dependencyLicenses.get()
+    }
+
     @TaskAction
     fun run() {
         val dependencies = MetadataStore.load(metadata).dependencies
         val output = outputFile.get().asFile
         output.parentFile.mkdirs()
+        if (dependencies.isNotEmpty()) {
+            buildDependencyCopySpec(dependencies)
+        }
+
         output.bufferedWriter().use { out ->
             out.appendln(SpdxLicense.Apache_2_0.text)
 
+            if (dependencies.isNotEmpty() && dependencySubfoder.get().isNotEmpty()) {
+                out.appendln(
+                    "Additional License files can be found in the '${dependencySubfoder.get()}' folder " +
+                            "located in the same directory as the LICENSE file (i.e. this file)"
+                )
+                out.appendln()
+            }
             dependencies
                 .map { (id, licenseInfo) ->
                     id to licenseInfo.license
@@ -88,6 +121,18 @@ open class Apache2LicenseRenderer @Inject constructor(
         }
 
         validateDependencies(dependencies)
+    }
+
+    private fun buildDependencyCopySpec(dependencies: Map<ModuleComponentIdentifier, LicenseInfo>) {
+        val dstSpec = dependencyLicenses.get().into(dependencySubfoder.get())
+        dependencies
+            .asSequence()
+            .mapNotNull { it.value.licenseFiles }
+            .forEach {
+                dstSpec.into(it.name) {
+                    from(it)
+                }
+            }
     }
 
     private fun Appendable.appendComponents(

@@ -127,9 +127,10 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
     private fun Project.addPreviewSiteTasks(): TaskProvider<GitCommitAndPush> {
         val releaseExt = project.the<ReleaseExtension>()
-        val preparePreviewSiteRepo = tasks.register("preparePreviewSiteRepo", GitPrepareRepo::class) {
-            repository.set(releaseExt.sitePreview)
-        }
+        val preparePreviewSiteRepo =
+            tasks.register("preparePreviewSiteRepo", GitPrepareRepo::class) {
+                repository.set(releaseExt.sitePreview)
+            }
 
         val syncPreviewSiteRepo = tasks.register("syncPreviewSiteRepo", Sync::class) {
             dependsOn(preparePreviewSiteRepo)

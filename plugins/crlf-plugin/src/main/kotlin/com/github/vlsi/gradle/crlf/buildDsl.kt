@@ -81,6 +81,7 @@ fun CopySpec.from(sourcePath: Any, textEol: LineEndings, action: AutoClassifySpe
     val shellScripts = spec.shell.toTypedArray()
     includeShell(sourcePath, *shellScripts) {
         exclude(spec.exclude)
+        spec.excludeSpecs.forEach { exclude(it) }
     }
     if (!spec.text.isEmpty()) {
         from(sourcePath) {
@@ -88,6 +89,7 @@ fun CopySpec.from(sourcePath: Any, textEol: LineEndings, action: AutoClassifySpe
             include(spec.text)
             exclude(spec.binary.exceptStar())
             exclude(spec.exclude)
+            spec.excludeSpecs.forEach { exclude(it) }
             excludeShell(*shellScripts)
         }
     }
@@ -96,19 +98,9 @@ fun CopySpec.from(sourcePath: Any, textEol: LineEndings, action: AutoClassifySpe
             include(spec.binary)
             exclude(spec.text.exceptStar())
             exclude(spec.exclude)
+            spec.excludeSpecs.forEach { exclude(it) }
             excludeShell(*shellScripts)
         }
     }
 }
 
-class CrLfSpec(val textEol: LineEndings = LineEndings.SYSTEM) {
-    fun CopySpec.textFrom(o: Any, eol: LineEndings = textEol) =
-        from(o) {
-            filter(eol)
-        }
-
-    fun CopySpec.textFrom(o: Any, action: AutoClassifySpec.() -> Unit) =
-        from(o, textEol) {
-            action()
-        }
-}
