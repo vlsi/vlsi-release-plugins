@@ -21,10 +21,11 @@ import com.github.vlsi.gradle.git.FilterAutoLf
 import com.github.vlsi.gradle.git.FilterTextCrlf
 import com.github.vlsi.gradle.git.FilterTextLf
 import com.github.vlsi.gradle.git.FindGitAttributes
+import com.github.vlsi.gradle.git.GitAttributesMerger
 import com.github.vlsi.gradle.git.GitProperties
 import org.eclipse.jgit.attributes.Attributes
 import org.eclipse.jgit.lib.CoreConfig
-import org.gradle.api.Action
+import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCopyDetails
 import org.gradle.api.provider.Provider
@@ -43,33 +44,57 @@ class CrLfSpec(val textEol: LineEndings = LineEndings.SYSTEM) {
             action()
         }
 
-    fun CopySpec.gitattributes(props: GitProperties) =
-        applyFilter(gitattributes(textEol, props))
+    fun CopySpec.gitattributes(props: GitProperties) {
+        if (this is Task) {
+            wa1191SetInputs(props.attrs)
+        }
+        filterBinary { filterEol(props, textEol) }
+    }
 
-    fun CopySpec.gitattributes(props: Provider<GitProperties>) =
-        applyFilter(gitattributes(textEol, props))
+    fun CopySpec.gitattributes(props: Provider<GitProperties>) {
+        if (this is Task) {
+            wa1191SetInputs(props)
+        }
+        filterBinary { filterEol(props.get(), textEol) }
+    }
 
     fun CopySpec.gitattributes(task: TaskProvider<FindGitAttributes>) {
         from(task)
-        applyFilter(gitattributes(textEol, task))
+        if (this is Task) {
+            wa1191SetInputs(task)
+        }
+        filterBinary { filterEol(task.get().props, textEol) }
+    }
+
+    fun Task.wa1191SetInputs(attributes: GitAttributesMerger) {
+        wa1191Internal(attributes.toString())
+    }
+
+    fun Task.wa1191SetInputs(props: Provider<GitProperties>) {
+        wa1191Internal(props.map { it.attrs.toString() })
+    }
+
+    fun Task.wa1191SetInputs(task: TaskProvider<FindGitAttributes>) {
+        wa1191Internal(task.map { it.props.attrs.toString() })
+    }
+
+    private fun Task.wa1191Internal(attributes: Any) {
+        // Workaround https://github.com/gradle/gradle/issues/1191
+        // Copy tasks do not consider filter/eachFile/expansion properties in up-to-date checks
+        inputs.property("gitproperties", attributes)
     }
 }
 
-private fun gitattributes(textEol: LineEndings, props: GitProperties): Action<in FileCopyDetails> =
-    Action { applyFilter(props, textEol) }
-
-private fun gitattributes(textEol: LineEndings, props: Provider<GitProperties>): Action<in FileCopyDetails> =
-    Action { applyFilter(props.get(), textEol) }
-
-private fun gitattributes(textEol: LineEndings, task: TaskProvider<FindGitAttributes>): Action<in FileCopyDetails> =
-    Action { applyFilter(task.get().props, textEol) }
-
-private fun CopySpec.applyFilter(action: Action<in FileCopyDetails>) {
+private fun CopySpec.filterBinary(action: FileCopyDetails.() -> Unit) {
     filteringCharset = StandardCharsets.ISO_8859_1.name()
+    if (this is Task) {
+        // https://github.com/gradle/gradle/issues/1191
+        // Copy tasks do not consider filter/eachFile/expansion properties in up-to-date checks
+    }
     eachFile(action)
 }
 
-private fun FileCopyDetails.applyFilter(props: GitProperties, textEol: LineEndings) {
+private fun FileCopyDetails.filterEol(props: GitProperties, textEol: LineEndings) {
     val attributes = props.attrs.compute(this)
     if (attributes.isSet("executable")) {
         mode = "755".toInt(8)

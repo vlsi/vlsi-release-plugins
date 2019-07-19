@@ -131,7 +131,8 @@ This library is distributed under terms of Apache License 2.0
 Change log
 ----------
 v1.3.0
-* move gitattributes and gitignore to crlf plugin (from stage-vote-release-plugin)
+* Move gitattributes and gitignore to crlf plugin (from stage-vote-release-plugin)
+* Add workaround for https://github.com/gradle/gradle/issues/1191 (Copy tasks do not consider filter/eachFile/expansion properties in up-to-date checks)
 
 v1.2.0
 * stage-vote-release-plugin: support `.gitignore` and `.gitattributes` in building `CopySpec`
