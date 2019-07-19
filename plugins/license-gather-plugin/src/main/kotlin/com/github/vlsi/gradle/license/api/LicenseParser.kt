@@ -22,7 +22,7 @@ interface LicenseParser {
     fun parseException(value: String): LicenseException
 }
 
-object DefaultLicenseParser: LicenseParser {
+object DefaultLicenseParser : LicenseParser {
     override fun parseLicense(value: String) =
         SpdxLicense.fromIdOrNull(value) ?: SimpleLicense(value)
 

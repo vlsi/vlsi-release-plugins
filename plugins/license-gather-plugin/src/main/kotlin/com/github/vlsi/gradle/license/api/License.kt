@@ -31,12 +31,18 @@ interface LicenseException {
 
 data class SimpleLicense(override val title: String, override val uri: List<URI>) :
     License {
-    constructor(title: String, uri: URI? = null) : this(title, if (uri == null) emptyList() else listOf(uri))
+    constructor(title: String, uri: URI? = null) : this(
+        title,
+        if (uri == null) emptyList() else listOf(uri)
+    )
 }
 
 data class SimpleException(override val title: String, override val uri: List<URI>) :
     LicenseException {
-    constructor(title: String, uri: URI? = null) : this(title, if (uri == null) emptyList() else listOf(uri))
+    constructor(title: String, uri: URI? = null) : this(
+        title,
+        if (uri == null) emptyList() else listOf(uri)
+    )
 }
 
 interface StandardLicense : License {

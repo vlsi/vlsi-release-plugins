@@ -24,7 +24,7 @@ class AutoClassifySpec {
     val binary = mutableListOf<String>()
     val shell = mutableListOf<String>()
     val exclude = mutableListOf(".DS_Store") // default excludes
-    val excludeSpecs= mutableListOf<Spec<FileTreeElement>>()
+    val excludeSpecs = mutableListOf<Spec<FileTreeElement>>()
 
     fun text(vararg fileName: String) {
         text.addAll(fileName)

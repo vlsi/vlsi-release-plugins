@@ -23,6 +23,7 @@ fun JustLicense.orLater(): LicenseExpression = OrLaterLicense(license)
 
 infix fun License.with(exception: LicenseException): LicenseExpression =
     asExpression() with exception
+
 infix fun SimpleLicenseExpression.with(exception: LicenseException): LicenseExpression =
     WithException(this, exception)
 
@@ -35,26 +36,26 @@ infix fun License.or(other: License): LicenseExpression = asExpression() or othe
 infix fun License.or(other: LicenseExpression): LicenseExpression = other or this
 
 fun LicenseExpression.disjunctions() =
-    when(this) {
+    when (this) {
         is DisjunctionLicenseExpression -> unordered
         else -> setOf(this)
     }
 
 fun LicenseExpression.conjunctions() =
-    when(this) {
+    when (this) {
         is ConjunctionLicenseExpression -> unordered
         else -> setOf(this)
     }
 
 infix fun LicenseExpression.and(other: LicenseExpression): LicenseExpression {
     fun LicenseExpression.ops() =
-        when(this) {
+        when (this) {
             is ConjunctionLicenseExpression -> licenses
             else -> setOf(this)
         }
 
     val ops = ops() + other.ops()
-    return when(ops.size) {
+    return when (ops.size) {
         0 -> throw IllegalArgumentException("Empty argument to ConjunctionLicenseExpression")
         1 -> ops.first()
         else -> ConjunctionLicenseExpression(ops)
@@ -63,13 +64,13 @@ infix fun LicenseExpression.and(other: LicenseExpression): LicenseExpression {
 
 infix fun LicenseExpression.or(other: LicenseExpression): LicenseExpression {
     fun LicenseExpression.ops() =
-        when(this) {
+        when (this) {
             is DisjunctionLicenseExpression -> licenses
             else -> setOf(this)
         }
 
     val ops = ops() + other.ops()
-    return when(ops.size) {
+    return when (ops.size) {
         0 -> throw IllegalArgumentException("Empty argument to DisjunctionLicenseExpression")
         1 -> ops.first()
         else -> DisjunctionLicenseExpression(ops)

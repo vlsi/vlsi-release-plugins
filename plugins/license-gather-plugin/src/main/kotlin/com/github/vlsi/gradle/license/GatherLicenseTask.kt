@@ -159,7 +159,8 @@ open class GatherLicenseTask @Inject constructor(
 
     // Used in test
     @get:Internal
-    val licensesXml: File get() = licenseDir.get().file("license.xml").asFile
+    val licensesXml: File
+        get() = licenseDir.get().file("license.xml").asFile
 
     private val extraDeps: Configuration by lazy {
         project.configurations.create("${name}_dependencies") {
@@ -396,8 +397,10 @@ open class GatherLicenseTask @Inject constructor(
         }
         val unusedOverrides = licenseOverrides.unusedOverrides
         if (unusedOverrides.isNotEmpty()) {
-            logger.warn("License overrides were declared but unused" +
-                    " for the following dependencies: {}", unusedOverrides.sorted())
+            logger.warn(
+                "License overrides were declared but unused" +
+                        " for the following dependencies: {}", unusedOverrides.sorted()
+            )
         }
         if (sb.isNotEmpty()) {
             throw GradleException(sb.toString())

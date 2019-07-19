@@ -103,4 +103,3 @@ fun CopySpec.from(sourcePath: Any, textEol: LineEndings, action: AutoClassifySpe
         }
     }
 }
-

@@ -37,49 +37,68 @@ class LicenseParserTest {
                 Arguments.of("MIT OR GPL AND Apache", "MIT OR Apache AND GPL"),
                 Arguments.of("MIT AND (GPL OR Apache)", "MIT AND (Apache OR GPL)"),
                 Arguments.of("MIT OR (GPL AND Apache OR ABC)", "ABC OR MIT OR Apache AND GPL"),
-                Arguments.of("MIT OR (GPL with exception AND Apache)", "MIT OR Apache AND GPL WITH exception"),
+                Arguments.of(
+                    "MIT OR (GPL with exception AND Apache)",
+                    "MIT OR Apache AND GPL WITH exception"
+                ),
                 Arguments.of("((A+)) WITH B", "A+ WITH B"),
                 // Failures
-                Arguments.of("(MIT OR (GPL WITH exception AND Apache)", """
+                Arguments.of(
+                    "(MIT OR (GPL WITH exception AND Apache)", """
                     com.github.vlsi.gradle.license.api.ParseException: Unclosed open brace
                     input: (MIT OR (GPL WITH exception AND Apache)
                            ^ error here
-                """.trimIndent()),
-                Arguments.of("(MIT OR (GPL WITH exception AND Apache", """
+                """.trimIndent()
+                ),
+                Arguments.of(
+                    "(MIT OR (GPL WITH exception AND Apache", """
                     com.github.vlsi.gradle.license.api.ParseException: Unclosed open brace
                     input: (MIT OR (GPL WITH exception AND Apache
                                    ^ error here
-                """.trimIndent()),
-                Arguments.of("WITH", """
+                """.trimIndent()
+                ),
+                Arguments.of(
+                    "WITH", """
                     com.github.vlsi.gradle.license.api.ParseException: 'With exception' should be applied to SimpleLicenseExpression and LicenseException. Actual arguments are [null] and [null]
                     input: WITH
                            ^__^ error here
-                """.trimIndent()),
-                Arguments.of("OR", """
+                """.trimIndent()
+                ),
+                Arguments.of(
+                    "OR", """
                     com.github.vlsi.gradle.license.api.ParseException: OR expression requires two arguments
                     input: OR
                            ^^ error here
-                """.trimIndent()),
-                Arguments.of("A OR", """
+                """.trimIndent()
+                ),
+                Arguments.of(
+                    "A OR", """
                     com.github.vlsi.gradle.license.api.ParseException: OR expression requires two arguments
                     input: A OR
                              ^^ error here
-                """.trimIndent()),
-                Arguments.of("OR B", """
+                """.trimIndent()
+                ),
+                Arguments.of(
+                    "OR B", """
                     com.github.vlsi.gradle.license.api.ParseException: OR expression requires two arguments
                     input: OR B
                            ^^ error here
-                """.trimIndent()),
-                Arguments.of("A WITH B WITH C", """
+                """.trimIndent()
+                ),
+                Arguments.of(
+                    "A WITH B WITH C", """
                     com.github.vlsi.gradle.license.api.ParseException: Left argument of 'with exception' must be a SimpleLicenseExpression. Actual argument is WithException: [A WITH B]
                     input: A WITH B WITH C
                                     ^__^ error here
-                """.trimIndent()),
-                Arguments.of("(A+) WITH (B WITH C)", """
+                """.trimIndent()
+                ),
+                Arguments.of(
+                    "(A+) WITH (B WITH C)", """
                     com.github.vlsi.gradle.license.api.ParseException: 'With exception' should be applied to SimpleLicenseExpression and LicenseException. Actual arguments are [A+] and [B WITH C]
                     input: (A+) WITH (B WITH C)
                                 ^__^ error here
-                """.trimIndent())
+                """.trimIndent()
+                )
             )
         }
     }

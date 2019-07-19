@@ -135,7 +135,9 @@ fun loadLicenses(
         batch<ComponentIdentifier, File, LicenseExpression?> {
             for (id in ids) {
                 task { loader ->
-                    LicenseDetector(overrides, normalizer) { id -> loader(id).parseXml().parsePom() }.detect(id)
+                    LicenseDetector(overrides, normalizer) { id ->
+                        loader(id).parseXml().parsePom()
+                    }.detect(id)
                 }
             }
 

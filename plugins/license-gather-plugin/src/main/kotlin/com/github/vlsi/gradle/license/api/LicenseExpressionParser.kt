@@ -102,14 +102,18 @@ class LicenseExpressionParser(private val titleParser: LicenseParser = DefaultLi
         }
         rpn.addAll(operators)
         val result = ArrayDeque<LicenseExpression>()
-        while(rpn.isNotEmpty()) {
+        while (rpn.isNotEmpty()) {
             val t = rpn.removeFirst()
             when (t.type) {
                 TokenType.LITERAL ->
                     when {
                         t.value == "NONE" -> result.push(LicenseExpression.NONE)
                         t.value == "NOASSERION" -> result.push(LicenseExpression.NOASSERTION)
-                        rpn.peekFirst()?.type != TokenType.WITH -> result.push(titleParser.parseLicense(t.value).asExpression())
+                        rpn.peekFirst()?.type != TokenType.WITH -> result.push(
+                            titleParser.parseLicense(
+                                t.value
+                            ).asExpression()
+                        )
                         else -> {
                             val withToken = rpn.pop()
                             val license = result.pop()
@@ -171,7 +175,11 @@ class LicenseExpressionParser(private val titleParser: LicenseParser = DefaultLi
             throw ParseException("Result is empty", 0..0, value)
         }
         if (result.size > 1) {
-            throw ParseException("Multiple expressions in the output. Probably, AND/OR is missing: [$result]", 0..0, value)
+            throw ParseException(
+                "Multiple expressions in the output. Probably, AND/OR is missing: [$result]",
+                0..0,
+                value
+            )
         }
         return result.first
     }

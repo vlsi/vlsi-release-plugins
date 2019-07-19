@@ -47,8 +47,10 @@ class LicenseEquivalence(
                         is SimpleLicenseExpression -> listOf(res with key.exception)
                         is DisjunctionLicenseExpression ->
                             res.unordered.map { (it as SimpleLicenseExpression) with key.exception }
-                        else -> throw IllegalArgumentException("Unexpected output for expand(${key.license}): $res. " +
-                                "Expected SimpleLicenseExpression or DisjunctionLicenseExpression")
+                        else -> throw IllegalArgumentException(
+                            "Unexpected output for expand(${key.license}): $res. " +
+                                    "Expected SimpleLicenseExpression or DisjunctionLicenseExpression"
+                        )
                     })
             }
         }

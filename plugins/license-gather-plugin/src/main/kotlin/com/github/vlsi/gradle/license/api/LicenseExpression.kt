@@ -32,7 +32,7 @@ sealed class LicenseExpression {
 }
 
 private fun List<URI>.asString() =
-    when(size) {
+    when (size) {
         0 -> ""
         else -> joinToString(prefix = " (", separator = ", ", postfix = ")")
     }

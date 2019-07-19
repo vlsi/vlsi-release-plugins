@@ -84,7 +84,7 @@ object MetadataStore {
         }
 
         fun GPathResult.readLicenseExpression(): LicenseExpression =
-            when(name()) {
+            when (name()) {
                 "license" -> toLicense().asExpression()
                 "or-later" -> toLicense().orLater()
                 "expression" -> expressionParser.parse(text())
@@ -137,9 +137,9 @@ object MetadataStore {
                         .sortedWith(compareBy { it.key.displayName })) {
                         val params = mutableMapOf("id" to compId.displayName)
                         with(licenseInfo) {
-//                            file?.let {
-//                                params["file"] = it.relativeTo(folder).path
-//                            }
+                            // file?.let {
+                            //     params["file"] = it.relativeTo(folder).path
+                            // }
                             licenseFiles?.let {
                                 params["licenseFiles"] = it.relativeTo(folder).path
                             }

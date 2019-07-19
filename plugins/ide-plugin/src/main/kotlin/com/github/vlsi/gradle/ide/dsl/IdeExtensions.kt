@@ -17,7 +17,7 @@
 package com.github.vlsi.gradle.ide.dsl
 
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.* // ktlint-disable
 import org.gradle.plugins.ide.idea.model.IdeaProject
 import org.jetbrains.gradle.ext.CopyrightConfiguration
 import org.jetbrains.gradle.ext.GroovyCompilerConfiguration
@@ -25,17 +25,17 @@ import org.jetbrains.gradle.ext.IdeaCompilerConfiguration
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
 
-fun IdeaProject.settings(configuration: ProjectSettings.() -> kotlin.Unit) =
+fun IdeaProject.settings(configuration: ProjectSettings.() -> Unit) =
     (this as ExtensionAware).configure(configuration)
 
-fun ProjectSettings.taskTriggers(configuration: TaskTriggersConfig.() -> kotlin.Unit) =
+fun ProjectSettings.taskTriggers(configuration: TaskTriggersConfig.() -> Unit) =
     (this as ExtensionAware).configure(configuration)
 
-fun ProjectSettings.compiler(configuration: IdeaCompilerConfiguration.() -> kotlin.Unit) =
+fun ProjectSettings.compiler(configuration: IdeaCompilerConfiguration.() -> Unit) =
     (this as ExtensionAware).configure(configuration)
 
-fun ProjectSettings.groovyCompiler(configuration: GroovyCompilerConfiguration.() -> kotlin.Unit) =
+fun ProjectSettings.groovyCompiler(configuration: GroovyCompilerConfiguration.() -> Unit) =
     (this as ExtensionAware).configure(configuration)
 
-fun ProjectSettings.copyright(configuration: CopyrightConfiguration.() -> kotlin.Unit) =
+fun ProjectSettings.copyright(configuration: CopyrightConfiguration.() -> Unit) =
     (this as ExtensionAware).configure(configuration)

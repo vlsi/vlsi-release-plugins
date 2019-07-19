@@ -41,7 +41,13 @@ class GuessBasedNormalizerTest {
     @Test
     internal fun al11() {
         val n = GuessBasedNormalizer(logger)
-        println(n.normalize(SimpleLicense("The Apache Software License, Version 1.1",
-            URI("http://www.apache.org/licenses/LICENSE-1.1.txt"))))
+        println(
+            n.normalize(
+                SimpleLicense(
+                    "The Apache Software License, Version 1.1",
+                    URI("http://www.apache.org/licenses/LICENSE-1.1.txt")
+                )
+            )
+        )
     }
 }

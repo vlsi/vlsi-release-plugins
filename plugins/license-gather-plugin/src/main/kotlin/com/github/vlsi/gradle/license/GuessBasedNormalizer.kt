@@ -27,7 +27,10 @@ import com.github.vlsi.gradle.license.api.asExpression
 import org.slf4j.Logger
 import java.net.URI
 
-class GuessBasedNormalizer(private val logger: Logger, private val similarityThreshold: Double = 42.0) :
+class GuessBasedNormalizer(
+    private val logger: Logger,
+    private val similarityThreshold: Double = 42.0
+) :
     LicenseExpressionNormalizer() {
 
     private val nameGuesser = TfIdfBuilder<LicenseExpression>().apply {

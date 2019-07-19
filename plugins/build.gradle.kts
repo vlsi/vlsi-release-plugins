@@ -60,7 +60,8 @@ subprojects {
         tags = (project.property("plugin.tags") as String).split(Regex("\\s*,\\s*"))
     }
 
-    configure<GradlePluginDevelopmentExtension> { // gradlePlugin
+    configure<GradlePluginDevelopmentExtension> {
+        // gradlePlugin
         val pluginId = project.name.removeSuffix("-plugin")
         plugins {
             create(pluginId) {
