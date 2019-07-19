@@ -38,8 +38,8 @@ allprojects {
     version = "1.3.0"
 
     tasks.withType<KotlinCompile> {
-        sourceCompatibility = "1.8"
-        targetCompatibility = "1.8"
+        sourceCompatibility = "unused"
+        targetCompatibility = "unused"
         kotlinOptions {
             jvmTarget = "1.8"
         }

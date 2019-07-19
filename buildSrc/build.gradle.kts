@@ -45,8 +45,8 @@ fun Project.applyKotlinProjectConventions() {
     }
 
     tasks.withType<KotlinCompile> {
-        sourceCompatibility = "1.8"
-        targetCompatibility = "1.8"
+        sourceCompatibility = "unused"
+        targetCompatibility = "unused"
         kotlinOptions {
             jvmTarget = "1.8"
         }
