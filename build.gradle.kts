@@ -35,7 +35,7 @@ val repoUrl = "https://github.com/vlsi/vlsi-release-plugins"
 
 allprojects {
     group = "com.github.vlsi.gradle"
-    version = "1.3.0"
+    version = "1.4.0"
 
     tasks.withType<KotlinCompile> {
         sourceCompatibility = "unused"
