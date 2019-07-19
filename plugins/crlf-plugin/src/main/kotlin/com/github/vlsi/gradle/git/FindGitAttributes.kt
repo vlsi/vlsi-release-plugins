@@ -40,5 +40,7 @@ open class FindGitAttributes @Inject constructor(
     @TaskAction
     fun run() {
         props = findGitproperties(root.get().asFile.toPath(), maxDepth.get())
+        logger.debug("Overall .gitignore: {}", props.ignores)
+        logger.debug("Overall .gitattributes: {}", props.attrs)
     }
 }
