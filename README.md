@@ -130,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.5.0
+* stage-vote-release-plugin: Project.licensesCopySpec includes NOTICE and license by default
+
 v1.3.0
 * Move gitattributes and gitignore to crlf plugin (from stage-vote-release-plugin)
 * Add workaround for https://github.com/gradle/gradle/issues/1191 (Copy tasks do not consider filter/eachFile/expansion properties in up-to-date checks)

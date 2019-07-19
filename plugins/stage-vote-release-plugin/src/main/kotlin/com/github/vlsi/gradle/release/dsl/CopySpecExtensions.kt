@@ -31,6 +31,7 @@ fun CopySpec.dependencyLicenses(task: BuildLicenseCopySpec) {
 
 fun Project.licensesCopySpec(
     source: Any,
+    noticeFile: String? = "$rootDir/NOTICE",
     action: Action<in CopySpec>? = null
 ): BuildLicenseCopySpec {
     if (source !is TaskProvider<*>) {
@@ -38,7 +39,9 @@ fun Project.licensesCopySpec(
     }
     return tasks.create<BuildLicenseCopySpec>("${source.name}CopySpec") {
         dependsOn(source)
-    }.also {
-        action?.execute(it.copySpec)
+    }.apply {
+        noticeFile?.let { copySpec.from(it) }
+        copySpec.from(source)
+        action?.execute(copySpec)
     }
 }
