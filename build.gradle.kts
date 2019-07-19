@@ -24,7 +24,6 @@ plugins {
     `maven-publish`
     id("com.gradle.plugin-publish") version "0.10.1" apply false
     id("com.diffplug.gradle.spotless") version "3.23.0"
-    id("com.github.johnrengelman.shadow") version "5.0.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "0.5"
     id("com.github.ben-manes.versions") version "0.21.0"
     id("org.jetbrains.dokka") version "0.9.17"

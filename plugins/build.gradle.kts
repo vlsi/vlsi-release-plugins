@@ -128,7 +128,6 @@ subprojects {
         val archives by configurations.getting
         //archives.artifacts.clear()
         artifacts {
-            //    add(archives.name, tasks.shadowJar)
             add(archives.name, sourcesJar)
             add(archives.name, javadocJar)
         }
