@@ -105,7 +105,7 @@ val gitProps by tasks.registering(FindGitAttributes::class) {
 
 fun CrLfSpec.sourceLayout() = copySpec {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    gitattributes(this, gitProps)
+    gitattributes(gitProps)
     into(baseFolder) {
         // Note: license content is taken from "/build/..", so gitignore should not be used
         // Note: this is a "license + third-party licenses", not just Apache-2.0
@@ -130,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.3.0
+* move gitattributes and gitignore to crlf plugin (from stage-vote-release-plugin)
+
 v1.2.0
 * stage-vote-release-plugin: support `.gitignore` and `.gitattributes` in building `CopySpec`
 

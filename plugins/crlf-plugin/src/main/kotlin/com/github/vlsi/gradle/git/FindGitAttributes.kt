@@ -32,7 +32,7 @@ open class FindGitAttributes @Inject constructor(
     val root = objectFactory.directoryProperty()
 
     @Input
-    val maxDepth = project.objects.property<Int>().convention(Int.MAX_VALUE)
+    val maxDepth = objectFactory.property<Int>().convention(Int.MAX_VALUE)
 
     @Internal
     lateinit var props: GitProperties
