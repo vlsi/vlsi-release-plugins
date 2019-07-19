@@ -17,6 +17,7 @@
 import org.gradle.plugins.ide.idea.model.IdeaProject
 import org.jetbrains.gradle.ext.CopyrightConfiguration
 import org.jetbrains.gradle.ext.ProjectSettings
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
@@ -35,6 +36,14 @@ val repoUrl = "https://github.com/vlsi/vlsi-release-plugins"
 allprojects {
     group = "com.github.vlsi.gradle"
     version = "1.1.0"
+
+    tasks.withType<KotlinCompile> {
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
 
     plugins.withType<KotlinDslPlugin> {
         configure<KotlinDslPluginOptions> {

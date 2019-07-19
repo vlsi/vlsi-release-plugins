@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 /*
  * Copyright 2019 Vladimir Sitnikov <sitnikov.vladimir@gmail.com>
  *
@@ -39,6 +41,14 @@ fun Project.applyKotlinProjectConventions() {
     plugins.withType<KotlinDslPlugin> {
         configure<KotlinDslPluginOptions> {
             experimentalWarning.set(false)
+        }
+    }
+
+    tasks.withType<KotlinCompile> {
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
+        kotlinOptions {
+            jvmTarget = "1.8"
         }
     }
 }
