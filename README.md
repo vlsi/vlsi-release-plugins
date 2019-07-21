@@ -130,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.6.0
+* license-gather-plugin: build "predict license by text" model at the build time
+
 v1.5.0
 * stage-vote-release-plugin: Project.licensesCopySpec includes NOTICE and license by default
 
