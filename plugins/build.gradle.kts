@@ -33,6 +33,12 @@ plugins {
 
 val repoUrl = "https://github.com/vlsi/vlsi-release-plugins"
 
+tasks {
+    jar {
+        enabled = false
+    }
+}
+
 subprojects {
     repositories {
         mavenCentral()
