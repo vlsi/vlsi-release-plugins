@@ -32,6 +32,10 @@ plugins {
 description = "A set of plugins to simplify Gradle release tasks"
 val repoUrl = "https://github.com/vlsi/vlsi-release-plugins"
 
+tasks.jar {
+    enabled = false
+}
+
 allprojects {
     group = "com.github.vlsi.gradle"
     version = "1.5.0"
@@ -65,6 +69,14 @@ allprojects {
                 licenseHeaderFile(licenseHeaderFile)
             }
         }
+    }
+
+    tasks.withType<AbstractArchiveTask>().configureEach {
+        // Ensure builds are reproducible
+        isPreserveFileTimestamps = false
+        isReproducibleFileOrder = true
+        dirMode = "775".toInt(8)
+        fileMode = "664".toInt(8)
     }
 }
 
