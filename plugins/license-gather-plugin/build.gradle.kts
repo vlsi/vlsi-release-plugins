@@ -31,9 +31,9 @@ tasks {
         licenses.set(File(projectDir, "license-list-data/json"))
         outputDir.set(File(buildDir, "generated-sources/licenses"))
 
-        sourceSets {
-            main {
-                java.srcDir(outputDir.get())
+        sourceSets.main {
+            java {
+                srcDir(this@registering.outputDir)
             }
         }
     }
@@ -59,14 +59,42 @@ tasks {
         val output = "$buildDir/licenses"
         into(output)
         with(licenseTexts)
-        sourceSets {
-            main {
-                resources.srcDir(output)
-            }
+        sourceSets.main {
+            resources.srcDir(output)
         }
     }
 
     compileKotlin {
+        require(this is Task)
         dependsOn(saveLicenses, copyLicenses)
+    }
+
+    val generateStaticTfIdf by registering(JavaExec::class) {
+        val output = "$buildDir/tfidf"
+        inputs.files(sourceSets.main.map { it.runtimeClasspath })
+        inputs.files(copyLicenses)
+        outputs.dir(output)
+
+        classpath(sourceSets.main.map { it.runtimeClasspath })
+        main = "com.github.vlsi.gradle.license.SpdxPredictorKt"
+        args("$output/com/github/vlsi/gradle/license/api/models/tfidf_licenses.bin")
+
+        doLast {
+            // This resource is generated after compile, so we copy it manually
+            copy {
+                into("$buildDir/resources/main")
+                from(output) {
+                    include("**/tfidf_licenses.bin")
+                }
+            }
+        }
+    }
+
+    jar {
+        dependsOn(generateStaticTfIdf)
+    }
+
+    test {
+        dependsOn(generateStaticTfIdf)
     }
 }

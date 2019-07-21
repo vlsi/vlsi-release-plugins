@@ -17,10 +17,13 @@
 
 package com.github.vlsi.gradle.license
 
+import java.io.DataInputStream
+import java.io.DataOutputStream
 import kotlin.math.ln
 import kotlin.math.sqrt
 
 typealias Term = String
+typealias TermId = Int
 
 class TfIdfBuilder<Document> {
     private val tokenizer = Tokenizer()
@@ -37,7 +40,7 @@ class TfIdfBuilder<Document> {
         }
     }
 
-    fun build(): Predictor<Document> {
+    fun toModel(): Model<Document> {
         val idf: Map<Term, Double> =
             words.mapValues { ln(documents.size.toDouble() / it.value.size) }
         val freqTerms = mutableSetOf<Term>()
@@ -56,38 +59,131 @@ class TfIdfBuilder<Document> {
             freqTerms.addAll(terms.map { it.first })
         }
 
-        val termList = freqTerms.toList()
-        val docVec = mutableMapOf<Document, DoubleArray>()
-        for (doc in documents.entries) {
+        val termList = freqTerms.toList().sorted()
+        val docVec = mutableMapOf<Document, MutableMap<TermId, Double>>()
+        for ((document, termCount) in documents.entries) {
             val terms = termList
-                .map {
-                    doc.value.getOrDefault(it, 0) * idf.getValue(it)
+                .asSequence()
+                .withIndex()
+                .filter { termCount.containsKey(it.value) }
+                .associateTo(mutableMapOf()) { (index, term) ->
+                    index to termCount.getValue(term) * idf.getValue(term)
                 }
-                .toDoubleArray()
-            val k = 1 / sqrt(terms.sumByDouble { it * it })
-            for (i in terms.indices) {
-                terms[i] *= k
-            }
-            docVec[doc.key] = terms
+            val k = 1 / sqrt(terms.values.sumByDouble { it * it })
+            terms.replaceAll { _, value -> value * k }
+            docVec[document] = terms
         }
 
         val usedIdf =
-            freqTerms.associateWith { idf[it] ?: error("Term $it is not found in documents") }
-        return Predictor(tokenizer, usedIdf, docVec)
+            termList.asSequence()
+                .withIndex()
+                .associate { (index, value) -> index to idf.getOrDefault(value, 0.0) }
+        return Model(termList, usedIdf, docVec)
     }
+
+    fun build(): Predictor<Document> =
+        toModel().predictor()
 }
 
-private fun cross(a: DoubleArray, b: DoubleArray): Double {
-    var sum = 0.0
-    for (i in a.indices) {
-        sum += a[i] * b[i]
+class Model<Document>(
+    private val terms: List<Term>,
+    private val idf: Map<TermId, Double>,
+    private val docVec: Map<Document, Map<TermId, Double>>
+) {
+    companion object {
+        private const val FORMAT_ID = 1
+
+        fun <Document> load(
+            dis: DataInputStream,
+            deserializeDocument: (String) -> Document
+        ): Model<Document> {
+            val formatId = dis.readInt()
+            if (formatId != FORMAT_ID) {
+                throw IllegalArgumentException("Invalid file format. Expecting $FORMAT_ID got $formatId")
+            }
+            val terms = mutableListOf<String>()
+            val idf = mutableMapOf<TermId, Double>()
+            val docVec = mutableMapOf<Document, Map<TermId, Double>>()
+            val termsSize = dis.readShort().toInt()
+            repeat(termsSize) {
+                terms.add(dis.readUTF())
+            }
+            repeat(termsSize) {
+                idf[it] = dis.readDouble()
+            }
+            repeat(dis.readShort().toInt()) {
+                val docId = dis.readUTF()
+                val docTerms = mutableMapOf<TermId, Double>()
+                repeat(dis.readShort().toInt()) {
+                    val termId = dis.readShort()
+                    docTerms[termId.toInt()] = dis.readDouble()
+                }
+                docVec[deserializeDocument(docId)] = docTerms
+            }
+            return Model(terms, idf, docVec)
+        }
     }
-    return sum
+
+    private val termIds =
+        terms.asSequence()
+            .withIndex()
+            .associate { it.value to it.index }
+
+    init {
+        require(terms.size == idf.size) { "terms.size should be equal to idf.size: ${terms.size} != ${idf.size}" }
+        require(terms.size < Short.MAX_VALUE) { "terms.size should be less than ${Short.MAX_VALUE}" }
+    }
+
+    fun writeTo(os: DataOutputStream, serializeDocument: (Document) -> String) {
+        os.writeInt(FORMAT_ID) // file format
+        os.writeShort(terms.size)
+        for (term in terms) {
+            os.writeUTF(term)
+        }
+        for ((_, value) in idf) {
+            os.writeDouble(value)
+        }
+        os.writeShort(docVec.size)
+        for ((doc, values) in docVec) {
+            os.writeUTF(serializeDocument(doc))
+            os.writeShort(values.size)
+            for ((index, value) in values) {
+                os.writeShort(index)
+                os.writeDouble(value)
+            }
+        }
+    }
+
+    fun predictor(): Predictor<Document> =
+        Predictor(Tokenizer(), termIds, idf, docVec)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Model<*>
+
+        if (terms != other.terms) return false
+        if (idf != other.idf) return false
+        if (docVec != other.docVec) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = terms.hashCode()
+        result = 31 * result + idf.hashCode()
+        result = 31 * result + docVec.hashCode()
+        return result
+    }
 }
 
 class Tokenizer {
     companion object {
-        val WHITESPACE = Regex("(\\s\\.|[^\\p{L}\\d-.]|v(?=\\d)|\\.(?=\\s))++")
+        val WHITESPACE = Regex("""(\s\.|[^\p{L}\d-.]|v(?=\d)|\.(?=\s))++""")
+        val COPYRIGHT = Regex("""((copyright|©|\(c\))++\s*+)++""")
+        val STOP_WORDS = Regex("[-.]++")
+        val SPDX_TAG = Regex("<[^>]*+>")
 
         val NORMALIZE = mapOf(
             "acknowledgment" to "acknowledgement",
@@ -138,9 +234,14 @@ class Tokenizer {
     }
 
     fun getTokens(input: String): List<Term> {
-        val text = input.replace(Regex("<[^>]*+>"), " ").toLowerCase()
+        val text = input
+            .replace(SPDX_TAG, " ")
+            .toLowerCase()
+            .replace(COPYRIGHT, "copyright ")
 
         val words = WHITESPACE.split(text)
+            .asSequence()
+            .filter { it.isNotEmpty() && !STOP_WORDS.matches(it) }
             .map { NORMALIZE[it] ?: it }
             .minus(setOf("the", "version", "software"))
 
@@ -154,22 +255,42 @@ class Tokenizer {
 
 class Predictor<Document>(
     private val tokenizer: Tokenizer,
-    private val idf: Map<Term, Double>,
-    private val docVec: Map<Document, DoubleArray>
+    private val terms: Map<Term, TermId>,
+    private val idf: Map<TermId, Double>,
+    private val docVec: Map<Document, Map<TermId, Double>>
 ) {
     fun predict(text: String): Map<Document, Double> {
         val testTerms =
             tokenizer.getTokens(text)
+                .asSequence()
+                .mapNotNull { terms[it] }
                 .groupingBy { it }
                 .eachCount()
 
-        val testVec = idf
-            .map {
-                testTerms.getOrDefault(it.key, 0) * it.value
-            }
-            .toDoubleArray()
-        val norm = 1 / sqrt(cross(testVec, testVec))
+        val testVec =
+            testTerms
+                .mapValuesTo(mutableMapOf()) { (termId, termCount) ->
+                    termCount * idf.getOrDefault(
+                        termId,
+                        0.0
+                    )
+                }
 
-        return docVec.mapValues { cross(it.value, testVec) * norm }
+        val norm = 1 / sqrt(testVec.values.sumByDouble { it * it })
+        testVec.replaceAll { _, value -> value * norm }
+
+        return docVec.mapValues { (_, docTerms) -> cross(testVec, docTerms) }
     }
+}
+
+private fun cross(a: Map<TermId, Double>, b: Map<TermId, Double>): Double {
+    if (a.size > b.size) {
+        return cross(b, a)
+    }
+    var sum = 0.0
+    for ((termId, value) in a) {
+        val bValue = b.getOrDefault(termId, 0.0)
+        sum += value * bValue
+    }
+    return sum
 }

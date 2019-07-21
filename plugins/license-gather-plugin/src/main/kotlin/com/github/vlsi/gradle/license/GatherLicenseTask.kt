@@ -304,22 +304,14 @@ open class GatherLicenseTask @Inject constructor(
             }
         }
         // We build TfIdf in parallel with extracting the artifacts
-        val model = if (!haveFilesToAnalyze) null else
-            TfIdfBuilder<LicenseExpression>().apply {
-                SpdxLicense.values()
-                    .forEach {
-                        addDocument(
-                            it.asExpression(),
-                            it.text
-                        )
-                    }
-            }.build()
+        val predictor = if (!haveFilesToAnalyze) null else
+            spdxPredictor
         workerExecutor.await()
 
-        if (model != null) {
+        if (predictor != null) {
             findManifestLicenses(allDependencies, licenseExpressionParser)
             findPomLicenses(allDependencies)
-            findLicenseFromFiles(allDependencies, model)
+            findLicenseFromFiles(allDependencies, predictor)
         }
 
         val missingLicenseId = mutableListOf<ComponentIdentifier>()
@@ -540,7 +532,7 @@ open class GatherLicenseTask @Inject constructor(
 
     private fun findLicenseFromFiles(
         detectedLicenses: MutableMap<ComponentIdentifier, LicenseInfo>,
-        model: Predictor<LicenseExpression>
+        model: Predictor<SpdxLicense>
     ) {
         for (e in detectedLicenses) {
             val licenseDir = e.value.licenseFiles
@@ -560,12 +552,12 @@ open class GatherLicenseTask @Inject constructor(
                     .take(5) // And take best 5 among all license files
 
             if (bestLicenses.isNotEmpty()) {
-                val bestLicense = bestLicenses.first()
-                if (bestLicense.value * 100 < similarityThreshold.get()) {
+                val (licenseId, similarity) = bestLicenses.first()
+                if (similarity * 100 < similarityThreshold.get()) {
                     throw GradleException(
                         "Unable to identify license for ${e.key}." +
-                                " Best matching license is ${bestLicense.key}," +
-                                " however similarity is ${(bestLicense.value * 100)}% which is less" +
+                                " Best matching license is $licenseId," +
+                                " however similarity is ${(similarity * 100)}% which is less" +
                                 " than similarityThreshold=${similarityThreshold.get()}." +
                                 " Possible licenses are $bestLicenses"
                     )
@@ -574,9 +566,9 @@ open class GatherLicenseTask @Inject constructor(
                     "Detected license in {} to mean {}." +
                             " Consider using SPDX id or specify the license explicitly",
                     licenseDir,
-                    bestLicense.key
+                    licenseId
                 )
-                e.setValue(e.value.copy(license = bestLicense.key))
+                e.setValue(e.value.copy(license = licenseId.toLicenseExpression()))
                 continue
             }
             throw GradleException("Unable to identify license for ${e.key}")
