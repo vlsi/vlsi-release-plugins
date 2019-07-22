@@ -130,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.10.0
+* stage-vote-release-plugin: fix asfSvnUsername should be used instead of asfasfSvnUsername
+
 v1.9.0
 * stage-vote-release-plugin: properly support username/password for Nexus and SVN
 * stage-vote-release-plugin: make sitePreview optional

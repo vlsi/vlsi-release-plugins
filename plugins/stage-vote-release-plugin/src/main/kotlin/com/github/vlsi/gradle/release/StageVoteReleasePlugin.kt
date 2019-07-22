@@ -148,12 +148,24 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             from("${rootProject.rootDir}/.gitattributes")
         }
 
+        val pushPreviewSite = tasks.register(PUSH_PREVIEW_SITE_TASK_NAME, GitCommitAndPush::class) {
+            group = PublishingPlugin.PUBLISH_TASK_GROUP
+            description = "Builds and publishes site preview"
+            commitMessage.set("Update preview for ${rootProject.version}")
+            repository.set(rootProject.the<ReleaseExtension>().sitePreview)
+
+            dependsOn(syncPreviewSiteRepo)
+        }
+
         // previewSiteContents can be populated from different places, so we defer to afterEvaluate
         afterEvaluate {
             val sitePreviewEnabled = releaseExt.sitePreviewEnabled.get()
             if (!sitePreviewEnabled) {
                 preparePreviewSiteRepo {
-                    enabled = sitePreviewEnabled
+                    enabled = false
+                }
+                pushPreviewSite {
+                    enabled = false
                 }
             }
             syncPreviewSiteRepo {
@@ -164,14 +176,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             }
         }
 
-        return tasks.register(PUSH_PREVIEW_SITE_TASK_NAME, GitCommitAndPush::class) {
-            group = PublishingPlugin.PUBLISH_TASK_GROUP
-            description = "Builds and publishes site preview"
-            commitMessage.set("Update preview for ${rootProject.version}")
-            repository.set(rootProject.the<ReleaseExtension>().sitePreview)
-
-            dependsOn(syncPreviewSiteRepo)
-        }
+        return pushPreviewSite
     }
 
     private fun Project.configureNexusStaging() {

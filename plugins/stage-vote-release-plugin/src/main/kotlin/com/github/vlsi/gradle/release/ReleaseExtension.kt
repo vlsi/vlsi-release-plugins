@@ -35,7 +35,7 @@ import javax.inject.Inject
  */
 open class ReleaseExtension @Inject constructor(
     private val project: Project,
-    private val objects: ObjectFactory
+    objects: ObjectFactory
 ) {
     internal val repositoryIdStore = NexusRepositoryIdStore(project)
 
@@ -113,9 +113,9 @@ private fun ReleaseExtension.defaultValue(property: String) = prefix.map { it + 
 open class SvnDistConfig @Inject constructor(
     private val ext: ReleaseExtension,
     private val project: Project,
-    private val objects: ObjectFactory
+    objects: ObjectFactory
 ) {
-    val credentials = objects.newInstance<Credentials>("asfSvn", ext)
+    val credentials = objects.newInstance<Credentials>("Svn", ext)
 
     val url = objects.property<URI>()
         .convention(
