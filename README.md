@@ -130,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.8.0
+* stage-vote-release-plugin: add ReleaseExtension#validateReleaseParams(Runnable) to enable fail-fast on releasing SNAPSHOT versions
+
 v1.7.0
 * crlf-plugin: add CrLfSpec { CopySpec.textAuto() } for simplified handling of text files
 

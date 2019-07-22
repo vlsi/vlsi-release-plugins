@@ -38,6 +38,9 @@ open class ReleaseExtension @Inject constructor(
 ) {
     internal val repositoryIdStore = NexusRepositoryIdStore(project)
 
+    val validateReleaseParams =
+        mutableListOf<Runnable>()
+
     val repositoryType = objects.property<RepositoryType>()
         .convention(RepositoryType.TEST)
 
@@ -95,6 +98,10 @@ open class ReleaseExtension @Inject constructor(
     val site by git.registering {
         branch.convention("asf-site")
         gitUrlConvention("-preview")
+    }
+
+    fun validateReleaseParams(action: Runnable) {
+        validateReleaseParams.add(action)
     }
 }
 

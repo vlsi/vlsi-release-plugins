@@ -84,7 +84,19 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             files.from(releaseExt.archives.get())
         }
 
+        // Tasks from NexusStagingPlugin
         val closeRepository = tasks.named("closeRepository")
+        val closeAndReleaseRepository = tasks.named("closeAndReleaseRepository")
+
+        project.gradle.taskGraph.whenReady {
+            val validators = releaseExt.validateReleaseParams
+            if (validators.isNotEmpty() &&
+                (hasTask(stageSvnDist.get()) || hasTask(publishSvnDist.get()) ||
+                        hasTask(closeRepository.get()) || hasTask(closeAndReleaseRepository.get()))
+            ) {
+                validators.forEach { it.run() }
+            }
+        }
 
         // closeRepository does not wait all publications by default, so we add that dependency
         allprojects {
@@ -106,8 +118,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             description = "Publish release artifacts to SVN and Nexus"
             group = "release"
             dependsOn(publishSvnDist)
-            // Task from NexusStagingPlugin
-            dependsOn(tasks.named("closeAndReleaseRepository"))
+            dependsOn(closeAndReleaseRepository)
         }
 
         // prepareVote depends on all the publish tasks
