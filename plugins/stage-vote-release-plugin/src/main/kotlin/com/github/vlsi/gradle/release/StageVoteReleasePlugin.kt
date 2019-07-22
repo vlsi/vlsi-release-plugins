@@ -27,12 +27,7 @@ import org.gradle.api.publish.plugins.PublishingPlugin
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.reflect.Instantiator
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.the
-import org.gradle.kotlin.dsl.withType
+import org.gradle.kotlin.dsl.* // ktlint-disable
 import java.io.File
 import java.net.URI
 import javax.inject.Inject
@@ -155,7 +150,14 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
         // previewSiteContents can be populated from different places, so we defer to afterEvaluate
         afterEvaluate {
-            syncPreviewSiteRepo.configure {
+            val sitePreviewEnabled = releaseExt.sitePreviewEnabled.get()
+            if (!sitePreviewEnabled) {
+                preparePreviewSiteRepo {
+                    enabled = sitePreviewEnabled
+                }
+            }
+            syncPreviewSiteRepo {
+                enabled = sitePreviewEnabled
                 for (c in releaseExt.previewSiteContents.get()) {
                     with(c)
                 }
@@ -179,8 +181,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             configure<NexusStagingExtension> {
                 val nexus = project.the<ReleaseExtension>().nexus
                 packageGroup = nexus.packageGroup.get()
-                username = nexus.credentials.username.get()
-                password = nexus.credentials.password.get()
+                username = nexus.credentials.username(project)
+                password = nexus.credentials.password(project)
                 val nexusPublish = project.the<NexusPublishExtension>()
                 serverUrl =
                     nexusPublish.run { if (useStaging.get()) serverUrl else snapshotRepositoryUrl }

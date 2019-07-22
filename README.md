@@ -130,6 +130,10 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.9.0
+* stage-vote-release-plugin: properly support username/password for Nexus and SVN
+* stage-vote-release-plugin: make sitePreview optional
+
 v1.8.0
 * stage-vote-release-plugin: add ReleaseExtension#validateReleaseParams(Runnable) to enable fail-fast on releasing SNAPSHOT versions
 

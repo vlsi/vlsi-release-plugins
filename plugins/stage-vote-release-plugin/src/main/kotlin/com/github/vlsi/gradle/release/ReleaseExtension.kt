@@ -17,6 +17,7 @@
 package com.github.vlsi.gradle.release
 
 import org.gradle.api.Action
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
 import org.gradle.api.model.ObjectFactory
@@ -94,6 +95,8 @@ open class ReleaseExtension @Inject constructor(
         branch.convention("asf-site")
         gitUrlConvention("-site")
     }
+
+    val sitePreviewEnabled = objects.property<Boolean>().convention(true)
 
     val site by git.registering {
         branch.convention("asf-site")
@@ -191,6 +194,18 @@ open class Credentials @Inject constructor(
 
     val password = objects.property<String>()
         .convention(ext.defaultValue("${name}Password"))
+
+    fun username(project: Project) = project.stringProperty(username.get())
+
+    fun password(project: Project) = project.stringProperty(password.get())
+
+    private fun Project.stringProperty(property: String): String {
+        val value = project.findProperty(property)
+        if (value !is String) {
+            throw GradleException("Project property '$property' should be a String. Got $value")
+        }
+        return value
+    }
 }
 
 class ReleaseArtifact(

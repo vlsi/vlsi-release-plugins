@@ -39,8 +39,9 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
     abstract fun message(): String
 
     private fun ExecSpec.svnCredentials() {
-        args("--username", "test")
-        args("--password", "test")
+        val credentials = project.the<ReleaseExtension>().svnDist.credentials
+        args("--username", credentials.username(project))
+        args("--password", credentials.password(project))
     }
 
     fun exists(path: String): Boolean {
