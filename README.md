@@ -130,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.7.0
+* crlf-plugin: add CrLfSpec { CopySpec.textAuto() } for simplified handling of text files
+
 v1.6.0
 * license-gather-plugin: build "predict license by text" model at the build time
 

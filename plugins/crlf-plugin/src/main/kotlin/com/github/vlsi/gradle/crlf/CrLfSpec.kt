@@ -44,6 +44,21 @@ class CrLfSpec(val textEol: LineEndings = LineEndings.SYSTEM) {
             action()
         }
 
+    /**
+     * Recognizes text files automatically and converts them to the appropriate eol-style.
+     * Note: due to https://github.com/gradle/gradle/issues/1191, Gradle does not use
+     * filtering for up-to-date checks, so you need to add explicit "task.inputs.property"
+     * for proper incremental task operation.
+     * This is similar to Git's `* text=auto`
+     */
+    fun CopySpec.textAuto() {
+        val streamType = when (textEol) {
+            LineEndings.CRLF -> CoreConfig.EolStreamType.AUTO_CRLF
+            LineEndings.LF -> CoreConfig.EolStreamType.AUTO_LF
+        }
+        filterBinary { filterEol(streamType) }
+    }
+
     fun CopySpec.gitattributes(props: GitProperties) {
         if (this is Task) {
             wa1191SetInputs(props.attrs)
@@ -100,6 +115,10 @@ private fun FileCopyDetails.filterEol(props: GitProperties, textEol: LineEndings
         mode = "755".toInt(8)
     }
     val streamType = textEol.toStreamType(attributes)
+    filterEol(streamType)
+}
+
+private fun FileCopyDetails.filterEol(streamType: CoreConfig.EolStreamType) {
     filter(
         when (streamType) {
             CoreConfig.EolStreamType.TEXT_CRLF -> FilterTextCrlf::class
