@@ -46,10 +46,7 @@ tasks {
                 from("$projectDir/licenses") {
                     include("*.txt")
                 }
-                from("$projectDir/license-list-data/text") {
-                    include("*.txt")
-                    exclude("deprecated*.txt")
-                }
+                // license-list-data is not included into the release jar
             }
         }
     }
@@ -64,6 +61,17 @@ tasks {
         }
     }
 
+    val allLicenseTextsDir = "$buildDir/license-texts"
+    val copyTexts by registering(Sync::class) {
+        into(allLicenseTextsDir)
+        into("com/github/vlsi/gradle/license/api/text") {
+            from("$projectDir/license-list-data/text") {
+                include("*.txt")
+                exclude("deprecated*.txt")
+            }
+        }
+    }
+
     compileKotlin {
         require(this is Task)
         dependsOn(saveLicenses, copyLicenses)
@@ -71,11 +79,14 @@ tasks {
 
     val generateStaticTfIdf by registering(JavaExec::class) {
         val output = "$buildDir/tfidf"
+        dependsOn(copyTexts)
         inputs.files(sourceSets.main.map { it.runtimeClasspath })
         inputs.files(copyLicenses)
+        inputs.dir(allLicenseTextsDir)
         outputs.dir(output)
 
         classpath(sourceSets.main.map { it.runtimeClasspath })
+        classpath(allLicenseTextsDir)
         main = "com.github.vlsi.gradle.license.SpdxPredictorKt"
         args("$output/com/github/vlsi/gradle/license/api/models/tfidf_licenses.bin")
 
