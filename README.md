@@ -130,9 +130,6 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
-v1.11.0
-* stage-vote-release-plugin: require Nexus username/password only when release task is used
-
 v1.10.0
 * stage-vote-release-plugin: fix asfSvnUsername should be used instead of asfasfSvnUsername
 

@@ -63,6 +63,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
         configureNexusPublish()
 
+        configureNexusStaging()
+
         val pushPreviewSite = addPreviewSiteTasks()
 
         val stageSvnDist = tasks.register<StageToSvnTask>(STAGE_SVN_DIST_TASK_NAME) {
@@ -81,12 +83,13 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val closeRepository = tasks.named("closeRepository")
         val closeAndReleaseRepository = tasks.named("closeAndReleaseRepository")
 
-        gradle.taskGraph.whenReady {
+        project.gradle.taskGraph.whenReady {
             val validators = releaseExt.validateReleaseParams
-            if (hasTask(stageSvnDist.get()) || hasTask(publishSvnDist.get()) ||
-                hasTask(closeRepository.get()) || hasTask(closeAndReleaseRepository.get())) {
+            if (validators.isNotEmpty() &&
+                (hasTask(stageSvnDist.get()) || hasTask(publishSvnDist.get()) ||
+                        hasTask(closeRepository.get()) || hasTask(closeAndReleaseRepository.get()))
+            ) {
                 validators.forEach { it.run() }
-                configureNexusStaging()
             }
         }
 
@@ -177,17 +180,19 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
     }
 
     private fun Project.configureNexusStaging() {
-        // Note: NexusStaging does not allow Property for delayed property access,
-        // So we initialize Nexus password in case release tasks are used only
-        configure<NexusStagingExtension> {
-            val nexus = project.the<ReleaseExtension>().nexus
-            packageGroup = nexus.packageGroup.get()
-            username = nexus.credentials.username(project)
-            password = nexus.credentials.password(project)
-            val nexusPublish = project.the<NexusPublishExtension>()
-            serverUrl =
-                nexusPublish.run { if (useStaging.get()) serverUrl else snapshotRepositoryUrl }
-                    .get().toString()
+        // The fields of releaseExt are not configured yet (the extension is not yet used in build scripts),
+        // so we populate NexusStaging properties after the project is configured
+        afterEvaluate {
+            configure<NexusStagingExtension> {
+                val nexus = project.the<ReleaseExtension>().nexus
+                packageGroup = nexus.packageGroup.get()
+                username = nexus.credentials.username(project)
+                password = nexus.credentials.password(project)
+                val nexusPublish = project.the<NexusPublishExtension>()
+                serverUrl =
+                    nexusPublish.run { if (useStaging.get()) serverUrl else snapshotRepositoryUrl }
+                        .get().toString()
+            }
         }
     }
 
