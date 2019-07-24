@@ -43,7 +43,12 @@ open class ReleaseExtension @Inject constructor(
         mutableListOf<Runnable>()
 
     val repositoryType = objects.property<RepositoryType>()
-        .convention(RepositoryType.TEST)
+        .value(
+            when (project.findProperty("asf")) {
+                true -> RepositoryType.PROD
+                else -> RepositoryType.TEST
+            }
+        )
 
     val prefixForProperties = objects.property<String>().convention("asf")
     val prefix = prefixForProperties.map {
