@@ -40,7 +40,28 @@ open class ReleaseExtension @Inject constructor(
     internal val repositoryIdStore = NexusRepositoryIdStore(project)
 
     val validateReleaseParams =
-        mutableListOf<Runnable>()
+        mutableListOf<Runnable>().apply {
+            add(Runnable {
+                if (!rc.isPresent || rc.get() < 0) {
+                    throw GradleException(
+                        "Please specify release candidate index via -Prc=<int>"
+                    )
+                }
+            })
+            add(Runnable {
+                // Validate that credentials should be present
+                if (repositoryType.get() == RepositoryType.PROD) {
+                    svnDist {
+                        credentials.username(project, required = true)
+                        credentials.password(project, required = true)
+                    }
+                    nexus {
+                        credentials.username(project, required = true)
+                        credentials.password(project, required = true)
+                    }
+                }
+            })
+        }
 
     val repositoryType = objects.property<RepositoryType>()
         .value(
@@ -65,6 +86,25 @@ open class ReleaseExtension @Inject constructor(
     val tag = objects.property<String>()
         .convention(project.provider { "v${project.version}" })
 
+    val rc = objects.property<Int>()
+        .value(
+            project.findProperty("rc")
+                ?.let { it as? String }
+                ?.toInt()
+        )
+
+    val release = objects.property<Boolean>()
+        .value(
+            rc.isPresent || project.findProperty("release")
+                ?.let { it as? String }
+                ?.toBoolean() == true
+        )
+
+    val committerId = objects.property<String>()
+        .value((project.findProperty("asfCommitterId") as? String) ?: "COMMITTER_ID")
+
+    val snapshotSuffix: String get() = if (release.orNull == true) "" else "-SNAPSHOT"
+
     val archives = objects.listProperty<Any>()
     val previewSiteContents = objects.listProperty<CopySpec>()
 
@@ -73,7 +113,7 @@ open class ReleaseExtension @Inject constructor(
     }
 
     val svnDist = objects.newInstance<SvnDistConfig>(this, project)
-    fun svnDist(action: SvnDistConfig.() -> Unit) = svnDist.action()
+    fun svnDist(action: Action<in SvnDistConfig>) = action(svnDist)
 
     val nexus = objects.newInstance<NexusConfig>(this, project)
     fun nexus(action: NexusConfig.() -> Unit) = nexus.action()
@@ -200,14 +240,23 @@ open class Credentials @Inject constructor(
     val password = objects.property<String>()
         .convention(ext.defaultValue("${name}Password"))
 
-    fun username(project: Project) = project.stringProperty(username.get())
+    fun username(project: Project, required: Boolean = false) =
+        project.stringProperty(username.get(), required)
 
-    fun password(project: Project) = project.stringProperty(password.get())
+    fun password(project: Project, required: Boolean = false) =
+        project.stringProperty(password.get(), required)
 
-    private fun Project.stringProperty(property: String): String {
+    private fun Project.stringProperty(property: String, required: Boolean = false): String? {
         val value = project.findProperty(property)
+        if (value == null) {
+            if (required) {
+                throw GradleException("Property $property is not specified")
+            }
+            logger.debug("Using null value for $property")
+            return null
+        }
         if (value !is String) {
-            throw GradleException("Project property '$property' should be a String. Got $value")
+            throw GradleException("Project property '$property' should be a String")
         }
         return value
     }
@@ -223,6 +272,8 @@ class ReleaseParams(
     val version: String,
     val gitSha: String,
     val tag: String,
+    val rc: Int,
+    val committerId: String,
     val artifacts: List<ReleaseArtifact>,
     val svnStagingUri: URI,
     val nexusRepositoryUri: URI,

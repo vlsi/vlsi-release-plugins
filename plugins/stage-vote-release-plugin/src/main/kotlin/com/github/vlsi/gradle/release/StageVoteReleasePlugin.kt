@@ -271,9 +271,11 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
                 val releaseParams = ReleaseParams(
                     tlp = releaseExt.tlp.get(),
-                    version = projectVersion,
+                    version = version.toString(),
                     gitSha = grgit.head().id,
                     tag = releaseExt.tag.get(),
+                    rc = releaseExt.rc.get(),
+                    committerId = releaseExt.committerId.get(),
                     artifacts = files(releaseExt.archives.get())
                         .sortedBy { it.name }
                         .map {
@@ -284,7 +286,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                         },
                     svnStagingUri = svnDist.url.get().let { it.replacePath(it.path + "/" + svnDist.stageFolder.get()) },
                     nexusRepositoryUri = repoUri,
-                    previewSiteUri = pushPreviewSite.get().repository.get().urls.get().pagesUri,
+                    previewSiteUri = releaseExt.sitePreview.get().urls.get().pagesUri,
                     sourceCodeTagUrl = releaseExt.source.get().urls.get().tagUri(releaseExt.tag.get())
                 )
                 val voteText = releaseExt.voteText.get().invoke(releaseParams)
