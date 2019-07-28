@@ -96,22 +96,18 @@ open class ReleaseExtension @Inject constructor(
 
     val rc = objects.property<Int>()
         .value(
-            project.findProperty("rc")
-                ?.let { it as? String }
-                ?.toInt()
+            project.stringProperty("rc")?.toInt()
         )
 
     val release = objects.property<Boolean>()
         .value(
-            rc.isPresent || project.findProperty("release")
-                ?.let { it as? String }
-                ?.toBoolean() == true
+            rc.isPresent || project.stringProperty("release").toBool(true)
         )
 
     val committerId = objects.property<String>()
-        .value((project.findProperty("asfCommitterId") as? String) ?: "COMMITTER_ID")
+        .value(project.stringProperty("asfCommitterId") ?: "COMMITTER_ID")
 
-    val snapshotSuffix: String get() = if (release.orNull == true) "" else "-SNAPSHOT"
+    val snapshotSuffix: String get() = if (release.get()) "" else "-SNAPSHOT"
 
     val archives = objects.listProperty<Any>()
 
@@ -316,6 +312,12 @@ private fun Project.stringProperty(property: String, required: Boolean = false):
     }
     return value
 }
+
+private fun String?.toBool(default: Boolean = true) =
+    when (default) {
+        true -> this?.equals("true", ignoreCase = true)
+        false -> this?.equals("false", ignoreCase = true)?.not()
+    } ?: default
 
 private val kebabDelimeters = Regex("""(\p{Lower})\s*(\p{Upper})""")
 private fun String.toKebabCase() =
