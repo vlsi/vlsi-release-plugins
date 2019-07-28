@@ -80,8 +80,13 @@ open class ReleaseExtension @Inject constructor(
     }
 
     val tlp = objects.property<String>()
-    val tlpUrl
-        get() = tlp.get().toLowerCase()
+    val tlpUrl = objects.property<String>().convention(tlp.map { it.toKebabCase() })
+
+    val componentName = objects.property<String>()
+        .convention(tlp.map { "Apache $it" })
+    val componentNameUrl = objects.property<String>()
+        .convention(componentName.map { it.toKebabCase() })
+
     val voteText = objects.property<(ReleaseParams) -> String>()
 
     val releaseTag = objects.property<String>()
@@ -212,12 +217,12 @@ open class SvnDistConfig @Inject constructor(
 
     val stageFolder = objects.property<String>()
         .convention(project.provider {
-            "dev/${ext.tlpUrl}/${ext.tag.get()}"
+            "dev/${ext.tlpUrl.get()}/${ext.componentNameUrl.get()}-${project.version}-rc${ext.rc.get()}"
         })
 
     val finalFolder = objects.property<String>()
         .convention(project.provider {
-            "release/${ext.tlpUrl}"
+            "release/${ext.tlpUrl.get()}/${ext.componentNameUrl.get()}-${project.version}"
         })
 
     val releaseSubfolder = objects.mapProperty<Regex, String>()
@@ -312,6 +317,11 @@ private fun Project.stringProperty(property: String, required: Boolean = false):
     return value
 }
 
+private val kebabDelimeters = Regex("""(\p{Lower})\s*(\p{Upper})""")
+private fun String.toKebabCase() =
+    replace(kebabDelimeters) { "${it.groupValues[1]}-${it.groupValues[2]}" }
+        .toLowerCase()
+
 class ReleaseArtifact(
     val name: String,
     val sha512: String
@@ -319,6 +329,7 @@ class ReleaseArtifact(
 
 class ReleaseParams(
     val tlp: String,
+    val componentName: String,
     val version: String,
     val gitSha: String,
     val tag: String,

@@ -37,7 +37,7 @@ abstract class StageToSvnTask() : SvnmuccTask() {
 
     override fun message() =
         project.the<ReleaseExtension>().run {
-            "Uploading release candidate ${tlp.get()} ${rcTag.get()} to dev area"
+            "Uploading release candidate ${componentName.get()} ${rcTag.get()} to dev area"
         }
 
     override fun operations(inputChanges: InputChanges): List<SvnOperation> =

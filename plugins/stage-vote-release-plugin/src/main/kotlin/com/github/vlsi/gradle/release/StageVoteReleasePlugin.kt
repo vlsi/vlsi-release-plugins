@@ -329,6 +329,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
                 val releaseParams = ReleaseParams(
                     tlp = releaseExt.tlp.get(),
+                    componentName = releaseExt.componentName.get(),
                     version = version.toString(),
                     gitSha = grgit.head().id,
                     tag = releaseExt.rcTag.get(),
