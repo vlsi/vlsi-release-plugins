@@ -72,7 +72,7 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
 
     @TaskAction
     fun mucc(inputChanges: InputChanges) {
-        println(
+        logger.debug(
             if (inputChanges.isIncremental) "Executing incrementally"
             else "Executing non-incrementally"
         )
@@ -103,6 +103,7 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
         commandsFile.parentFile.mkdir()
         commandsFile.writeText(commands)
 
+        logger.info("Svnmucc: executing {}", commands)
         project.exec {
             workingDir = project.projectDir
             commandLine("svnmucc", "--non-interactive", "--root-url", repository.get())
