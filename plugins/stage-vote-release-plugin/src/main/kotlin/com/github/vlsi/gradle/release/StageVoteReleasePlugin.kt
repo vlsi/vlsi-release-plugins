@@ -402,15 +402,16 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         }
     }
 
-    private fun Project.generateVoteText(pushPreviewSite: TaskProvider<GitCommitAndPush>) =
+    private fun Project.generateVoteText(
+        pushPreviewSite: TaskProvider<*>,
+        stageDist: TaskProvider<*>
+    ) =
         tasks.register(GENERATE_VOTE_TEXT_TASK_NAME) {
-            dependsOn(tasks.named(STAGE_DIST_TASK_NAME))
-            dependsOn(pushPreviewSite)
-
+            mustRunAfter(pushPreviewSite, stageDist)
+            // Note: task is not incremental, and inputs are deliberatly not declared here
+            // Otherwise we would have to duplicate ReleaseParams logic as "inputs"
             val releaseExt = project.the<ReleaseExtension>()
-            val projectVersion = version.toString()
-            inputs.property("version", projectVersion)
-            inputs.files(releaseExt.archives.get())
+            dependsOn(releaseExt.archives)
 
             val voteMailFile = "$buildDir/$PREPARE_VOTE_TASK_NAME/mail.txt"
             outputs.file(file(voteMailFile))
