@@ -19,6 +19,7 @@ package com.github.vlsi.gradle.release
 import de.marcphilipp.gradle.nexus.InitializeNexusStagingRepository
 import de.marcphilipp.gradle.nexus.NexusPublishExtension
 import io.codearte.gradle.nexus.NexusStagingExtension
+import io.codearte.gradle.nexus.NexusStagingPlugin
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -308,7 +309,18 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         return pushPreviewSite
     }
 
-    private fun Project.configureNexusStaging() {
+    private fun Project.configureNexusStaging(releaseExt: ReleaseExtension) {
+        plugins.withType<NexusStagingPlugin> {
+            tasks {
+                // Hide "deprecated" tasks from "./gradlew tasks"
+                named("closeAndPromoteRepository") {
+                    group = null
+                }
+                named("promoteRepository") {
+                    group = null
+                }
+            }
+        }
         // The fields of releaseExt are not configured yet (the extension is not yet used in build scripts),
         // so we populate NexusStaging properties after the project is configured
         afterEvaluate {
