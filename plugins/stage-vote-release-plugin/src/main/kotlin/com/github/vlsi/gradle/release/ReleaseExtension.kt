@@ -119,14 +119,18 @@ open class ReleaseExtension @Inject constructor(
     fun nexus(action: NexusConfig.() -> Unit) = nexus.action()
 
     private val git = project.container<GitConfig> {
-        objects.newInstance(it, this)
+        objects.newInstance(it, this, project)
     }
 
     private fun GitConfig.gitUrlConvention(suffix: String = "") {
         urls.convention(repositoryType.map {
+            val repo = "${tlpUrl.get()}$suffix"
             when (it) {
-                RepositoryType.PROD -> GitHub("apache", "$tlpUrl$suffix")
-                RepositoryType.TEST -> GitDaemon("127.0.0.1", "$tlpUrl$suffix")
+                RepositoryType.PROD -> when (pushRepositoryProvider.get()) {
+                    GitPushRepositoryProvider.GITHUB -> GitHub("apache", repo)
+                    GitPushRepositoryProvider.GITBOX -> GitBox(repo)
+                }
+                RepositoryType.TEST -> GitDaemon("127.0.0.1", repo)
             }
         })
     }
@@ -209,17 +213,28 @@ open class NexusConfig @Inject constructor(
 
 open class GitConfig @Inject constructor(
     val name: String,
-    private val ext: ReleaseExtension,
+    ext: ReleaseExtension,
+    project: Project,
     objects: ObjectFactory
 ) {
+    val pushRepositoryProvider = objects.property<GitPushRepositoryProvider>()
+        .convention(project.provider {
+            project.stringProperty("asf.git.pushRepositoryProvider")
+                ?.let { GitPushRepositoryProvider.valueOf(it.toUpperCase()) }
+                ?: GitPushRepositoryProvider.GITHUB
+        })
+
     val urls = objects.property<GitUrlConventions>()
+
     val remote = objects.property<String>()
         .convention(ext.repositoryType.map {
+            // User might want to have their own preferences for "origin", so we use release-origin
             when (it) {
-                RepositoryType.PROD -> "origin"
-                RepositoryType.TEST -> "origin-test"
+                RepositoryType.PROD -> "release-origin"
+                RepositoryType.TEST -> "release-origin-test"
             }
         })
+
     val branch = objects.property<String>()
 
     val credentials = objects.newInstance<Credentials>(name.capitalize(), ext)
@@ -245,21 +260,21 @@ open class Credentials @Inject constructor(
 
     fun password(project: Project, required: Boolean = false) =
         project.stringProperty(password.get(), required)
+}
 
-    private fun Project.stringProperty(property: String, required: Boolean = false): String? {
-        val value = project.findProperty(property)
-        if (value == null) {
-            if (required) {
-                throw GradleException("Property $property is not specified")
-            }
-            logger.debug("Using null value for $property")
-            return null
+private fun Project.stringProperty(property: String, required: Boolean = false): String? {
+    val value = project.findProperty(property)
+    if (value == null) {
+        if (required) {
+            throw GradleException("Property $property is not specified")
         }
-        if (value !is String) {
-            throw GradleException("Project property '$property' should be a String")
-        }
-        return value
+        logger.debug("Using null value for $property")
+        return null
     }
+    if (value !is String) {
+        throw GradleException("Project property '$property' should be a String")
+    }
+    return value
 }
 
 class ReleaseArtifact(

@@ -20,7 +20,7 @@ import java.net.URI
 
 interface GitUrlConventions {
     val pushUrl: String
-    val pagesUri: URI
+    val pagesUri: URI get() = URI(pushUrl)
     fun tagUri(tag: String): URI
 }
 
@@ -32,6 +32,13 @@ class GitHub(val organization: String, val repo: String) : GitUrlConventions {
         get() = URI("https://$organization.github.io/$repo")
 
     override fun tagUri(tag: String) = URI("https://github.com/$organization/$repo/tree/$tag")
+}
+
+class GitBox(val repo: String) : GitUrlConventions {
+    override val pushUrl: String
+        get() = "https://gitbox.apache.org/repos/asf/$repo.git"
+
+    override fun tagUri(tag: String) = URI("https://gitbox.apache.org/repos/asf?p=$repo.git;a=tag;h=refs/tags/$tag")
 }
 
 class GitDaemon(val host: String, val repo: String) : GitUrlConventions {
