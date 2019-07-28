@@ -317,11 +317,16 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 packageGroup = nexus.packageGroup.get()
                 username = nexus.credentials.username(project)
                 password = nexus.credentials.password(project)
+                stagingProfileId = nexus.stagingProfileId.orNull
                 val nexusPublish = project.the<NexusPublishExtension>()
                 serverUrl =
                     nexusPublish.run { if (useStaging.get()) serverUrl else snapshotRepositoryUrl }
                         .get().toString()
+
+                stagingRepositoryId.set(
                     nexusPublish.repositoryName
+                        .map { releaseExt.repositoryIdStore.getOrLoad(it) }
+                )
             }
         }
     }

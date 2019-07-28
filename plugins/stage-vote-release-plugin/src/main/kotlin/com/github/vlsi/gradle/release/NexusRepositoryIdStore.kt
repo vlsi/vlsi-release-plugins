@@ -17,6 +17,7 @@
 package com.github.vlsi.gradle.release
 
 import org.gradle.api.Project
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 class NexusRepositoryIdStore(private val project: Project) {
@@ -36,6 +37,11 @@ class NexusRepositoryIdStore(private val project: Project) {
             file.writeText(id)
         }
     }
+
+    fun getOrLoad(name: String) = savedIds[name] ?: load(name)
+
+    fun load(name: String) =
+        File(storeDir() + "/$name.txt").readText().also { set(name, it) }
 
     fun load() {
         for (f in project.file(storeDir()).listFiles { f -> f.name.endsWith("*.txt") }
