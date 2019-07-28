@@ -19,39 +19,21 @@ package com.github.vlsi.gradle.release
 import com.github.vlsi.gradle.release.jgit.dsl.* // ktlint-disable
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.ResetCommand
-import org.eclipse.jgit.transport.URIish
 import org.eclipse.jgit.util.FileUtils
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.property
-import java.io.File
 
-abstract class GitPrepareRepo : DefaultTask() {
-    @Input
-    val repository = project.objects.property<GitConfig>()
-
+open class GitPrepareRepo : DefaultGitTask() {
     @TaskAction
     fun execute() {
         val repo = repository.get()
-        val repoDir = File(project.buildDir, repo.name)
+        val repoDir = repositoryLocation.get().asFile
         FileUtils.mkdirs(repoDir, true)
         gitInit {
             setDirectory(repoDir)
         }.useRun {
             val remoteName = repo.remote.get()
             val pushUrl = repo.urls.get().pushUrl
-            if (remoteName !in repository.remoteNames) {
-                remoteAdd {
-                    setName(remoteName)
-                    setUri(URIish(pushUrl))
-                }
-            } else {
-                remoteSetUrl {
-                    setRemoteName(remoteName)
-                    setRemoteUri(URIish(pushUrl))
-                }
-            }
+            updateRemoteParams(repo)
             logger.info("Fetching commits from {}, {}", remoteName, pushUrl)
             fetch {
                 setCredentials(repo)

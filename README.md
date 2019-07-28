@@ -134,7 +134,9 @@ v1.13.0
 * Add .editorconfig
 * stage-vote-release-plugin: take RepositoryType.PROD/TEST from "asf" property
 * stage-vote-release-plugin: add releaseParams.rc, releaseParams.release and releaseParams.committerId properties
+* stage-vote-release-plugin: add GitCreateTagTask, GitPushTask
 * stage-vote-release-plugin: allow to select between GitHub and GitBox push alternatives
+* stage-vote-release-plugin: create and push RC and Release tags
 
 v1.12.0
 * license-gather-plugin: exclude txt-based licenses from the jar to save some space

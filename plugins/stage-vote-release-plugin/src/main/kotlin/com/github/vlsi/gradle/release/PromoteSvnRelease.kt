@@ -33,7 +33,7 @@ abstract class PromoteSvnRelease : SvnmuccTask() {
 
     override fun message() =
         project.the<ReleaseExtension>().run {
-            "Promoting release candidate ${tlp.get()} ${tag.get()} to release area"
+            "Promoting ${componentName.get()} ${rcTag.get()} -> ${releaseTag.get()} to release area"
         }
 
     override fun operations(inputChanges: InputChanges): List<SvnOperation> {

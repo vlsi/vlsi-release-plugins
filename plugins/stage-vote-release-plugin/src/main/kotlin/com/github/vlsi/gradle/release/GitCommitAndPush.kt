@@ -17,25 +17,19 @@
 package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.release.jgit.dsl.* // ktlint-disable
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.EmptyCommitException
-import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
-import java.io.File
 
-abstract class GitCommitAndPush : DefaultTask() {
-    @Input
-    val repository = project.objects.property<GitConfig>()
+open class GitCommitAndPush : DefaultGitTask() {
     @Input
     val commitMessage = project.objects.property<String>()
 
     @TaskAction
     fun execute() {
         val repo = repository.get()
-        val repoDir = File(project.buildDir, repo.name)
-        Git.open(repoDir).useRun {
+        jgit {
             add {
                 // Add new files
                 addFilepattern(".")
@@ -52,7 +46,7 @@ abstract class GitCommitAndPush : DefaultTask() {
                 }
             } catch (e: EmptyCommitException) {
                 println("Nothing to push for ${repo.name}, $repo is up to date")
-                return
+                return@jgit
             }
             println("Pushing ${repo.name} to $repo")
             push {

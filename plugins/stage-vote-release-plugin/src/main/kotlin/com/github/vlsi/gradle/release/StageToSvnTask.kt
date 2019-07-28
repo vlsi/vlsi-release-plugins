@@ -37,7 +37,7 @@ abstract class StageToSvnTask() : SvnmuccTask() {
 
     override fun message() =
         project.the<ReleaseExtension>().run {
-            "Uploading release candidate ${tlp.get()} ${tag.get()} to dev area"
+            "Uploading release candidate ${tlp.get()} ${rcTag.get()} to dev area"
         }
 
     private val extensions = listOf("", ".sha512", ".asc")

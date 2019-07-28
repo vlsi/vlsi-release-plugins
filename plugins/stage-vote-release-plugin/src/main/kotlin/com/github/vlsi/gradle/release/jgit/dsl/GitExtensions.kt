@@ -19,10 +19,27 @@ package com.github.vlsi.gradle.release.jgit.dsl
 import com.github.vlsi.gradle.release.GitConfig
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.TransportCommand
+import org.eclipse.jgit.transport.URIish
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 
 inline fun <T : AutoCloseable?, R> T.useRun(block: T.() -> R): R = use {
     it.run(block)
+}
+
+fun Git.updateRemoteParams(repo: GitConfig) {
+    val remoteName = repo.remote.get()
+    val pushUrl = repo.urls.get().pushUrl
+    if (remoteName !in repository.remoteNames) {
+        remoteAdd {
+            setName(remoteName)
+            setUri(URIish(pushUrl))
+        }
+    } else {
+        remoteSetUrl {
+            setRemoteName(remoteName)
+            setRemoteUri(URIish(pushUrl))
+        }
+    }
 }
 
 fun TransportCommand<*, *>.setCredentials(repo: GitConfig) =

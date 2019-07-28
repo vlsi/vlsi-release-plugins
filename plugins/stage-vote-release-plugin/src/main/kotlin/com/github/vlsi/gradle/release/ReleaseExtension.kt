@@ -83,8 +83,11 @@ open class ReleaseExtension @Inject constructor(
     val tlpUrl
         get() = tlp.get().toLowerCase()
     val voteText = objects.property<(ReleaseParams) -> String>()
-    val tag = objects.property<String>()
+
+    val releaseTag = objects.property<String>()
         .convention(project.provider { "v${project.version}" })
+    val rcTag = objects.property<String>()
+        .convention(releaseTag.map { "$it-rc" + rc.get() })
 
     val rc = objects.property<Int>()
         .value(

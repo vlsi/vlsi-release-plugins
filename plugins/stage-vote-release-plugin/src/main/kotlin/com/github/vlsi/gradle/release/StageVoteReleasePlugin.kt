@@ -22,6 +22,7 @@ import io.codearte.gradle.nexus.NexusStagingExtension
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.publish.plugins.PublishingPlugin
 import org.gradle.api.tasks.Sync
@@ -36,6 +37,14 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
     Plugin<Project> {
     companion object {
         const val EXTENSION_NAME = "releaseParams"
+
+        const val RELEASE_GROUP = "release"
+
+        const val CREATE_RC_TAG_TASK_NAME = "createRcTag"
+        const val PUSH_RC_TAG_TASK_NAME = "pushRcTag"
+
+        const val CREATE_RELEASE_TAG_TASK_NAME = "createReleaseTag"
+        const val PUSH_RELEASE_TAG_TASK_NAME = "pushReleaseTag"
 
         const val GENERATE_VOTE_TEXT_TASK_NAME = "generateVoteText"
         const val PREPARE_VOTE_TASK_NAME = "prepareVote"
@@ -64,12 +73,15 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         configureNexusPublish()
 
         configureNexusStaging()
+        val pushRcTag = createPushRcTag(releaseExt, validateReleaseParams)
+        val pushReleaseTag = createPushReleaseTag(releaseExt, validateReleaseParams)
 
         val pushPreviewSite = addPreviewSiteTasks()
 
         val stageSvnDist = tasks.register<StageToSvnTask>(STAGE_SVN_DIST_TASK_NAME) {
             description = "Stage release artifacts to SVN dist repository"
             group = "release"
+            mustRunAfter(pushRcTag)
             files.from(releaseExt.archives.get())
         }
 
@@ -105,6 +117,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         tasks.register(STAGE_DIST_TASK_NAME) {
             description = "Stage release artifacts to SVN and Nexus"
             group = "release"
+            dependsOn(pushRcTag)
             dependsOn(stageSvnDist)
             dependsOn(closeRepository)
         }
@@ -128,6 +141,49 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 val voteText = generateVote.get().outputs.files.singleFile.readText()
                 println(voteText)
             }
+        }
+    private fun DefaultGitTask.rootGitRepository(repo: Provider<GitConfig>) {
+        repository.set(repo)
+        repositoryLocation.set(project.rootDir)
+    }
+
+    private fun Project.createPushRcTag(
+        releaseExt: ReleaseExtension,
+        validateReleaseParams: TaskProvider<*>
+    ): TaskProvider<*> {
+        val createTag = tasks.register(CREATE_RC_TAG_TASK_NAME, GitCreateTagTask::class) {
+            description = "Create release candidate tag if missing"
+            group = RELEASE_GROUP
+            rootGitRepository(releaseExt.source)
+            tag.set(releaseExt.rcTag)
+        }
+
+        return tasks.register(PUSH_RC_TAG_TASK_NAME, GitPushTask::class) {
+            description = "Push release candidate tag to a remote repository"
+            group = RELEASE_GROUP
+            dependsOn(createTag)
+            rootGitRepository(releaseExt.source)
+            tag(releaseExt.rcTag)
+        }
+    }
+
+    private fun Project.createPushReleaseTag(
+        releaseExt: ReleaseExtension,
+        validateReleaseParams: TaskProvider<*>
+    ): TaskProvider<*> {
+        val createTag = tasks.register(CREATE_RELEASE_TAG_TASK_NAME, GitCreateTagTask::class) {
+            description = "Create release tag if missing"
+            group = RELEASE_GROUP
+            rootGitRepository(releaseExt.source)
+            tag.set(releaseExt.releaseTag)
+        }
+
+        return tasks.register(PUSH_RELEASE_TAG_TASK_NAME, GitPushTask::class) {
+            description = "Push release tag to a remote repository"
+            group = RELEASE_GROUP
+            dependsOn(createTag)
+            rootGitRepository(releaseExt.source)
+            tag(releaseExt.releaseTag)
         }
     }
 
@@ -273,7 +329,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                     tlp = releaseExt.tlp.get(),
                     version = version.toString(),
                     gitSha = grgit.head().id,
-                    tag = releaseExt.tag.get(),
+                    tag = releaseExt.rcTag.get(),
                     rc = releaseExt.rc.get(),
                     committerId = releaseExt.committerId.get(),
                     artifacts = files(releaseExt.archives.get())
@@ -287,7 +343,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                     svnStagingUri = svnDist.url.get().let { it.replacePath(it.path + "/" + svnDist.stageFolder.get()) },
                     nexusRepositoryUri = repoUri,
                     previewSiteUri = releaseExt.sitePreview.get().urls.get().pagesUri,
-                    sourceCodeTagUrl = releaseExt.source.get().urls.get().tagUri(releaseExt.tag.get())
+                    sourceCodeTagUrl = releaseExt.source.get().urls.get().tagUri(releaseExt.rcTag.get())
                 )
                 val voteText = releaseExt.voteText.get().invoke(releaseParams)
                 file(voteMailFile).writeText(voteText)
