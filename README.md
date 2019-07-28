@@ -141,6 +141,7 @@ v1.13.0
 * stage-vote-release-plugin: create and push RC and Release tags
 * stage-vote-release-plugin: add ReleaseExtension#componentName (a sub-component under TLP)
 * stage-vote-release-plugin: load stagingRepositoryId for release task
+* stage-vote-release-plugin: avoid parallel execution of initializeNexusStagingRepository to improve task concurrency
 
 v1.12.0
 * license-gather-plugin: exclude txt-based licenses from the jar to save some space

@@ -349,6 +349,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             serverUrl.set(releaseExt.nexus.url.map { it.replacePath("/service/local/") })
             snapshotRepositoryUrl.set(releaseExt.nexus.url.map { it.replacePath("/content/repositories/snapshots/") })
         }
+        val rootInitStagingRepository = tasks.named("initializeNexusStagingRepository")
         // Use the same settings for all subprojects that apply MavenPublishPlugin
         subprojects {
             plugins.withType<MavenPublishPlugin> {
@@ -360,6 +361,12 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                         snapshotRepositoryUrl.set(it.snapshotRepositoryUrl)
                         useStaging.set(it.useStaging)
                     }
+                }
+            }
+            plugins.withId("de.marcphilipp.nexus-publish") {
+                tasks.withType<InitializeNexusStagingRepository>().configureEach {
+                    // Allow for some parallelism, so the staging repository is created by the root task
+                    mustRunAfter(rootInitStagingRepository)
                 }
             }
         }
