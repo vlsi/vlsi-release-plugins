@@ -83,12 +83,14 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             group = "release"
             mustRunAfter(pushRcTag)
             files.from(releaseExt.archives.get())
+            files.from(releaseExt.checksums.get())
         }
 
         val publishSvnDist = tasks.register<PromoteSvnRelease>(PUBLISH_SVN_DIST_TASK_NAME) {
             description = "Publish release artifacts to SVN dist repository"
             group = "release"
             files.from(releaseExt.archives.get())
+            files.from(releaseExt.checksums.get())
         }
 
         // Tasks from NexusStagingPlugin

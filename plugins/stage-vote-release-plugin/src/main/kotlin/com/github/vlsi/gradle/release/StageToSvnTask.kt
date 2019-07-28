@@ -40,25 +40,21 @@ abstract class StageToSvnTask() : SvnmuccTask() {
             "Uploading release candidate ${tlp.get()} ${rcTag.get()} to dev area"
         }
 
-    private val extensions = listOf("", ".sha512", ".asc")
-
     override fun operations(inputChanges: InputChanges): List<SvnOperation> =
         mutableListOf<SvnOperation>().apply {
             val folderName = folder.get()
             add(SvnMkdir(folderName))
             for (f in inputChanges.getFileChanges(files)) {
                 val destinationName = "$folderName/${f.file.name}"
-                for (ext in extensions) {
-                    add(
-                        when (f.changeType) {
-                            ChangeType.REMOVED -> SvnRm(destinationName + ext)
-                            ChangeType.ADDED, ChangeType.MODIFIED -> SvnPut(
-                                f.file,
-                                destinationName + ext
-                            )
-                        }
-                    )
-                }
+                add(
+                    when (f.changeType) {
+                        ChangeType.REMOVED -> SvnRm(destinationName)
+                        ChangeType.ADDED, ChangeType.MODIFIED -> SvnPut(
+                            f.file,
+                            destinationName
+                        )
+                    }
+                )
             }
         }
 }

@@ -49,9 +49,7 @@ abstract class PromoteSvnRelease : SvnmuccTask() {
                 val subfolder = subfolders.entries.firstOrNull { f.name.contains(it.key) }?.value
                 val releasedFile =
                     "$releaseFolder/${if (subfolder.isNullOrEmpty()) "" else "$subfolder/"}${f.name}"
-                for (fileExt in listOf("", ".sha512")) {
-                    add(SvnMv(stagedFile + fileExt, releasedFile + fileExt))
-                }
+                add(SvnMv(stagedFile, releasedFile))
             }
             add(SvnRm(stageFolder))
         }

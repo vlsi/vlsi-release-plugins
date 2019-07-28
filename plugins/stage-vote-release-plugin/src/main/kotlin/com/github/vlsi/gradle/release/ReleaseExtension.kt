@@ -109,6 +109,38 @@ open class ReleaseExtension @Inject constructor(
     val snapshotSuffix: String get() = if (release.orNull == true) "" else "-SNAPSHOT"
 
     val archives = objects.listProperty<Any>()
+
+    val checksums = objects.listProperty<Any>()
+
+    fun archive(taskProvider: TaskProvider<out AbstractArchiveTask>) {
+        val task = taskProvider.get()
+        archives.add(task)
+        val project = task.project
+        val shaTask = project.tasks.register(taskProvider.name + "Sha512") {
+            val archiveFile = task.archiveFile
+            inputs.file(archiveFile)
+            outputs.file(archiveFile.map { File(it.asFile.absolutePath + ".sha512") })
+            doLast {
+                ant.withGroovyBuilder {
+                    "checksum"(
+                        "file" to archiveFile.get(),
+                        "algorithm" to "SHA-512",
+                        "fileext" to ".sha512"
+                    )
+                }
+            }
+        }
+        checksums.add(shaTask.get())
+        project.configure<SigningExtension> {
+            val signTask = sign(task)
+            // Note signTask does not hav
+            checksums.add(signTask)
+            project.tasks.named(BasePlugin.ASSEMBLE_TASK_NAME) {
+                dependsOn(shaTask, signTask)
+            }
+        }
+    }
+
     val previewSiteContents = objects.listProperty<CopySpec>()
 
     fun previewSiteContents(action: Action<CopySpec>) {
