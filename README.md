@@ -137,6 +137,7 @@ v1.13.0
 * stage-vote-release-plugin: add GitCreateTagTask, GitPushTask
 * stage-vote-release-plugin: add option to automatically generate SHA512
 * stage-vote-release-plugin: allow to select between GitHub and GitBox push alternatives
+* stage-vote-release-plugin: add pre-release validations
 * stage-vote-release-plugin: create and push RC and Release tags
 * stage-vote-release-plugin: add ReleaseExtension#componentName (a sub-component under TLP)
 

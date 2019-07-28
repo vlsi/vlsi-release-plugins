@@ -16,12 +16,20 @@
  */
 package com.github.vlsi.gradle.release
 
+import org.ajoberstar.grgit.Grgit
+import org.eclipse.jgit.lib.Constants
+import org.eclipse.jgit.lib.Repository
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.plugins.BasePlugin
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.kotlin.dsl.* // ktlint-disable
+import org.gradle.plugins.signing.SigningExtension
+import java.io.File
 import java.net.URI
 import javax.inject.Inject
 
@@ -39,6 +47,30 @@ open class ReleaseExtension @Inject constructor(
 ) {
     internal val repositoryIdStore = NexusRepositoryIdStore(project)
 
+    val validateSvnParams = mutableListOf<Runnable>().apply {
+        add(Runnable {
+            // Validate that credentials should be present
+            if (repositoryType.get() == RepositoryType.PROD) {
+                svnDist {
+                    credentials.username(project, required = true)
+                    credentials.password(project, required = true)
+                }
+            }
+        })
+    }
+
+    val validateNexusParams = mutableListOf<Runnable>().apply {
+        add(Runnable {
+            // Validate that credentials should be present
+            if (repositoryType.get() == RepositoryType.PROD) {
+                nexus {
+                    credentials.username(project, required = true)
+                    credentials.password(project, required = true)
+                }
+            }
+        })
+    }
+
     val validateReleaseParams =
         mutableListOf<Runnable>().apply {
             add(Runnable {
@@ -49,19 +81,46 @@ open class ReleaseExtension @Inject constructor(
                 }
             })
             add(Runnable {
-                // Validate that credentials should be present
-                if (repositoryType.get() == RepositoryType.PROD) {
-                    svnDist {
-                        credentials.username(project, required = true)
-                        credentials.password(project, required = true)
-                    }
-                    nexus {
-                        credentials.username(project, required = true)
-                        credentials.password(project, required = true)
+                if (!allowUncommittedChanges.get()) {
+                    val grgit = project.property("grgit") as Grgit
+                    val jgit = grgit.repository.jgit
+                    jgit.status().call().apply {
+                        if (!hasUncommittedChanges()) {
+                            return@Runnable
+                        }
+                        throw GradleException(
+                            "Please commit (or revert) the changes (or add -PallowUncommittedChanges): ${uncommittedChanges.joinToString(
+                                ", "
+                            )}"
+                        )
                     }
                 }
             })
+            add(Runnable {
+                val grgit = project.property("grgit") as Grgit
+                val repository = grgit.repository.jgit.repository
+                assertHeadTag(repository, releaseTag.get(), "Release")
+                if (rc.isPresent) {
+                    assertHeadTag(repository, rcTag.get(), "Release candidate")
+                }
+            })
         }
+
+    private fun assertHeadTag(repository: Repository, tagName: String, title: String) {
+        val taggedId = repository.exactRef(Constants.R_TAGS + tagName)?.peeledObjectId ?: return
+        val headId = repository.exactRef(Constants.HEAD).peeledObjectId
+        if (headId != taggedId) {
+            throw GradleException(
+                "$title must be built from a Git HEAD." +
+                        " $tagName points to $taggedId, HEAD points to $headId"
+            )
+        }
+    }
+
+    val allowUncommittedChanges = objects.property<Boolean>()
+        .value(
+            project.stringProperty("allowUncommittedChanges").toBool(false)
+        )
 
     val repositoryType = objects.property<RepositoryType>()
         .value(

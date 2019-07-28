@@ -20,6 +20,7 @@ import de.marcphilipp.gradle.nexus.InitializeNexusStagingRepository
 import de.marcphilipp.gradle.nexus.NexusPublishExtension
 import io.codearte.gradle.nexus.NexusStagingExtension
 import org.ajoberstar.grgit.Grgit
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
@@ -54,6 +55,11 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         const val PUBLISH_DIST_TASK_NAME = "publishDist"
 
         const val PUSH_PREVIEW_SITE_TASK_NAME = "pushPreviewSite"
+
+        // Marker tasks
+        const val VALIDATE_SVN_PARAMS_TASK_NAME = "validateSvnParams"
+        const val VALIDATE_NEXUS_PARAMS_TASK_NAME = "validateNexusParams"
+        const val VALIDATE_RELEASE_PARAMS_TASK_NAME = "validateReleaseParams"
     }
 
     override fun apply(project: Project) {
@@ -70,9 +76,29 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         // Save stagingRepoId. We don't know which
         val releaseExt = extensions.create<ReleaseExtension>(EXTENSION_NAME, project)
 
-        configureNexusPublish()
+        val validateNexusParams = tasks.register(VALIDATE_NEXUS_PARAMS_TASK_NAME)
+        val validateSvnParams = tasks.register(VALIDATE_SVN_PARAMS_TASK_NAME)
+        val validateReleaseParams = tasks.register(VALIDATE_RELEASE_PARAMS_TASK_NAME)
 
-        configureNexusStaging()
+        // Validations should be performed before tasks start execution
+        project.gradle.taskGraph.whenReady {
+            var validations = emptySequence<Runnable>()
+            if (hasTask(validateSvnParams.get())) {
+                validations += releaseExt.validateSvnParams
+            }
+            if (hasTask(validateNexusParams.get())) {
+                validations += releaseExt.validateNexusParams
+            }
+            if (hasTask(validateReleaseParams.get())) {
+                validations += releaseExt.validateReleaseParams
+            }
+            runValidations(validations)
+        }
+
+        configureNexusPublish(validateNexusParams)
+
+        configureNexusStaging(releaseExt)
+
         val pushRcTag = createPushRcTag(releaseExt, validateReleaseParams)
         val pushReleaseTag = createPushReleaseTag(releaseExt, validateReleaseParams)
 
@@ -80,31 +106,40 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
         val stageSvnDist = tasks.register<StageToSvnTask>(STAGE_SVN_DIST_TASK_NAME) {
             description = "Stage release artifacts to SVN dist repository"
-            group = "release"
+            group = RELEASE_GROUP
             mustRunAfter(pushRcTag)
+            dependsOn(validateSvnParams)
+            dependsOn(validateReleaseParams)
             files.from(releaseExt.archives.get())
             files.from(releaseExt.checksums.get())
         }
 
         val publishSvnDist = tasks.register<PromoteSvnRelease>(PUBLISH_SVN_DIST_TASK_NAME) {
             description = "Publish release artifacts to SVN dist repository"
-            group = "release"
+            group = RELEASE_GROUP
+            dependsOn(validateSvnParams)
+            dependsOn(validateReleaseParams)
+            mustRunAfter(stageSvnDist)
+            // pushReleaseTag is easier to rollback, so we push it first
+            dependsOn(pushReleaseTag)
             files.from(releaseExt.archives.get())
             files.from(releaseExt.checksums.get())
         }
 
         // Tasks from NexusStagingPlugin
         val closeRepository = tasks.named("closeRepository")
-        val closeAndReleaseRepository = tasks.named("closeAndReleaseRepository")
+        val releaseRepository = tasks.named("releaseRepository")
 
-        project.gradle.taskGraph.whenReady {
-            val validators = releaseExt.validateReleaseParams
-            if (validators.isNotEmpty() &&
-                (hasTask(stageSvnDist.get()) || hasTask(publishSvnDist.get()) ||
-                        hasTask(closeRepository.get()) || hasTask(closeAndReleaseRepository.get()))
-            ) {
-                validators.forEach { it.run() }
-            }
+        closeRepository {
+            dependsOn(validateReleaseParams)
+        }
+
+        releaseRepository {
+            // Note: publishSvnDist might fail, and it is easier to rollback than "rollback Nexus"
+            // So we publish to SVN first, and release Nexus later
+            mustRunAfter(publishSvnDist)
+            dependsOn(validateNexusParams)
+            dependsOn(validateReleaseParams)
         }
 
         // closeRepository does not wait all publications by default, so we add that dependency
@@ -116,9 +151,9 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             }
         }
 
-        tasks.register(STAGE_DIST_TASK_NAME) {
+        val stageDist = tasks.register(STAGE_DIST_TASK_NAME) {
             description = "Stage release artifacts to SVN and Nexus"
-            group = "release"
+            group = RELEASE_GROUP
             dependsOn(pushRcTag)
             dependsOn(stageSvnDist)
             dependsOn(closeRepository)
@@ -126,24 +161,58 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
         tasks.register(PUBLISH_DIST_TASK_NAME) {
             description = "Publish release artifacts to SVN and Nexus"
-            group = "release"
+            group = RELEASE_GROUP
             dependsOn(publishSvnDist)
-            dependsOn(closeAndReleaseRepository)
+            dependsOn(releaseRepository)
         }
 
         // prepareVote depends on all the publish tasks
         // prepareVote depends on publish SVN
-        val generateVote = generateVoteText(pushPreviewSite)
+        val generateVote = generateVoteText(pushPreviewSite, stageDist)
 
-        tasks.register(PREPARE_VOTE_TASK_NAME) {
-            description = "Prepare text for vote mail"
-            group = "release"
+        val prepareVote = tasks.register(PREPARE_VOTE_TASK_NAME) {
+            description = "Stage artifacts and prepare text for vote mail"
+            group = RELEASE_GROUP
+            dependsOn(pushPreviewSite, stageDist)
             dependsOn(generateVote)
             doLast {
                 val voteText = generateVote.get().outputs.files.singleFile.readText()
                 println(voteText)
             }
         }
+
+        releaseRepository {
+            mustRunAfter(prepareVote)
+        }
+
+        publishSvnDist {
+            mustRunAfter(prepareVote)
+        }
+    }
+
+    private fun runValidations(validations: Sequence<Runnable>) {
+        val errors = validations.mapNotNull {
+            try {
+                it.run()
+                null
+            } catch (e: GradleException) {
+                println(e.message)
+                e
+            }
+        }.toList()
+        if (errors.size == 1) {
+            throw errors.first()
+        }
+        if (errors.isNotEmpty()) {
+            val sb = StringBuilder()
+            sb.append("Please correct the following before proceeding with the release:\n")
+            for ((index, error) in errors.withIndex()) {
+                sb.append("${index + 1}) ${error.message}\n")
+            }
+            throw GradleException(sb.toString())
+        }
+    }
+
     private fun DefaultGitTask.rootGitRepository(repo: Provider<GitConfig>) {
         repository.set(repo)
         repositoryLocation.set(project.rootDir)
@@ -156,6 +225,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val createTag = tasks.register(CREATE_RC_TAG_TASK_NAME, GitCreateTagTask::class) {
             description = "Create release candidate tag if missing"
             group = RELEASE_GROUP
+            dependsOn(validateReleaseParams)
             rootGitRepository(releaseExt.source)
             tag.set(releaseExt.rcTag)
         }
@@ -176,6 +246,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val createTag = tasks.register(CREATE_RELEASE_TAG_TASK_NAME, GitCreateTagTask::class) {
             description = "Create release tag if missing"
             group = RELEASE_GROUP
+            dependsOn(validateReleaseParams)
             rootGitRepository(releaseExt.source)
             tag.set(releaseExt.releaseTag)
         }
@@ -250,6 +321,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 serverUrl =
                     nexusPublish.run { if (useStaging.get()) serverUrl else snapshotRepositoryUrl }
                         .get().toString()
+                    nexusPublish.repositoryName
             }
         }
     }
@@ -264,7 +336,9 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         fragment
     )
 
-    private fun Project.configureNexusPublish() {
+    private fun Project.configureNexusPublish(
+        validateNexusParams: TaskProvider<*>
+    ) {
         val releaseExt = project.the<ReleaseExtension>()
         configure<NexusPublishExtension> {
             serverUrl.set(releaseExt.nexus.url.map { it.replacePath("/service/local/") })
@@ -291,6 +365,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         allprojects {
             plugins.withId("de.marcphilipp.nexus-publish") {
                 tasks.withType<InitializeNexusStagingRepository>().configureEach {
+                    dependsOn(validateNexusParams)
                     doLast {
                         // nexus-publish puts stagingRepositoryId to NexusStagingExtension so we get it from there
                         val repoName = this@configureEach.repositoryName.get()
