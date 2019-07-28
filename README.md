@@ -130,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.13.0
+* Add .editorconfig
+
 v1.12.0
 * license-gather-plugin: exclude txt-based licenses from the jar to save some space
 
