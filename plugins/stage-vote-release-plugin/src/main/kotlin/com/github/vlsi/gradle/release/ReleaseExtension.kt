@@ -301,7 +301,3 @@ class ReleaseParams(
     val tlpUrl
         get() = tlp.toLowerCase()
 }
-
-enum class RepositoryType {
-    PROD, TEST
-}
