@@ -332,7 +332,7 @@ open class GitConfig @Inject constructor(
 
     val branch = objects.property<String>()
 
-    val credentials = objects.newInstance<Credentials>(name.capitalize(), ext)
+    val credentials = objects.newInstance<Credentials>("Git" + name.capitalize(), ext)
 
     override fun toString() = "${urls.get().pushUrl}, branch: ${branch.get()}"
 }
@@ -350,11 +350,19 @@ open class Credentials @Inject constructor(
     val password = objects.property<String>()
         .convention(ext.defaultValue("${name}Password"))
 
-    fun username(project: Project, required: Boolean = false) =
-        project.stringProperty(username.get(), required)
+    fun username(project: Project, required: Boolean = false): String? {
+        val property = username.get()
+        val value = project.stringProperty(property, required)
+        project.logger.debug("Using username from property {}: {}", property, value)
+        return value
+    }
 
-    fun password(project: Project, required: Boolean = false) =
-        project.stringProperty(password.get(), required)
+    fun password(project: Project, required: Boolean = false): String? {
+        val property = password.get()
+        val value = project.stringProperty(password.get(), required)
+        project.logger.debug("Using username from property {}", property, value?.let { "***" })
+        return value
+    }
 }
 
 private fun Project.stringProperty(property: String, required: Boolean = false): String? {

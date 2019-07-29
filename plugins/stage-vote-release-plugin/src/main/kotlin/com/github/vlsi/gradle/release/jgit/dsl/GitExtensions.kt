@@ -21,6 +21,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.transport.URIish
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
+import org.gradle.api.Project
 
 inline fun <T : AutoCloseable?, R> T.useRun(block: T.() -> R): R = use {
     it.run(block)
@@ -42,12 +43,12 @@ fun Git.updateRemoteParams(repo: GitConfig) {
     }
 }
 
-fun TransportCommand<*, *>.setCredentials(repo: GitConfig) =
+fun TransportCommand<*, *>.setCredentials(repo: GitConfig, project: Project) =
     setCredentialsProvider(
         repo.credentials.run {
             UsernamePasswordCredentialsProvider(
-                username.get(),
-                password.get()
+                username(project),
+                password(project)
             )
         }
     )

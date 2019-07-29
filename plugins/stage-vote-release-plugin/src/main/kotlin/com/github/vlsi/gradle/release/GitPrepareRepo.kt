@@ -36,7 +36,7 @@ open class GitPrepareRepo : DefaultGitTask() {
             updateRemoteParams(repo)
             logger.info("Fetching commits from {}, {}", remoteName, pushUrl)
             fetch {
-                setCredentials(repo)
+                setCredentials(repo, project)
                 setRemote(remoteName)
                 setForceUpdate(true)
             }

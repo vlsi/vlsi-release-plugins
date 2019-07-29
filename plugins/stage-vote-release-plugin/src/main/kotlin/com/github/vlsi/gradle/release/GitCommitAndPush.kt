@@ -50,7 +50,7 @@ open class GitCommitAndPush : DefaultGitTask() {
             }
             println("Pushing ${repo.name} to $repo")
             push {
-                setCredentials(repo)
+                setCredentials(repo, project)
                 setRemote(repo.remote.get())
             }
         }

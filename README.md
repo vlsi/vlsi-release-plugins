@@ -130,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.14.0
+* stage-vote-release-plugin: use property value instead of name for Git credentials
+
 v1.13.0
 * stage-vote-release-plugin: allow to publish to AFF repository via -Pasf
 

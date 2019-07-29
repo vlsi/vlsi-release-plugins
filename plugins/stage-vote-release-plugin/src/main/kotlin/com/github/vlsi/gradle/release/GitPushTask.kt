@@ -51,7 +51,7 @@ open class GitPushTask : DefaultGitTask() {
             val remoteName = repository.remote.get()
             logger.info("Pushing release tag to Git remote $remoteName: ${repository.urls.get().pushUrl}")
             val pushResults = push {
-                setCredentials(repository)
+                setCredentials(repository, project)
                 remote = remoteName
                 refSpecs = this@GitPushTask.refSpecs.get()
             }
