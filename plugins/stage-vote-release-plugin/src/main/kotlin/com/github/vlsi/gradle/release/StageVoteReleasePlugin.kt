@@ -300,7 +300,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val pushPreviewSite = tasks.register(PUSH_PREVIEW_SITE_TASK_NAME, GitCommitAndPush::class) {
             group = PublishingPlugin.PUBLISH_TASK_GROUP
             description = "Builds and publishes site preview"
-            commitMessage.set("Update preview for ${releaseExt.componentName.get()} ${releaseExt.rcTag.get()}")
+            val rcSuffix = if (releaseExt.rc.isPresent) " " + releaseExt.rcTag.get() else ""
+            commitMessage.set("Update preview for ${releaseExt.componentName.get()}$rcSuffix")
             repository.set(releaseExt.sitePreview)
 
             dependsOn(syncPreviewSiteRepo)
