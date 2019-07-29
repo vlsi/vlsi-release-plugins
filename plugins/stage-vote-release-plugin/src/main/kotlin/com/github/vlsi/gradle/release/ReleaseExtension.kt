@@ -124,7 +124,7 @@ open class ReleaseExtension @Inject constructor(
 
     val repositoryType = objects.property<RepositoryType>()
         .value(
-            when (project.findProperty("asf")) {
+            when (project.stringProperty("asf")?.toBool(false)) {
                 true -> RepositoryType.PROD
                 else -> RepositoryType.TEST
             }

@@ -130,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.13.0
+* stage-vote-release-plugin: allow to publish to AFF repository via -Pasf
+
 v1.12.0
 * Add .editorconfig
 * stage-vote-release-plugin: take RepositoryType.PROD/TEST from "asf" property
