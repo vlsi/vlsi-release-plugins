@@ -19,6 +19,7 @@ package com.github.vlsi.gradle.git.dsl
 import com.github.vlsi.gradle.git.FindGitAttributes
 import com.github.vlsi.gradle.git.GitProperties
 import com.github.vlsi.gradle.git.findGitproperties
+import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
@@ -38,10 +39,14 @@ fun PatternFilterable.gitignore(props: Provider<GitProperties>) =
         props.get().ignores.isSatisfiedBy(it)
     }
 
-fun PatternFilterable.gitignore(task: TaskProvider<FindGitAttributes>) =
-    exclude {
+fun PatternFilterable.gitignore(task: TaskProvider<FindGitAttributes>): PatternFilterable {
+    if (this is Task) {
+        dependsOn(task)
+    }
+    return exclude {
         task.get().props.ignores.isSatisfiedBy(it)
     }
+}
 
 fun CopySpec.gitignore(task: TaskProvider<FindGitAttributes>) {
     from(task)
