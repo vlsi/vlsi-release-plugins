@@ -41,7 +41,7 @@ abstract class PromoteSvnRelease : SvnmuccTask() {
             val ext = project.the<ReleaseExtension>()
             val svnDist = ext.svnDist
             val stageFolder = svnDist.stageFolder.get()
-            val releaseFolder = svnDist.finalFolder.get()
+            val releaseFolder = svnDist.releaseFolder.get()
 
             val subfolders = svnDist.releaseSubfolder.get()
             for (f in files) {

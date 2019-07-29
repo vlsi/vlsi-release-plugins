@@ -275,7 +275,7 @@ open class SvnDistConfig @Inject constructor(
             "dev/${ext.tlpUrl.get()}/${ext.componentNameUrl.get()}-${project.version}-rc${ext.rc.get()}"
         })
 
-    val finalFolder = objects.property<String>()
+    val releaseFolder = objects.property<String>()
         .convention(project.provider {
             "release/${ext.tlpUrl.get()}/${ext.componentNameUrl.get()}-${project.version}"
         })
