@@ -130,7 +130,7 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
-v1.13.0
+v1.12.0
 * Add .editorconfig
 * stage-vote-release-plugin: take RepositoryType.PROD/TEST from "asf" property
 * stage-vote-release-plugin: add releaseParams.rc, releaseParams.release and releaseParams.committerId properties
@@ -143,8 +143,6 @@ v1.13.0
 * stage-vote-release-plugin: load stagingRepositoryId for release task
 * stage-vote-release-plugin: avoid parallel execution of initializeNexusStagingRepository to improve task concurrency
 * ide-plugin: support generatedSources in Eclipse
-
-v1.12.0
 * license-gather-plugin: exclude txt-based licenses from the jar to save some space
 
 v1.11.0

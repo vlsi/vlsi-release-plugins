@@ -38,7 +38,7 @@ tasks.jar {
 
 allprojects {
     group = "com.github.vlsi.gradle"
-    version = "1.11.0"
+    version = "1.12.0"
 
     tasks.withType<KotlinCompile> {
         sourceCompatibility = "unused"
