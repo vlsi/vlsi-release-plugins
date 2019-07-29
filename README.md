@@ -130,6 +130,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.16.0
+* stage-vote-release-plugin: make -Prc optional for pushPreviewSite
+
 v1.15.0
 * stage-vote-release-plugin: validate Git credentials
 * stage-vote-release-plugin: use $it-site.git and $it-site-preview.git name conventions
