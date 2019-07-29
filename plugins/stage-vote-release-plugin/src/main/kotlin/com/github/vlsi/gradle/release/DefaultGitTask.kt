@@ -30,7 +30,7 @@ abstract class DefaultGitTask : DefaultTask() {
 
     @Internal
     val repositoryLocation = project.objects.directoryProperty()
-        .convention(project.layout.buildDirectory.dir(repository.map { it.remote.get() }))
+        .convention(project.layout.buildDirectory.dir(repository.map { it.name }))
 
     protected fun <R> jgit(action: Git.() -> R): R {
         val location = repositoryLocation.get().asFile

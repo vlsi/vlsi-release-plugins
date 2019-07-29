@@ -47,8 +47,8 @@ fun TransportCommand<*, *>.setCredentials(repo: GitConfig, project: Project) =
     setCredentialsProvider(
         repo.credentials.run {
             UsernamePasswordCredentialsProvider(
-                username(project),
-                password(project)
+                username(project, required = true),
+                password(project, required = true)
             )
         }
     )

@@ -81,21 +81,6 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val validateSvnParams = tasks.register(VALIDATE_SVN_PARAMS_TASK_NAME)
         val validateReleaseParams = tasks.register(VALIDATE_RELEASE_PARAMS_TASK_NAME)
 
-        // Validations should be performed before tasks start execution
-        project.gradle.taskGraph.whenReady {
-            var validations = emptySequence<Runnable>()
-            if (hasTask(validateSvnParams.get())) {
-                validations += releaseExt.validateSvnParams
-            }
-            if (hasTask(validateNexusParams.get())) {
-                validations += releaseExt.validateNexusParams
-            }
-            if (hasTask(validateReleaseParams.get())) {
-                validations += releaseExt.validateReleaseParams
-            }
-            runValidations(validations)
-        }
-
         configureNexusPublish(validateNexusParams)
 
         configureNexusStaging(releaseExt)
@@ -189,6 +174,40 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         publishSvnDist {
             mustRunAfter(prepareVote)
         }
+
+        // Validations should be performed before tasks start execution
+        project.gradle.taskGraph.whenReady {
+            var validations = emptySequence<Runnable>()
+            if (hasTask(validateSvnParams.get())) {
+                validations += releaseExt.validateSvnParams
+            }
+            if ((hasTask(pushRcTag.get()) || hasTask(pushReleaseTag.get())) &&
+                releaseExt.repositoryType.get() == RepositoryType.PROD) {
+                validations += Runnable {
+                    releaseExt.source {
+                        credentials.username(project, required = true)
+                        credentials.password(project, required = true)
+                    }
+                }
+            }
+            if (releaseExt.sitePreviewEnabled.get() &&
+                hasTask(pushPreviewSite.get()) &&
+                releaseExt.repositoryType.get() == RepositoryType.PROD) {
+                validations += Runnable {
+                    releaseExt.sitePreview {
+                        credentials.username(project, required = true)
+                        credentials.password(project, required = true)
+                    }
+                }
+            }
+            if (hasTask(validateNexusParams.get())) {
+                validations += releaseExt.validateNexusParams
+            }
+            if (hasTask(validateReleaseParams.get())) {
+                validations += releaseExt.validateReleaseParams
+            }
+            runValidations(validations)
+        }
     }
 
     private fun runValidations(validations: Sequence<Runnable>) {
@@ -281,8 +300,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val pushPreviewSite = tasks.register(PUSH_PREVIEW_SITE_TASK_NAME, GitCommitAndPush::class) {
             group = PublishingPlugin.PUBLISH_TASK_GROUP
             description = "Builds and publishes site preview"
-            commitMessage.set("Update preview for ${rootProject.version}")
-            repository.set(rootProject.the<ReleaseExtension>().sitePreview)
+            commitMessage.set("Update preview for ${releaseExt.componentName.get()} ${releaseExt.rcTag.get()}")
+            repository.set(releaseExt.sitePreview)
 
             dependsOn(syncPreviewSiteRepo)
         }

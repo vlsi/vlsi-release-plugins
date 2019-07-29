@@ -130,6 +130,10 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.15.0
+* stage-vote-release-plugin: validate Git credentials
+* stage-vote-release-plugin: use $it-site.git and $it-site-preview.git name conventions
+
 v1.14.0
 * stage-vote-release-plugin: use property value instead of name for Git credentials
 

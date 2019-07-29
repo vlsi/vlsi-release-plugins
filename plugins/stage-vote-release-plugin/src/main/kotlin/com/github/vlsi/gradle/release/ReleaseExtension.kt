@@ -47,6 +47,12 @@ open class ReleaseExtension @Inject constructor(
 ) {
     internal val repositoryIdStore = NexusRepositoryIdStore(project)
 
+    internal fun validateCredentials(credentials: Credentials) =
+        Runnable {
+            credentials.username(project, required = true)
+            credentials.password(project, required = true)
+        }
+
     val validateSvnParams = mutableListOf<Runnable>().apply {
         add(Runnable {
             // Validate that credentials should be present
@@ -236,15 +242,15 @@ open class ReleaseExtension @Inject constructor(
     }
 
     val sitePreview by git.registering {
-        branch.convention("asf-site")
-        gitUrlConvention("-site")
+        branch.convention("gh-pages")
+        gitUrlConvention("-site-preview")
     }
 
     val sitePreviewEnabled = objects.property<Boolean>().convention(true)
 
     val site by git.registering {
         branch.convention("asf-site")
-        gitUrlConvention("-preview")
+        gitUrlConvention("-site")
     }
 
     fun validateReleaseParams(action: Runnable) {
