@@ -26,6 +26,7 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.get
+import org.gradle.plugins.ide.eclipse.model.EclipseModel
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.gradle.ext.ProjectSettings
 import java.io.File
@@ -102,6 +103,13 @@ open class IdeExtension(private val project: Project) {
             module.generatedSourceDirs.add(generationOutput)
         }
 
+        // Run the specified task on import in Eclipse
+        // https://github.com/eclipse/buildship/issues/265
+        project.rootProject.configure<EclipseModel> {
+            synchronizationTasks(task)
+        }
+
+        // Run the specified task on import in IDEA
         project.rootProject.configure<IdeaModel> {
             project {
                 settings {
