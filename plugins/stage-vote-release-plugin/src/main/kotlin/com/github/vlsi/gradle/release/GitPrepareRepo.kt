@@ -34,7 +34,7 @@ open class GitPrepareRepo : DefaultGitTask() {
             val remoteName = repo.remote.get()
             val pushUrl = repo.urls.get().pushUrl
             updateRemoteParams(repo)
-            logger.info("Fetching commits from {}, {}", remoteName, pushUrl)
+            logger.lifecycle("Fetching commits from {}, {}", remoteName, pushUrl)
             fetch {
                 setCredentials(repo, project)
                 setRemote(remoteName)

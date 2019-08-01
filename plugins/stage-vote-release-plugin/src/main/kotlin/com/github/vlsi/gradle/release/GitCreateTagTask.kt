@@ -41,7 +41,7 @@ open class GitCreateTagTask : DefaultGitTask() {
             val tagRef = tag {
                 name = tagName
             }
-            logger.info("Created tag $tagName -> $tagRef")
+            logger.lifecycle("Created tag $tagName -> $tagRef")
         }
     }
 }

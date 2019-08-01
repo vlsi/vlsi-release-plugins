@@ -31,7 +31,7 @@ class NexusRepositoryIdStore(private val project: Project) {
 
     operator fun set(name: String, id: String) {
         if (savedIds.putIfAbsent(name, id) == null) {
-            project.logger.info("Saving stagingRepositoryId for repository $name -> $id")
+            project.logger.lifecycle("Initialized stagingRepositoryId {} for repository {}", id, name)
             val file = project.file(filePath(name))
             file.parentFile.mkdirs()
             file.writeText(id)

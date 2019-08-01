@@ -45,10 +45,9 @@ open class GitCommitAndPush : DefaultGitTask() {
                     setAllowEmpty(false)
                 }
             } catch (e: EmptyCommitException) {
-                println("Nothing to push for ${repo.name}, $repo is up to date")
-                return@jgit
+                logger.lifecycle("Nothing to push for {}, {} is up to date", repo.name, repo)
             }
-            println("Pushing ${repo.name} to $repo")
+            logger.lifecycle("Pushing {} to {}", repo.name, repo)
             push {
                 setCredentials(repo, project)
                 setRemote(repo.remote.get())
