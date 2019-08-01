@@ -26,8 +26,13 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.api.publish.maven.tasks.GenerateMavenPom
+import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.publish.plugins.PublishingPlugin
+import org.gradle.api.publish.tasks.GenerateModuleMetadata
 import org.gradle.api.tasks.Sync
+import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.kotlin.dsl.* // ktlint-disable
@@ -84,6 +89,9 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         configureNexusPublish(validateNexusParams)
 
         configureNexusStaging(releaseExt)
+
+        tasks.named("init").hide()
+        hideMavenPublishTasks()
 
         val pushRcTag = createPushRcTag(releaseExt, validateReleaseParams)
         val pushReleaseTag = createPushReleaseTag(releaseExt, validateReleaseParams)
@@ -210,6 +218,33 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         }
     }
 
+    private fun TaskCollection<*>.hide() = configureEach {
+        group = ""
+    }
+
+    private fun TaskProvider<*>.hide() = configure {
+        group = ""
+    }
+
+    private fun Project.hideMavenPublishTasks() {
+        allprojects {
+            plugins.withType<MavenPublishPlugin> {
+                afterEvaluate {
+                    tasks.withType<PublishToMavenRepository>().hide()
+                    tasks.withType<PublishToMavenLocal>().hide()
+                    tasks.withType<GenerateModuleMetadata>().hide()
+                    val generatePomTasks = tasks.withType<GenerateMavenPom>()
+                    generatePomTasks.hide()
+                    tasks.register("generatePom") {
+                        group = "test"
+                        description = "test"
+                        dependsOn(generatePomTasks)
+                    }
+                }
+            }
+        }
+    }
+
     private fun runValidations(validations: Sequence<Runnable>) {
         val errors = validations.mapNotNull {
             try {
@@ -333,12 +368,10 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         plugins.withType<NexusStagingPlugin> {
             tasks {
                 // Hide "deprecated" tasks from "./gradlew tasks"
-                named("closeAndPromoteRepository") {
-                    group = null
-                }
-                named("promoteRepository") {
-                    group = null
-                }
+                named("closeAndPromoteRepository").hide()
+                named("promoteRepository").hide()
+                // Hide "internal" tasks
+                named("createRepository").hide()
             }
         }
         // The fields of releaseExt are not configured yet (the extension is not yet used in build scripts),
@@ -408,6 +441,10 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         // The goal of this block is to fetch and save the Id of newly created staging repository
         allprojects {
             plugins.withId("de.marcphilipp.nexus-publish") {
+                // Hide unused task: https://github.com/marcphilipp/nexus-publish-plugin/issues/14
+                tasks.named("publishToNexus") {
+                    group = null
+                }
                 tasks.withType<InitializeNexusStagingRepository>().configureEach {
                     dependsOn(validateNexusParams)
                     doLast {
@@ -432,6 +469,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             // Otherwise we would have to duplicate ReleaseParams logic as "inputs"
             val releaseExt = project.the<ReleaseExtension>()
             dependsOn(releaseExt.archives)
+            dependsOn(releaseExt.checksums)
 
             val voteMailFile = "$buildDir/$PREPARE_VOTE_TASK_NAME/mail.txt"
             outputs.file(file(voteMailFile))
@@ -470,6 +508,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 )
                 val voteText = releaseExt.voteText.get().invoke(releaseParams)
                 file(voteMailFile).writeText(voteText)
+                logger.lifecycle("Please find draft vote text in {}", voteMailFile)
             }
         }
 }
