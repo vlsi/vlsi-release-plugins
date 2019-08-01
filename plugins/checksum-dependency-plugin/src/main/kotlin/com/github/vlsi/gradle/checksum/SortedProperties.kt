@@ -14,14 +14,24 @@
  * limitations under the License.
  *
  */
+package com.github.vlsi.gradle.checksum
 
-rootProject.name = "vlsi-release-plugins"
+import java.util.* // ktlint-disable
 
-include(
-    "plugins",
-    "plugins:checksum-dependency-plugin",
-    "plugins:crlf-plugin",
-    "plugins:ide-plugin",
-    "plugins:license-gather-plugin",
-    "plugins:stage-vote-release-plugin"
-)
+class SortedProperties(props: Properties) : Properties() {
+    init {
+        putAll(props)
+    }
+
+    override fun keys(): Enumeration<Any> {
+        val iterator = super.keys
+            .asSequence()
+            .filterIsInstance<String>()
+            .sorted()
+            .iterator()
+        return object : Enumeration<Any> {
+            override fun hasMoreElements() = iterator.hasNext()
+            override fun nextElement(): Any? = iterator.next()
+        }
+    }
+}

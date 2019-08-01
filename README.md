@@ -5,6 +5,109 @@ About
 
 This is a set of Gradle plugins to simplify release tasks
 
+Checksum Dependency Plugin
+==========================
+
+Enables to validate the checksums of the project dependencies (both plugins and regular dependencies).
+Note: this plugin has nothing to do with generating checksums.
+What it does it prevents man-in-the middle attack by enabling developers
+to declare the expected checksums.
+
+Prior art
+---------
+
+https://github.com/signalapp/gradle-witness
+
+The problem with `gradle-witness` is it cannot verify `plugins`.
+That is even `gradle-witness.jar` should be downloaded manually.
+
+Solution
+--------
+
+Checksum Dependency Plugin solves that problem by implementing `Settings` plugin
+which is installed before even a single plugin is downloaded.
+
+The bootstrapping problem is solved by placing the checksum of `checksum-dependency-plugin.jar`
+into `settings.gradle` script.
+
+Expected checksums for `checksum-dependency-plugin.jar`
+-------------------------------------------------------
+
+SHA-512
+
+v1.17.0: `59055DDA9A9E797CEF37CCAF5BFD0CA326115003E7F9A61F3960A24B806F2336552FA816F9AD1C73AA579E703EBA5A183E7D3E88AF2BB0C9C034799B4DABE3D1`
+
+Properties
+----------
+
+The following properties can configure behavior of the plugin
+
+`checksum.properties` configures the location of `checksum.properties` file.
+The file should contain the expected checksums in the format of `bsf/bsf/2.4.0=CF2FF6EA53CD13EA84...`
+
+`checksum.buildDir` (defaults to `build/checksum`) configures the location of temporary directory to use.
+The plugin generates `computed.checksums.properties` (actual checksums), and
+`lastmodified.properties` (cache to avoid repeated computations) files there.
+
+`checksum.violation.log.level` (defaults to `ERROR`, other values are `LIFECYCLE`, `INFO`, ...)
+Specifies the logging level when printing the violations.
+
+`checksum.allDependencies.task.enabled` (defaults to `true`). Configures if the plugin should add
+`allDependencies` task.
+
+Tasks
+-----
+
+`allDependencies` task enables to resolve all configurations in all the projects and verify
+if there are checksum violations.
+
+Usage
+-----
+
+Add the following entry to `settings.gradle.kts` (and `buildSrc/settings.gradle.kts` if you have `buildSrc`)
+
+Note: it assumes you have no other `dependencies` in `settings.gradle.kts` (which is probably the most common case)
+
+```kotlin
+// The below code snippet is provided under CC0 (Public Domain)
+// Checksum plugin sources can be validated at https://github.com/vlsi/vlsi-release-plugins
+buildscript {
+    dependencies {
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.17.0")
+        // Alternative option is to use local jar file via
+        classpath(files("libs/checksum-dependency-plugin-1.17.0.jar"))
+    }
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+// Note: we need to verify the checksum for checksum-dependency-plugin itself
+val expectedSha512 =
+    "59055DDA9A9E797CEF37CCAF5BFD0CA326115003E7F9A61F3960A24B806F2336552FA816F9AD1C73AA579E703EBA5A183E7D3E88AF2BB0C9C034799B4DABE3D1"
+
+fun File.sha512(): String {
+    val md = java.security.MessageDigest.getInstance("SHA-512")
+    forEachBlock { buffer, bytesRead ->
+        md.update(buffer, 0, bytesRead)
+    }
+    return BigInteger(1, md.digest()).toString(16).toUpperCase()
+}
+
+val checksumDependencyJar: File = buildscript.configurations["classpath"].resolve().first()
+val actualSha512 = checksumDependencyJar.sha512()
+if (actualSha512 != expectedSha512) {
+    throw GradleException(
+        """
+        Checksum mismatch for $checksumDependencyJar
+        Expected: $expectedSha512
+          Actual: $actualSha512
+        """.trimIndent()
+    )
+}
+
+apply(plugin = "com.github.vlsi.checksum-dependency")
+```
 
 CRLF Plugin
 ===========
@@ -131,6 +234,7 @@ This library is distributed under terms of Apache License 2.0
 Change log
 ----------
 v1.17.0
+* checksum-dependency-plugin: new plugin to verify the downloaded dependencies on resolution
 * all plugins: remove Implementation-Version manifest attribute to make jars have
 consistent checksums across versions
 * stage-vote-release-plugin: make sitePreviewEnabled configurable via property
