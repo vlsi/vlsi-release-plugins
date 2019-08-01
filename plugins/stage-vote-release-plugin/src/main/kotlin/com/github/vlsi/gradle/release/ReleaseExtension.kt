@@ -125,12 +125,12 @@ open class ReleaseExtension @Inject constructor(
 
     val allowUncommittedChanges = objects.property<Boolean>()
         .value(
-            project.stringProperty("allowUncommittedChanges").toBool(false)
+            project.stringProperty("allowUncommittedChanges").toBool()
         )
 
     val repositoryType = objects.property<RepositoryType>()
         .value(
-            when (project.stringProperty("asf")?.toBool(false)) {
+            when (project.stringProperty("asf").toBool()) {
                 true -> RepositoryType.PROD
                 else -> RepositoryType.TEST
             }
@@ -166,7 +166,7 @@ open class ReleaseExtension @Inject constructor(
 
     val release = objects.property<Boolean>()
         .value(
-            rc.isPresent || project.stringProperty("release").toBool(true)
+            rc.isPresent || project.stringProperty("release").toBool()
         )
 
     val committerId = objects.property<String>()
@@ -246,7 +246,8 @@ open class ReleaseExtension @Inject constructor(
         gitUrlConvention("-site-preview")
     }
 
-    val sitePreviewEnabled = objects.property<Boolean>().convention(true)
+    val sitePreviewEnabled = objects.property<Boolean>()
+        .convention(project.stringProperty("sitePreviewEnabled").toBool(nullAs = true))
 
     val site by git.registering {
         branch.convention("asf-site")
@@ -386,11 +387,13 @@ private fun Project.stringProperty(property: String, required: Boolean = false):
     return value
 }
 
-private fun String?.toBool(default: Boolean = true) =
-    when (default) {
-        true -> this?.equals("true", ignoreCase = true)
-        false -> this?.equals("false", ignoreCase = true)?.not()
-    } ?: default
+fun String?.toBool(nullAs: Boolean = false, blankAs: Boolean = true, default: Boolean = false) =
+    when {
+        this == null -> nullAs
+        isBlank() -> blankAs
+        default -> !equals("false", ignoreCase = true)
+        else -> equals("true", ignoreCase = true)
+    }
 
 private val kebabDelimeters = Regex("""(\p{Lower})\s*(\p{Upper})""")
 private fun String.toKebabCase() =
