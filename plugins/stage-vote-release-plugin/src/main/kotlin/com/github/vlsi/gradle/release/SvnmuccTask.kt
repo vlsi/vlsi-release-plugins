@@ -103,7 +103,7 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
         commandsFile.parentFile.mkdir()
         commandsFile.writeText(commands)
 
-        logger.info("Svnmucc: executing {}", commands)
+        logger.lifecycle("Svnmucc: executing {}", commands)
         project.exec {
             workingDir = project.projectDir
             commandLine("svnmucc", "--non-interactive", "--root-url", repository.get())
