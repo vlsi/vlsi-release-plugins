@@ -104,7 +104,7 @@ subprojects {
                     attributes["Specification-Vendor"] = "Vladimir Sitnikov"
                     attributes["Implementation-Vendor"] = "Vladimir Sitnikov"
                     attributes["Implementation-Vendor-Id"] = "com.github.vlsi"
-                    attributes["Implementation-Version"] = rootProject.version
+                    // Implementation-Version is not here to make jar reproducible across versions
                 }
             }
 

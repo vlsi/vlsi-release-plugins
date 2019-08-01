@@ -130,6 +130,10 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.17.0
+* all plugins: remove Implementation-Version manifest attribute to make jars have
+consistent checksums across versions
+
 v1.16.0
 * stage-vote-release-plugin: make -Prc optional for pushPreviewSite
 

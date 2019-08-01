@@ -38,7 +38,7 @@ tasks.jar {
 
 allprojects {
     group = "com.github.vlsi.gradle"
-    version = "1.16.0"
+    version = project.findProperty("project.version") as? String ?: rootProject.version
 
     tasks.withType<KotlinCompile> {
         sourceCompatibility = "unused"
