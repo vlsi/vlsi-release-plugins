@@ -35,8 +35,8 @@ Expected checksums for `checksum-dependency-plugin.jar`
 
 SHA-512
 
-v1.18.0: `14CF9F9CA05397DBB6B94AEC424C11916E4BC2CE477F439F50408459EADCAB14C6243365BA7499C395192BC14ED9164FB1862CE9E1A3B5DAAD040FA218201A39`
-v1.17.0: `59055DDA9A9E797CEF37CCAF5BFD0CA326115003E7F9A61F3960A24B806F2336552FA816F9AD1C73AA579E703EBA5A183E7D3E88AF2BB0C9C034799B4DABE3D1`
+* v1.18.0: `14CF9F9CA05397DBB6B94AEC424C11916E4BC2CE477F439F50408459EADCAB14C6243365BA7499C395192BC14ED9164FB1862CE9E1A3B5DAAD040FA218201A39`
+* v1.17.0: `59055DDA9A9E797CEF37CCAF5BFD0CA326115003E7F9A61F3960A24B806F2336552FA816F9AD1C73AA579E703EBA5A183E7D3E88AF2BB0C9C034799B4DABE3D1`
 
 Properties
 ----------
@@ -69,6 +69,7 @@ Add the following entry to `settings.gradle.kts` (and `buildSrc/settings.gradle.
 
 Note: it assumes you have no other `dependencies` in `settings.gradle.kts` (which is probably the most common case)
 
+Kotlin DSL:
 ```kotlin
 // The below code snippet is provided under CC0 (Public Domain)
 // Checksum plugin sources can be validated at https://github.com/vlsi/vlsi-release-plugins
@@ -108,6 +109,39 @@ if (actualSha512 != expectedSha512) {
 }
 
 apply(plugin = "com.github.vlsi.checksum-dependency")
+```
+
+Groovy DSL:
+```groovy
+// See https://github.com/vlsi/vlsi-release-plugins
+buildscript {
+    dependencies {
+        classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.18.0')
+        // Alternative option is to use local jar file via
+        // classpath(files("checksum-dependency-plugin-1.18.0.jar"))
+    }
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+// Note: we need to verify the checksum for checksum-dependency-plugin itself
+def expectedSha512 =
+    '14CF9F9CA05397DBB6B94AEC424C11916E4BC2CE477F439F50408459EADCAB14C6243365BA7499C395192BC14ED9164FB1862CE9E1A3B5DAAD040FA218201A39'
+
+def checksumDependencyJar = buildscript.configurations.classpath.resolve().first()
+def actualSha512 = checksumDependencyJar.bytes.digest('SHA-512').toUpperCase()
+if (actualSha512 != expectedSha512) {
+    throw GradleException(
+        """
+        Checksum mismatch for $checksumDependencyJar
+        Expected: $expectedSha512
+          Actual: $actualSha512
+        """.stripIndent()
+    )
+}
+
+apply plugin: 'com.github.vlsi.checksum-dependency'
 ```
 
 CRLF Plugin
