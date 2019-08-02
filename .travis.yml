@@ -18,8 +18,10 @@ matrix:
       jdk: openjdk8
       script:
         - ./gradlew validateTaskProperties build
+        - openssl dgst -sha512 plugins/*/build/libs/*.jar
     - name: Tests with OpenJDK 11
       jdk: openjdk11
       script:
         # https://youtrack.jetbrains.com/issue/KT-31710 Dokka javadoc task fails with JDK 11 reporting missing HtmlDoclet
         - ./gradlew validateTaskProperties build -x dokka
+        - openssl dgst -sha512 plugins/*/build/libs/*.jar
