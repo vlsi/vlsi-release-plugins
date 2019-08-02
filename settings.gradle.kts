@@ -28,9 +28,9 @@ include(
 
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.18.0")
-        // Note: replace with below to use locally-built jar file (extra logging is not released yet)
-        // classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.18.0.jar"))
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.19.0")
+        // Note: replace with below to use locally-built jar file
+        // classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.19.0.jar"))
     }
     repositories {
         gradlePluginPortal()
@@ -39,7 +39,7 @@ buildscript {
 
 // Note: we need to verify the checksum for checksum-dependency-plugin itself
 val expectedSha512 =
-    "14CF9F9CA05397DBB6B94AEC424C11916E4BC2CE477F439F50408459EADCAB14C6243365BA7499C395192BC14ED9164FB1862CE9E1A3B5DAAD040FA218201A39"
+    "D7B1A0C7937DCB11536F97C52FE25752BD7DA6011299E81FA59AD446A843265A6FA079ECA1D5FD49C4B3C2496A363C60C5939268BED0B722EFB8BB6787A2B193"
 
 fun File.sha512(): String {
     val md = java.security.MessageDigest.getInstance("SHA-512")

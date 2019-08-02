@@ -35,6 +35,7 @@ Expected checksums for `checksum-dependency-plugin.jar`
 
 SHA-512
 
+* v1.19.0: `D7B1A0C7937DCB11536F97C52FE25752BD7DA6011299E81FA59AD446A843265A6FA079ECA1D5FD49C4B3C2496A363C60C5939268BED0B722EFB8BB6787A2B193`
 * v1.18.0: `14CF9F9CA05397DBB6B94AEC424C11916E4BC2CE477F439F50408459EADCAB14C6243365BA7499C395192BC14ED9164FB1862CE9E1A3B5DAAD040FA218201A39`
 * v1.17.0: `59055DDA9A9E797CEF37CCAF5BFD0CA326115003E7F9A61F3960A24B806F2336552FA816F9AD1C73AA579E703EBA5A183E7D3E88AF2BB0C9C034799B4DABE3D1`
 
@@ -75,9 +76,9 @@ Kotlin DSL:
 // Checksum plugin sources can be validated at https://github.com/vlsi/vlsi-release-plugins
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.18.0")
-        // Alternative option is to use local jar file via
-        // classpath(files("checksum-dependency-plugin-1.18.0.jar"))
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.19.0")
+        // Alternative option is to use a local jar file via
+        // classpath(files("checksum-dependency-plugin-1.19.0.jar"))
     }
     repositories {
         gradlePluginPortal()
@@ -86,7 +87,7 @@ buildscript {
 
 // Note: we need to verify the checksum for checksum-dependency-plugin itself
 val expectedSha512 =
-    "14CF9F9CA05397DBB6B94AEC424C11916E4BC2CE477F439F50408459EADCAB14C6243365BA7499C395192BC14ED9164FB1862CE9E1A3B5DAAD040FA218201A39"
+    "D7B1A0C7937DCB11536F97C52FE25752BD7DA6011299E81FA59AD446A843265A6FA079ECA1D5FD49C4B3C2496A363C60C5939268BED0B722EFB8BB6787A2B193"
 
 fun File.sha512(): String {
     val md = java.security.MessageDigest.getInstance("SHA-512")
@@ -116,9 +117,9 @@ Groovy DSL:
 // See https://github.com/vlsi/vlsi-release-plugins
 buildscript {
     dependencies {
-        classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.18.0')
-        // Alternative option is to use local jar file via
-        // classpath(files("checksum-dependency-plugin-1.18.0.jar"))
+        classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.19.0')
+        // Alternative option is to use a local jar file via
+        // classpath(files("checksum-dependency-plugin-1.19.0.jar"))
     }
     repositories {
         gradlePluginPortal()
@@ -127,7 +128,7 @@ buildscript {
 
 // Note: we need to verify the checksum for checksum-dependency-plugin itself
 def expectedSha512 =
-    '14CF9F9CA05397DBB6B94AEC424C11916E4BC2CE477F439F50408459EADCAB14C6243365BA7499C395192BC14ED9164FB1862CE9E1A3B5DAAD040FA218201A39'
+    'D7B1A0C7937DCB11536F97C52FE25752BD7DA6011299E81FA59AD446A843265A6FA079ECA1D5FD49C4B3C2496A363C60C5939268BED0B722EFB8BB6787A2B193'
 
 def checksumDependencyJar = buildscript.configurations.classpath.resolve().first()
 def actualSha512 = checksumDependencyJar.bytes.digest('SHA-512').toUpperCase()
@@ -268,6 +269,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.19.0
+* checksum-dependency-plugin: include `classifier` and `extension` to artifact key
+
 v1.18.0
 * checksum-dependency-plugin: improve logging
 

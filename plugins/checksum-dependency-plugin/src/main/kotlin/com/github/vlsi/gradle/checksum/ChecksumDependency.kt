@@ -19,11 +19,14 @@ package com.github.vlsi.gradle.checksum
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.GradleException
+import org.gradle.api.artifacts.DependencyArtifact
 import org.gradle.api.artifacts.DependencyResolutionListener
 import org.gradle.api.artifacts.ResolvableDependencies
+import org.gradle.api.artifacts.component.ComponentArtifactIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
+import org.gradle.internal.component.external.model.DefaultModuleComponentArtifactIdentifier
 import java.io.File
 import java.util.* // ktlint-disable
 
@@ -87,6 +90,24 @@ class ChecksumDependency(
         )
     }
 
+    private val ComponentArtifactIdentifier.artifactKey: String
+        get() {
+            val id = componentIdentifier.toString().replace(':', '/')
+            if (this !is DefaultModuleComponentArtifactIdentifier) {
+                return id
+            }
+            if (name.classifier == null) {
+                return id
+            }
+            val sb = StringBuilder()
+            sb.append(id)
+            sb.append('/').append(name.classifier)
+            if (name.extension != DependencyArtifact.DEFAULT_TYPE) {
+                sb.append('/').append(name.extension)
+            }
+            return sb.toString()
+        }
+
     private fun afterResolveDependencies(dependencies: ResolvableDependencies) {
         if (dependencies.resolutionResult.allComponents
                 .none { it.id is ModuleComponentIdentifier }
@@ -106,8 +127,7 @@ class ChecksumDependency(
         }
 
         for (artifact in artifactView.artifacts) {
-            val id = artifact.id.componentIdentifier as? ModuleComponentIdentifier ?: continue
-            val artifactKey = id.toString().replace(':', '/')
+            val artifactKey = artifact.id.artifactKey
             val expectedChecksum = expectedChecksums.getProperty(artifactKey)
             val file = artifact.file
             val staleCheckValue = file.lastModifiedKey
