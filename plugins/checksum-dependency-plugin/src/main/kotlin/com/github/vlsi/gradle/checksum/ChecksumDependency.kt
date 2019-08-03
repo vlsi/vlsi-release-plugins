@@ -96,12 +96,14 @@ class ChecksumDependency(
             if (this !is DefaultModuleComponentArtifactIdentifier) {
                 return id
             }
-            if (name.classifier == null) {
+            if (name.classifier == null &&
+                name.extension == DependencyArtifact.DEFAULT_TYPE
+            ) {
                 return id
             }
             val sb = StringBuilder()
-            sb.append(id)
-            sb.append('/').append(name.classifier)
+            sb.append(id).append('/')
+            name.classifier?.let { sb.append(it) }
             if (name.extension != DependencyArtifact.DEFAULT_TYPE) {
                 sb.append('/').append(name.extension)
             }
