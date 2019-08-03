@@ -18,14 +18,22 @@ Prior art
 
 https://github.com/signalapp/gradle-witness
 
-The problem with `gradle-witness` is it cannot verify `plugins`.
-That is even `gradle-witness.jar` should be downloaded manually.
+The problem with `gradle-witness` is it [cannot verify plugins](https://github.com/signalapp/gradle-witness/issues/10).
+Thus `gradle-witness.jar` should be stored in the repository.
+`gradle-witness` [does not](https://github.com/signalapp/gradle-witness/issues/24) support [java-library](https://github.com/signalapp/gradle-witness/issues/24)
+
+https://github.com/MatthewDavidBradshaw/Retrial
+
+It seems to be just a rewrite of `gradle-witness` in Kotlin.
 
 Solution
 --------
 
-Checksum Dependency Plugin solves that problem by implementing `Settings` plugin
-which is installed before even a single plugin is downloaded.
+TL;DR: Checksum Dependency Plugin implements Gradle's `DependencyResolutionListener`
+which should transparently all plugins and tasks.
+
+Checksum Dependency Plugin is applied at `Settings` level which is installed before even
+a single plugin is downloaded.
 
 The bootstrapping problem is solved by placing the checksum of `checksum-dependency-plugin.jar`
 into `settings.gradle` script.
@@ -63,7 +71,7 @@ Tasks
 `allDependencies` task enables to resolve all configurations in all the projects and verify
 if there are checksum violations.
 
-Usage
+Installation
 -----
 
 Add the following entry to `settings.gradle.kts` (and `buildSrc/settings.gradle.kts` if you have `buildSrc`)
@@ -116,30 +124,38 @@ Groovy DSL:
 ```groovy
 // See https://github.com/vlsi/vlsi-release-plugins
 buildscript {
-    dependencies {
-        classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.19.0')
-        // Alternative option is to use a local jar file via
-        // classpath(files("checksum-dependency-plugin-1.19.0.jar"))
-    }
-    repositories {
-        gradlePluginPortal()
-    }
+  dependencies {
+    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.19.0')
+    // Note: replace with below to use a locally-built jar file
+    // classpath(files('checksum-dependency-plugin-1.19.0.jar'))
+  }
+  repositories {
+    gradlePluginPortal()
+  }
 }
 
 // Note: we need to verify the checksum for checksum-dependency-plugin itself
 def expectedSha512 =
-    'D7B1A0C7937DCB11536F97C52FE25752BD7DA6011299E81FA59AD446A843265A6FA079ECA1D5FD49C4B3C2496A363C60C5939268BED0B722EFB8BB6787A2B193'
+  'D7B1A0C7937DCB11536F97C52FE25752BD7DA6011299E81FA59AD446A843265A6FA079ECA1D5FD49C4B3C2496A363C60C5939268BED0B722EFB8BB6787A2B193'
+
+static def sha512(File file) {
+  def md = java.security.MessageDigest.getInstance('SHA-512')
+  file.eachByte(8192) { buffer, length ->
+     md.update(buffer, 0, length)
+  }
+  new BigInteger(1, md.digest()).toString(16).toUpperCase()
+}
 
 def checksumDependencyJar = buildscript.configurations.classpath.resolve().first()
-def actualSha512 = checksumDependencyJar.bytes.digest('SHA-512').toUpperCase()
+def actualSha512 = sha512(checksumDependencyJar)
 if (actualSha512 != expectedSha512) {
-    throw GradleException(
-        """
-        Checksum mismatch for $checksumDependencyJar
-        Expected: $expectedSha512
-          Actual: $actualSha512
-        """.stripIndent()
-    )
+  throw GradleException(
+    """
+    Checksum mismatch for $checksumDependencyJar
+    Expected: $expectedSha512
+      Actual: $actualSha512
+    """.stripIndent()
+  )
 }
 
 apply plugin: 'com.github.vlsi.checksum-dependency'
