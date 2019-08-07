@@ -13,154 +13,7 @@ Note: this plugin has nothing to do with generating checksums.
 What it does it prevents man-in-the middle attack by enabling developers
 to declare the expected checksums.
 
-Prior art
----------
-
-https://github.com/signalapp/gradle-witness
-
-The problem with `gradle-witness` is it [cannot verify plugins](https://github.com/signalapp/gradle-witness/issues/10).
-Thus `gradle-witness.jar` should be stored in the repository.
-`gradle-witness` [does not](https://github.com/signalapp/gradle-witness/issues/24) support [java-library](https://github.com/signalapp/gradle-witness/issues/24)
-
-https://github.com/MatthewDavidBradshaw/Retrial
-
-It seems to be just a rewrite of `gradle-witness` in Kotlin.
-
-Solution
---------
-
-TL;DR: Checksum Dependency Plugin implements Gradle's `DependencyResolutionListener`
-which should transparently all plugins and tasks.
-
-Checksum Dependency Plugin is applied at `Settings` level which is installed before even
-a single plugin is downloaded.
-
-The bootstrapping problem is solved by placing the checksum of `checksum-dependency-plugin.jar`
-into `settings.gradle` script.
-
-Expected checksums for `checksum-dependency-plugin.jar`
--------------------------------------------------------
-
-SHA-512
-
-* v1.20.0: `9C5581EAF60573609A81EE2293433D1820390D163955D8964B795C720D4C342550EA41AD836825D70D69946BB20566A60E5F51FB3BC9B124484E43575764D133`
-* v1.19.0: `D7B1A0C7937DCB11536F97C52FE25752BD7DA6011299E81FA59AD446A843265A6FA079ECA1D5FD49C4B3C2496A363C60C5939268BED0B722EFB8BB6787A2B193`
-* v1.18.0: `14CF9F9CA05397DBB6B94AEC424C11916E4BC2CE477F439F50408459EADCAB14C6243365BA7499C395192BC14ED9164FB1862CE9E1A3B5DAAD040FA218201A39`
-* v1.17.0: `59055DDA9A9E797CEF37CCAF5BFD0CA326115003E7F9A61F3960A24B806F2336552FA816F9AD1C73AA579E703EBA5A183E7D3E88AF2BB0C9C034799B4DABE3D1`
-
-Properties
-----------
-
-The following properties can configure behavior of the plugin
-
-`checksum.properties` configures the location of `checksum.properties` file.
-The file should contain the expected checksums in the format of `bsf/bsf/2.4.0=CF2FF6EA53CD13EA84...`
-
-`checksum.buildDir` (defaults to `build/checksum`) configures the location of temporary directory to use.
-The plugin generates `computed.checksums.properties` (actual checksums), and
-`lastmodified.properties` (cache to avoid repeated computations) files there.
-
-`checksum.violation.log.level` (defaults to `ERROR`, other values are `LIFECYCLE`, `INFO`, ...)
-Specifies the logging level when printing the violations.
-
-`checksum.allDependencies.task.enabled` (defaults to `true`). Configures if the plugin should add
-`allDependencies` task.
-
-Tasks
------
-
-`allDependencies` task enables to resolve all configurations in all the projects and verify
-if there are checksum violations.
-
-Installation
------
-
-Add the following entry to `settings.gradle.kts` (and `buildSrc/settings.gradle.kts` if you have `buildSrc`)
-
-Note: it assumes you have no other `dependencies` in `settings.gradle.kts` (which is probably the most common case)
-
-Kotlin DSL:
-```kotlin
-// The below code snippet is provided under CC0 (Public Domain)
-// Checksum plugin sources can be validated at https://github.com/vlsi/vlsi-release-plugins
-buildscript {
-    dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.20.0")
-        // Alternative option is to use a local jar file via
-        // classpath(files("checksum-dependency-plugin-1.20.0.jar"))
-    }
-    repositories {
-        gradlePluginPortal()
-    }
-}
-
-// Note: we need to verify the checksum for checksum-dependency-plugin itself
-val expectedSha512 =
-    "9C5581EAF60573609A81EE2293433D1820390D163955D8964B795C720D4C342550EA41AD836825D70D69946BB20566A60E5F51FB3BC9B124484E43575764D133"
-
-fun File.sha512(): String {
-    val md = java.security.MessageDigest.getInstance("SHA-512")
-    forEachBlock { buffer, bytesRead ->
-        md.update(buffer, 0, bytesRead)
-    }
-    return BigInteger(1, md.digest()).toString(16).toUpperCase()
-}
-
-val checksumDependencyJar: File = buildscript.configurations["classpath"].resolve().first()
-val actualSha512 = checksumDependencyJar.sha512()
-if (actualSha512 != expectedSha512) {
-    throw GradleException(
-        """
-        Checksum mismatch for $checksumDependencyJar
-        Expected: $expectedSha512
-          Actual: $actualSha512
-        """.trimIndent()
-    )
-}
-
-apply(plugin = "com.github.vlsi.checksum-dependency")
-```
-
-Groovy DSL:
-```groovy
-// See https://github.com/vlsi/vlsi-release-plugins
-buildscript {
-  dependencies {
-    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.20.0')
-    // Note: replace with below to use a locally-built jar file
-    // classpath(files('checksum-dependency-plugin-1.20.0.jar'))
-  }
-  repositories {
-    gradlePluginPortal()
-  }
-}
-
-// Note: we need to verify the checksum for checksum-dependency-plugin itself
-def expectedSha512 =
-  '9C5581EAF60573609A81EE2293433D1820390D163955D8964B795C720D4C342550EA41AD836825D70D69946BB20566A60E5F51FB3BC9B124484E43575764D133'
-
-static def sha512(File file) {
-  def md = java.security.MessageDigest.getInstance('SHA-512')
-  file.eachByte(8192) { buffer, length ->
-     md.update(buffer, 0, length)
-  }
-  new BigInteger(1, md.digest()).toString(16).toUpperCase()
-}
-
-def checksumDependencyJar = buildscript.configurations.classpath.resolve().first()
-def actualSha512 = sha512(checksumDependencyJar)
-if (actualSha512 != expectedSha512) {
-  throw GradleException(
-    """
-    Checksum mismatch for $checksumDependencyJar
-    Expected: $expectedSha512
-      Actual: $actualSha512
-    """.stripIndent()
-  )
-}
-
-apply plugin: 'com.github.vlsi.checksum-dependency'
-```
+See [detailed description](plugins/checksum-dependency-plugin/README.md) for installation and configuration options.
 
 CRLF Plugin
 ===========
@@ -286,6 +139,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.21.0
+* checksum-dependency-plugin: PGP-based dependency verification (see [detailed description](plugins/checksum-dependency-plugin/README.md))
+
 v1.20.0
 * checksum-dependency-plugin: properly track `.pom` artifacts (and other non-jar artifacts with default classifier)
 

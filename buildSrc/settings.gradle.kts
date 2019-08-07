@@ -66,4 +66,4 @@ if (actualSha512 != expectedSha512) {
     )
 }
 
-apply(plugin = "com.github.vlsi.checksum-dependency")
+//apply(plugin = "com.github.vlsi.checksum-dependency")

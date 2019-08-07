@@ -16,25 +16,19 @@
  */
 package com.github.vlsi.gradle.checksum
 
-import java.util.* // ktlint-disable
-
-class SortedProperties(props: Properties) : Properties() {
-    init {
-        putAll(props)
-    }
-
-    override fun keys(): Enumeration<Any> {
-        val iterator = super.keys
-            .asSequence()
-            .filterIsInstance<String>()
-            .sorted()
-            .iterator()
-        return object : Enumeration<Any> {
-            override fun hasMoreElements() = iterator.hasNext()
-            override fun nextElement(): Any? = iterator.next()
-        }
-    }
-
-    override val entries: MutableSet<MutableMap.MutableEntry<Any, Any>>
-        get() = super.entries.toSortedSet(compareBy { it.key.toString() })
+enum class FailOn {
+    /**
+     * Fail the build on the first violation. This is the most secure setting as it prevents
+     * execution of untrusted code.
+     */
+    FIRST_ERROR,
+    /**
+     * Print all the violations at the build finish. It might be more convenient to see all
+     * the violations, however it allows execution of untrusted code.
+     */
+    BUILD_FINISH,
+    /**
+     * Do not fail the build when checksum/pgp verification fails.
+     */
+    NEVER,
 }

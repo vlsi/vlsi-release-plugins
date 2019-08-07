@@ -34,7 +34,7 @@ class LicenseOverrides {
 
     operator fun get(compId: ModuleComponentIdentifier): LicenseOverride? =
         get(compId.displayName) ?: get("${compId.module}:${compId.version}")
-        ?: get("${compId.group}:${compId.module}") ?: get(compId.module)
+        ?: get("${compId.group}:${compId.module}") ?: get(compId.module) ?: get("${compId.group}:")
 
     operator fun set(id: String, value: LicenseOverride) {
         map[id] = value

@@ -41,7 +41,7 @@ import groovy.xml.MarkupBuilder
 import org.gradle.api.GradleException
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import java.io.File
-import java.io.Reader
+import java.io.InputStream
 import java.io.Writer
 import java.net.URI
 
@@ -58,13 +58,13 @@ object MetadataStore {
 
     @JvmStatic
     fun load(folder: File): DependencyInfo =
-        File(folder, "license.xml").reader().use {
+        File(folder, "license.xml").inputStream().use {
             load(it, folder)
         }
 
     @JvmStatic
     fun load(
-        input: Reader,
+        input: InputStream,
         relativePath: File
     ): DependencyInfo {
         val xml = XmlSlurper().parse(input)
@@ -213,5 +213,6 @@ object MetadataStore {
                 }
             }
         }
+        out.write("\n")
     }
 }

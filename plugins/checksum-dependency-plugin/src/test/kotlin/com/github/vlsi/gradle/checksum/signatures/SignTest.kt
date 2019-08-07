@@ -14,25 +14,20 @@
  * limitations under the License.
  *
  */
+package com.github.vlsi.gradle.checksum.signatures
 
-dependencies {
-    implementation("org.bouncycastle:bcpg-jdk15on:1.62")
-}
+import com.github.vlsi.gradle.checksum.hexKey
+import com.github.vlsi.gradle.checksum.toSignatureList
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 
-fun File.sha512(): String {
-    val md = `java.security`.MessageDigest.getInstance("SHA-512")
-    forEachBlock { buffer, bytesRead ->
-        md.update(buffer, 0, bytesRead)
-    }
-    return BigInteger(1, md.digest()).toString(16).toUpperCase()
-}
+class SignTest {
+    @Test
+    internal fun loadAsc() {
+        val signatureList =
+            SignTest::class.java.getResourceAsStream("biz.aQute.bnd.gradle-4.2.0.jar.asc")
+                .toSignatureList()
 
-tasks {
-    jar {
-        doLast {
-            for(f in outputs.files) {
-                println("SHA-512(${f.name}) = ${f.sha512()}")
-            }
-        }
+        Assertions.assertEquals("36feecf06c2da10b", signatureList.joinToString { it.hexKey })
     }
 }

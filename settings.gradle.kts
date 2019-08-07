@@ -28,9 +28,10 @@ include(
 
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.19.0")
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.21.0")
         // Note: replace with below to use locally-built jar file
-        // classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.19.0.jar"))
+        // classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.21.0.jar"))
+        classpath("org.bouncycastle:bcpg-jdk15on:1.62")
     }
     repositories {
         gradlePluginPortal()
@@ -38,8 +39,14 @@ buildscript {
 }
 
 // Note: we need to verify the checksum for checksum-dependency-plugin itself
-val expectedSha512 =
-    "D7B1A0C7937DCB11536F97C52FE25752BD7DA6011299E81FA59AD446A843265A6FA079ECA1D5FD49C4B3C2496A363C60C5939268BED0B722EFB8BB6787A2B193"
+val expectedSha512 = mapOf(
+    "43BC9061DFDECA0C421EDF4A76E380413920E788EF01751C81BDC004BD28761FBD4A3F23EA9146ECEDF10C0F85B7BE9A857E9D489A95476525565152E0314B5B"
+            to "bcpg-jdk15on-1.62.jar",
+    "2BA6A5DEC9C8DAC2EB427A65815EB3A9ADAF4D42D476B136F37CD57E6D013BF4E9140394ABEEA81E42FBDB8FC59228C7B85C549ED294123BF898A7D048B3BD95"
+            to "bcprov-jdk15on-1.62.jar",
+    "1AA18B47D3F868D60DC0D5418797984B7CE09439181BEEA51DDF6E54D28740412C19FC5A10572C975CC3216EBFE786FD929FF605291B721159FAD9F1DB261F7A"
+            to "checksum-dependency-plugin-1.21.0.jar"
+)
 
 fun File.sha512(): String {
     val md = java.security.MessageDigest.getInstance("SHA-512")
@@ -49,16 +56,19 @@ fun File.sha512(): String {
     return BigInteger(1, md.digest()).toString(16).toUpperCase()
 }
 
-val checksumDependencyJar: File = buildscript.configurations["classpath"].resolve().first()
-val actualSha512 = checksumDependencyJar.sha512()
-if (actualSha512 != expectedSha512) {
-    throw GradleException(
-        """
-        Checksum mismatch for $checksumDependencyJar
-        Expected: $expectedSha512
-          Actual: $actualSha512
-        """.trimIndent()
-    )
-}
+val violations =
+    buildscript.configurations["classpath"]
+        .resolve()
+        .sortedBy { it.name }
+        .associateWith { it.sha512() }
+        .filterNot { (_, sha512) -> expectedSha512.contains(sha512) }
+        .entries
+        .joinToString("\n  ") { (file, sha512) -> "SHA-512(${file.name}) = $sha512 ($file)" }
 
-apply(plugin = "com.github.vlsi.checksum-dependency")
+// This enables to skip checksum-dependency which is helpful for checksum-dependency development
+if (!extra.has("noverify")) {
+    if (violations.isNotBlank()) {
+        throw GradleException("Buildscript classpath has non-whitelisted files:\n  $violations")
+    }
+    apply(plugin = "com.github.vlsi.checksum-dependency")
+}

@@ -1,0 +1,31 @@
+<!--
+  ~ Copyright 2019 Vladimir Sitnikov <sitnikov.vladimir@gmail.com>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  -->
+
+<dependency-verification version="1">
+    <trusted-keys>
+        <trusted-key id="bcf4173966770193" group="org.jetbrains"/>
+        <trusted-key id="379ce192d401ab61" group="org.jetbrains.intellij.deps"/>
+    </trusted-keys>
+    <dependencies>
+        <dependency group="com.android.tools" module="dvlib" version="24.0.0">
+            <sha512>BF96E53408EAEC8E366F50E0125D6E7E072400887C03EC3C7E8C0B4C9267E5E5B4C0BB2D1FA3355B878DFCEE9334FB145AC38E3CD54D869D9F5283145169DECF</sha512>
+            <sha512>239789823479823497823497234978</sha512>
+            <pgp>ac214caa0612b399</pgp>
+            <pgp>bcf4173966770193</pgp>
+        </dependency>
+    </dependencies>
+</dependency-verification>

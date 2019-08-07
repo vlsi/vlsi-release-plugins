@@ -16,25 +16,16 @@
  */
 package com.github.vlsi.gradle.checksum
 
-import java.util.* // ktlint-disable
+import org.gradle.api.logging.Logger
 
-class SortedProperties(props: Properties) : Properties() {
-    init {
-        putAll(props)
+internal inline fun Logger.debug(message: () -> String) {
+    if (isDebugEnabled) {
+        debug(message())
     }
+}
 
-    override fun keys(): Enumeration<Any> {
-        val iterator = super.keys
-            .asSequence()
-            .filterIsInstance<String>()
-            .sorted()
-            .iterator()
-        return object : Enumeration<Any> {
-            override fun hasMoreElements() = iterator.hasNext()
-            override fun nextElement(): Any? = iterator.next()
-        }
+internal inline fun Logger.info(message: () -> String) {
+    if (isInfoEnabled) {
+        info(message())
     }
-
-    override val entries: MutableSet<MutableMap.MutableEntry<Any, Any>>
-        get() = super.entries.toSortedSet(compareBy { it.key.toString() })
 }

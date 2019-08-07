@@ -41,7 +41,6 @@ tasks {
 
 subprojects {
     repositories {
-        mavenCentral()
         gradlePluginPortal()
     }
 

@@ -16,40 +16,107 @@
  */
 package com.github.vlsi.gradle.checksum
 
+import com.github.vlsi.gradle.checksum.model.* // ktlint-disable
+import com.github.vlsi.gradle.checksum.pgp.KeyDownloader
+import com.github.vlsi.gradle.checksum.pgp.KeyStore
+import com.github.vlsi.gradle.checksum.pgp.Retry
+import com.github.vlsi.gradle.checksum.pgp.Timeouts
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.initialization.Settings
-import org.gradle.api.logging.LogLevel
+import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.HelpTasksPlugin
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.diagnostics.DependencyReportTask
 import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.register
 import java.io.File
+import java.net.URI
+import java.time.Duration
 
-class ChecksumDependencyPlugin : Plugin<Settings> {
+private val logger = Logging.getLogger(ChecksumDependencyPlugin::class.java)
+
+open class ChecksumDependencyPlugin : Plugin<Settings> {
     private fun Settings.property(name: String, default: String) =
         settings.extra.let {
             if (it.has(name)) it.get(name) as String else default
         }
 
+    private fun Settings.boolProperty(name: String) =
+        settings.extra.let {
+            when {
+                it.has(name) ->
+                    (it.get(name) as String)
+                        .equals("false", ignoreCase = true)
+                        .not()
+                else -> false
+            }
+        }
+
     override fun apply(settings: Settings) {
-        val checksumPropertiesFileName =
-            settings.property("checksum.properties", "checksum.properties")
-        val checksums = File(settings.rootDir, checksumPropertiesFileName)
-        val buildDir = settings.property("checksum.buildDir", "build/checksum")
+        val checksumFileName =
+            settings.property("checksum.xml", "checksum.xml")
+        val checksums = File(settings.rootDir, checksumFileName)
+        val buildDir = settings.property("checksumBuildDir", "build/checksum")
         val buildFolder = File(settings.rootDir, buildDir)
-        val violationLogLevel =
-            LogLevel.valueOf(
-                settings.property(
-                    "checksum.violation.log.level",
-                    "ERROR"
-                ).toUpperCase()
+
+        val checksumUpdate = settings.boolProperty("checksumUpdate")
+        val computedChecksumFile =
+            if (checksumUpdate) checksums else File(buildFolder, "checksum.xml")
+
+        val checksumPrint = settings.boolProperty("checksumPrint")
+
+        val failOn =
+            settings.property(
+                "checksumFailOn",
+                if (checksumUpdate && !checksums.exists()) {
+                    logger.lifecycle("Checksums file is missing ($checksums), and checksum update was requested (-PchecksumUpdate). Will refrain from failing the build on the first checksum/pgp violation")
+                    "NEVER"
+                } else {
+                    "FIRST_ERROR"
+                }
+            ).toUpperCase().let {
+                try {
+                    FailOn.valueOf(it)
+                } catch (e: IllegalArgumentException) {
+                    throw GradleException("'$it' is not supported for 'checksumFailOn' property. Please use one of ${FailOn.values().toList()}")
+                }
+            }
+
+        val pgpKeyserver = settings.property("pgpKeyserver", "hkp://hkps.pool.sks-keyservers.net")
+
+        val pgpConnectTimeout = settings.property("pgpConnectTimeout", "5").toLong()
+        val pgpReadTimeout = settings.property("pgpReadTimeout", "20").toLong()
+
+        val pgpRetryCount = settings.property("pgpRetryCount", "10").toInt()
+        val pgpInitialRetryDelay = settings.property("pgpInitialRetryDelay", "100").toLong()
+        val pgpMaximumRetryDelay = settings.property("pgpMaximumRetryDelay", "10000").toLong()
+
+        val keyDownloader = KeyDownloader(
+            keyServer = URI(pgpKeyserver),
+            timeouts = Timeouts(
+                connectTimeout = Duration.ofSeconds(pgpConnectTimeout),
+                readTimeout = Duration.ofSeconds(pgpReadTimeout)
+            ),
+            retry = Retry(
+                retryCount = pgpRetryCount,
+                initialDelay = pgpInitialRetryDelay,
+                maximumDelay = pgpMaximumRetryDelay
             )
-        val checksum = ChecksumDependency(checksums, buildFolder, violationLogLevel)
+        )
+        val keyStore = KeyStore(File(buildFolder, "keystore"), keyDownloader)
+        val verification =
+            if (checksums.exists()) {
+                DependencyVerificationStore.load(checksums)
+            } else {
+                DependencyVerification(VerificationConfig(PgpLevel.GROUP, ChecksumLevel.NONE))
+            }
+
+        val verificationDb = DependencyVerificationDb(verification)
+        val checksum =
+            ChecksumDependency(settings, checksumUpdate, checksumPrint, computedChecksumFile, keyStore, verificationDb, failOn)
         settings.gradle.addListener(checksum.resolutionListener)
         settings.gradle.addBuildListener(checksum.buildListener)
 
@@ -60,7 +127,7 @@ class ChecksumDependencyPlugin : Plugin<Settings> {
             }
         })
 
-        val allDeps = settings.property("checksum.allDependencies.task.enabled", "true").toBoolean()
+        val allDeps = settings.property("allDependenciesEnabled", "true").toBoolean()
 
         if (allDeps) {
             settings.gradle.rootProject {
@@ -77,20 +144,6 @@ class ChecksumDependencyPlugin : Plugin<Settings> {
 
         subprojects {
             tasks.register("allDependencies", DependencyReportTask::class) {
-            }
-        }
-
-        // Gradle might deadlock if resolve dependencies in parallel, so we set linear execution order
-        afterEvaluate {
-            var prevTask: TaskProvider<Task>? = null
-            for (p in allprojects.sortedBy { it.path }) {
-                val nextTask = p.tasks.named("allDependencies")
-                if (prevTask != null) {
-                    // Bug: can't use nextTask.configure because Gradle is confused by the task with same
-                    // name across different projects.
-                    nextTask.get().mustRunAfter(prevTask)
-                }
-                prevTask = nextTask
             }
         }
     }

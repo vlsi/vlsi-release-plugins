@@ -97,7 +97,7 @@ class MetadataStoreTest {
             expected, res
         )
 
-        val parsed = MetadataStore.load(StringReader(res), root)
+        val parsed = MetadataStore.load(res.byteInputStream(), root)
         Assertions.assertEquals(metadata.toMutableMap(), parsed.dependencies.toMutableMap())
     }
 
