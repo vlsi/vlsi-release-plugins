@@ -28,9 +28,9 @@ include(
 
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.21.0")
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.23.0")
         // Note: replace with below to use locally-built jar file
-        // classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.21.0.jar"))
+        // classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.23.0.jar"))
         classpath("org.bouncycastle:bcpg-jdk15on:1.62")
     }
     repositories {
@@ -44,8 +44,8 @@ val expectedSha512 = mapOf(
             to "bcpg-jdk15on-1.62.jar",
     "2BA6A5DEC9C8DAC2EB427A65815EB3A9ADAF4D42D476B136F37CD57E6D013BF4E9140394ABEEA81E42FBDB8FC59228C7B85C549ED294123BF898A7D048B3BD95"
             to "bcprov-jdk15on-1.62.jar",
-    "1AA18B47D3F868D60DC0D5418797984B7CE09439181BEEA51DDF6E54D28740412C19FC5A10572C975CC3216EBFE786FD929FF605291B721159FAD9F1DB261F7A"
-            to "checksum-dependency-plugin-1.21.0.jar"
+    "1BB240CA435BCE1AD14905514D9B245D7C922D31956789EF6EE672591D27C8861D04B8012F710798EC4DCD243CFFCAB9F4FA3D2B4521E2736DABCE2C9947ABF0"
+            to "checksum-dependency-plugin-1.23.0.jar"
 )
 
 fun File.sha512(): String {
