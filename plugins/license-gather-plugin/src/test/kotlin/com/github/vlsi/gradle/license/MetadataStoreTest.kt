@@ -94,7 +94,7 @@ class MetadataStoreTest {
         MetadataStore.save(sw, root, DependencyInfo(metadata))
         val res = sw.toString()
         Assertions.assertEquals(
-            expected, res
+            expected + "\n", res
         )
 
         val parsed = MetadataStore.load(res.byteInputStream(), root)

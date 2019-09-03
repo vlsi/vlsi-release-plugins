@@ -145,7 +145,7 @@ class GatherLicenseTaskTest {
                 </component>
               </components>
             </license-list>
-            """.trimIndent().normalizeEol(),
+            """.trimIndent().normalizeEol() + "\n",
             result.output.normalizeEol()
         )
     }
