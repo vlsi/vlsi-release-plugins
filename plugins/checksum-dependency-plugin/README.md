@@ -57,6 +57,18 @@ It seems to be just a rewrite of `gradle-witness` in Kotlin.
 `Checksum Dependency Plugin` is probably the first plugin that is able to verify Gradle Plugins and
 that is able to use PGP for trust-based verification.
 
+Expected checksums for `checksum-dependency-plugin.jar`
+-------------------------------------------------------
+
+SHA-512
+
+* v1.22.0: `AE25D8B49A20D68CCF8396E36806E473BA8D89D594CB8D0DB3EA3CDA3E47F718FD6E23AFED1C95DC269F2BD3E12F3D1FAD710E9F71066C1E5B12F80E346FA602`
+* v1.21.0: `1AA18B47D3F868D60DC0D5418797984B7CE09439181BEEA51DDF6E54D28740412C19FC5A10572C975CC3216EBFE786FD929FF605291B721159FAD9F1DB261F7A`
+* v1.20.0: `9C5581EAF60573609A81EE2293433D1820390D163955D8964B795C720D4C342550EA41AD836825D70D69946BB20566A60E5F51FB3BC9B124484E43575764D133`
+* v1.19.0: `D7B1A0C7937DCB11536F97C52FE25752BD7DA6011299E81FA59AD446A843265A6FA079ECA1D5FD49C4B3C2496A363C60C5939268BED0B722EFB8BB6787A2B193`
+* v1.18.0: `14CF9F9CA05397DBB6B94AEC424C11916E4BC2CE477F439F50408459EADCAB14C6243365BA7499C395192BC14ED9164FB1862CE9E1A3B5DAAD040FA218201A39`
+* v1.17.0: `59055DDA9A9E797CEF37CCAF5BFD0CA326115003E7F9A61F3960A24B806F2336552FA816F9AD1C73AA579E703EBA5A183E7D3E88AF2BB0C9C034799B4DABE3D1`
+
 Installation
 ------------
 
@@ -94,8 +106,8 @@ val expectedSha512 = mapOf(
             to "bcpg-jdk15on-1.62.jar",
     "2BA6A5DEC9C8DAC2EB427A65815EB3A9ADAF4D42D476B136F37CD57E6D013BF4E9140394ABEEA81E42FBDB8FC59228C7B85C549ED294123BF898A7D048B3BD95"
             to "bcprov-jdk15on-1.62.jar",
-    "1AA18B47D3F868D60DC0D5418797984B7CE09439181BEEA51DDF6E54D28740412C19FC5A10572C975CC3216EBFE786FD929FF605291B721159FAD9F1DB261F7A"
-            to "checksum-dependency-plugin-1.21.0.jar"
+    "AE25D8B49A20D68CCF8396E36806E473BA8D89D594CB8D0DB3EA3CDA3E47F718FD6E23AFED1C95DC269F2BD3E12F3D1FAD710E9F71066C1E5B12F80E346FA602"
+            to "checksum-dependency-plugin-1.22.0.jar"
 )
 
 fun File.sha512(): String {
@@ -144,8 +156,8 @@ def expectedSha512 = [
     'bcpg-jdk15on-1.62.jar',
   '2BA6A5DEC9C8DAC2EB427A65815EB3A9ADAF4D42D476B136F37CD57E6D013BF4E9140394ABEEA81E42FBDB8FC59228C7B85C549ED294123BF898A7D048B3BD95':
     'bcprov-jdk15on-1.62.jar',
-  '1AA18B47D3F868D60DC0D5418797984B7CE09439181BEEA51DDF6E54D28740412C19FC5A10572C975CC3216EBFE786FD929FF605291B721159FAD9F1DB261F7A':
-    'checksum-dependency-plugin-1.21.0.jar'
+  'AE25D8B49A20D68CCF8396E36806E473BA8D89D594CB8D0DB3EA3CDA3E47F718FD6E23AFED1C95DC269F2BD3E12F3D1FAD710E9F71066C1E5B12F80E346FA602':
+    'checksum-dependency-plugin-1.22.0.jar'
 ]
 
 static def sha512(File file) {
@@ -186,6 +198,9 @@ Successful validation requires dependency to be listed at least once (either in 
 <?xml version='1.0' encoding='utf-8'?>
 <dependency-verification version='1'>
     <trust-requirement pgp='GROUP' checksum='NONE' />
+    <ignored-keys>
+        <ignored-key id="1122334455667788"/>
+    </ignored-keys>
     <trusted-keys>
         <trusted-key id='bcf4173966770193' group='org.jetbrains'/>
         <trusted-key id='379ce192d401ab61' group='org.jetbrains.intellij.deps'/>
@@ -202,6 +217,10 @@ Successful validation requires dependency to be listed at least once (either in 
 ```
 
 It works as follows:
+
+* Key `1122334455667788` would be ignored as if it did not exist. The plugin won't try downloading it.
+
+    This might help when `.asc` signature references a key that known to be absent on public keyservers (e.g. when private/public part is lost).  
 
 * When dependency has neither dependency-specific configuration nor `trusted-keys`, the artifact would be matched against `<trust-requirement` (==default trust configuration).
 
@@ -372,4 +391,8 @@ Verification options
 Changelog
 ---------
 
-v1.21.0: PGP verification is implemented
+v1.22.0
+* Implemented `<ignored-keys>` to prevent resolution of known to be absent keys
+
+v1.21.0
+* PGP verification is implemented

@@ -17,7 +17,9 @@
 package com.github.vlsi.gradle.checksum.pgp
 
 import com.github.vlsi.gradle.checksum.hexKey
+import org.gradle.api.GradleException
 import org.gradle.api.logging.Logging
+import java.io.FileNotFoundException
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
 import java.net.URI
@@ -81,6 +83,14 @@ class KeyDownloader(
                 else -> false
             }
         }
-        urlConnection.inputStream.use { it.readBytes() }
+        try {
+            urlConnection.inputStream.use { it.readBytes() }
+        }  catch (e: FileNotFoundException) {
+            val formattedKey = "%016x".format(keyId)
+            logger.info("Unable to find key $formattedKey at $keyServer." +
+                    " Please ask $comment to publish public key. Otherwise the verification is not possible." +
+                    " You can ignore the key by adding <ignored-key id='$formattedKey'/> to checksum.xml")
+            null
+        }
     }
 }

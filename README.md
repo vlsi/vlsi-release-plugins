@@ -139,6 +139,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.22.0
+* checksum-dependency-plugin: add `<ignored-keys>` to prevent resolution of known to be absent keys
+
 v1.21.0
 * checksum-dependency-plugin: PGP-based dependency verification (see [detailed description](plugins/checksum-dependency-plugin/README.md))
 

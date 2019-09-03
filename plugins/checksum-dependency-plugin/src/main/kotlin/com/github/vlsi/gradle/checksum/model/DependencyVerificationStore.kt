@@ -112,6 +112,10 @@ object DependencyVerificationStore {
             VerificationConfig(pgp, checksum)
         }
         val result = DependencyVerification(verificationConfig)
+        xml["ignored-keys"]
+            .getList("ignored-key").forEach {
+                result.ignoredKeys += it.requiredAttr("id").parseKey
+            }
         xml["trusted-keys"]
             .apply {
                 if (isEmpty) {
@@ -152,6 +156,13 @@ object DependencyVerificationStore {
             .withGroovyBuilder {
                 "dependency-verification"(mapOf("version" to "1")) {
                     "trust-requirement"(verification.defaultVerificationConfig.toMap())
+                    "ignored-keys" {
+                        verification.ignoredKeys
+                            .sorted()
+                            .forEach {
+                                "ignored-key"(mapOf("id" to it.hexKey))
+                            }
+                    }
                     "trusted-keys" {
                         verification.groupKeys
                             .flatMap { it.value.map { pgp -> it.key to pgp } }

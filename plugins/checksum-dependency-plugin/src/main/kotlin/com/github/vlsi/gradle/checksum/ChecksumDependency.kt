@@ -157,7 +157,9 @@ class ChecksumDependency(
                         for (sign in art.file.toSignatureList()) {
                             val publicKey = keyResolutionTimer { keyStore.getKey(sign.keyID, signatureDependency) }
                             if (publicKey == null) {
-                                logger.warn("Public key ${sign.keyID.hexKey} is not found. The key was used to sign ${art.id.artifactDependency}")
+                                logger.warn("Public key ${sign.keyID.hexKey} is not found. The key was used to sign ${art.id.artifactDependency}." +
+                                        " Please ask dependency author to publish the PGP key otherwise signature verification is not possibles")
+                                verificationDb.ignoreKey(sign.keyID)
                                 continue
                             }
                             logger.debug { "Verifying signature ${sign.keyID.hexKey} for ${art.id.artifactDependency}" }

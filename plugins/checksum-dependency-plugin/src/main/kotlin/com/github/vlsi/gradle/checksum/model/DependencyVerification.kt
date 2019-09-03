@@ -76,6 +76,8 @@ class DependencyChecksum(
 }
 
 class DependencyVerification(val defaultVerificationConfig: VerificationConfig) {
+    val ignoredKeys = mutableSetOf<Long>()
+
     val groupKeys = mutableMapOf<String, MutableSet<Long>>()
 
     fun add(group: String, key: Long): Boolean =
@@ -87,6 +89,8 @@ class DependencyVerification(val defaultVerificationConfig: VerificationConfig) 
 
     fun deepClone(): DependencyVerification =
         DependencyVerification(defaultVerificationConfig).also { copy ->
+            copy.ignoredKeys += ignoredKeys
+
             for ((k, v) in groupKeys) {
                 copy.groupKeys[k] = v.toMutableSet()
             }
@@ -96,7 +100,7 @@ class DependencyVerification(val defaultVerificationConfig: VerificationConfig) 
         }
 
     override fun toString(): String {
-        return "DependencyVerification(trustedKeys=${groupKeys.mapValues { it.value.hexKeys }}, dependencies=$dependencies)"
+        return "DependencyVerification(ignoredKeys=${ignoredKeys.hexKeys}, trustedKeys=${groupKeys.mapValues { it.value.hexKeys }}, dependencies=$dependencies)"
     }
 }
 
@@ -118,6 +122,11 @@ class DependencyVerificationDb(
 
     fun getConfigFor(id: Id): VerificationConfig =
         verification.dependencies[id]?.verificationConfig ?: verification.defaultVerificationConfig
+
+    fun ignoreKey(key: Long) {
+        updatedVerification.ignoredKeys += key
+        hasUpdates = true
+    }
 
     fun verify(actualChecksums: ActualChecksums): List<Pair<DependencyChecksum, String>> {
         val violations = mutableListOf<Pair<DependencyChecksum, String>>()

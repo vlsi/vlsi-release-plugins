@@ -33,8 +33,8 @@ class KeyStore(
     val keyDownloader: KeyDownloader
 ) {
     private val keys =
-        object : LinkedHashMap<Long, PGPPublicKey>(100, 0.75f, true) {
-            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, PGPPublicKey>?): Boolean {
+        object : LinkedHashMap<Long, PGPPublicKey?>(100, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, PGPPublicKey?>?): Boolean {
                 return this.size > 1000
             }
         }
@@ -44,7 +44,9 @@ class KeyStore(
 
     fun getKey(keyId: Long, comment: String): PGPPublicKey? {
         lock.read {
-            keys[keyId]?.let { return it }
+            if (keys.containsKey(keyId)) {
+                return keys[keyId]
+            }
         }
         lock.write {
             return keys.computeIfAbsent(keyId) {
@@ -54,7 +56,9 @@ class KeyStore(
                 val keyStream = if (cacheFile.exists()) {
                     cacheFile.inputStream().buffered()
                 } else {
-                    val keyBytes = downloadTimer { keyDownloader.findKey(it, comment) }
+                    val keyBytes =
+                        downloadTimer { keyDownloader.findKey(it, comment) } ?: return@computeIfAbsent null
+
                     File(storePath, "$fileName.tmp").apply {
                         // It will throw exception should create fail (e.g. permission or something)
                         Files.createDirectories(parentFile.toPath())
