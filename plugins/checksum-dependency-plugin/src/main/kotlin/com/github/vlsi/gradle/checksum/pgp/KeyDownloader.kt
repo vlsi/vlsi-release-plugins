@@ -17,7 +17,6 @@
 package com.github.vlsi.gradle.checksum.pgp
 
 import com.github.vlsi.gradle.checksum.hexKey
-import org.gradle.api.GradleException
 import org.gradle.api.logging.Logging
 import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
@@ -91,7 +90,7 @@ class KeyDownloader(
                 it.copyTo(baos)
                 baos.toByteArray()
             }
-        }  catch (e: FileNotFoundException) {
+        } catch (e: FileNotFoundException) {
             val formattedKey = "%016x".format(keyId)
             logger.info("Unable to find key $formattedKey at $keyServer." +
                     " Please ask $comment to publish public key. Otherwise the verification is not possible." +

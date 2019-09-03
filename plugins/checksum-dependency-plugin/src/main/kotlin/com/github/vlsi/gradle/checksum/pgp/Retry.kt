@@ -16,10 +16,8 @@
  */
 package com.github.vlsi.gradle.checksum.pgp
 
-import org.gradle.api.GradleException
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
-import java.io.FileNotFoundException
 import java.util.concurrent.TimeoutException
 
 private val logger = Logging.getLogger(Retry::class.java)
