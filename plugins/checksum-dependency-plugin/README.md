@@ -80,7 +80,7 @@ Installation
 
 The plugin is installed via `settings.gradle` (and `buildSrc/settings.gradle` if you have `buildSrc`).
 
-Note: `settings.gradle` is a unusual place for Gradle Plugins, and it enables `Checksum Dependency Plugin`
+Note: `settings.gradle` is an unusual place for Gradle Plugins, and it enables `Checksum Dependency Plugin`
 to capture all the dependency resolutions so the plugin can verify other plugins.
 
 The plugin can be downloaded from Gradle Plugin Portal, or you can add it as a jar file to the project
