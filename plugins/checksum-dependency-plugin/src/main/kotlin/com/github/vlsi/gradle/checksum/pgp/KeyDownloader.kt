@@ -19,6 +19,7 @@ package com.github.vlsi.gradle.checksum.pgp
 import com.github.vlsi.gradle.checksum.hexKey
 import org.gradle.api.GradleException
 import org.gradle.api.logging.Logging
+import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
@@ -84,7 +85,12 @@ class KeyDownloader(
             }
         }
         try {
-            urlConnection.inputStream.use { it.readBytes() }
+            urlConnection.inputStream.use {
+                // Support Gradle 4.10.2, so InputStream.readBytes() is not available
+                val baos = ByteArrayOutputStream()
+                it.copyTo(baos)
+                baos.toByteArray()
+            }
         }  catch (e: FileNotFoundException) {
             val formattedKey = "%016x".format(keyId)
             logger.info("Unable to find key $formattedKey at $keyServer." +

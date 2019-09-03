@@ -30,6 +30,7 @@ class ChecksumVerificationTest {
         @JvmStatic
         private fun gradleVersionAndSettings(): Iterable<Arguments> {
             return listOf(
+                Arguments.of("4.10.2"),
                 Arguments.of("5.4.1"),
                 Arguments.of("5.5.1"),
                 Arguments.of("5.6.1")
@@ -126,6 +127,7 @@ class ChecksumVerificationTest {
         )
         val result =
             prepare(gradleVersion, "allDependencies", "--quiet", "--info",
+                "--stacktrace",
                 "-PchecksumFailOn=build_finish")
                 .buildAndFail()
         val updatedChecksums = projectDir.resolve("build/checksum/checksum.xml").read()
