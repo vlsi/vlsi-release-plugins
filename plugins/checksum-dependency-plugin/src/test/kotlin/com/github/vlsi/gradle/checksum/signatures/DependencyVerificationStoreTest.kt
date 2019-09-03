@@ -59,7 +59,8 @@ class DependencyVerificationStoreTest {
         )
         Assertions.assertEquals(
             """
-                DependencyVerification(trustedKeys={org.jetbrains=[bcf4173966770193,
+                DependencyVerification(ignoredKeys=[],
+                trustedKeys={org.jetbrains=[bcf4173966770193,
                 cafebabecafebabe],
                 org.jetbrains.intellij.deps=[379ce192d401ab61]},
                 dependencies={com.android.tools:dvlib:24.0.0=DependencyChecksum(sha512=[BF96E53408EAEC8E366F50E0125D6E,
@@ -92,6 +93,7 @@ class DependencyVerificationStoreTest {
             <?xml version='1.0' encoding='utf-8'?>
             <dependency-verification version='1'>
               <trust-requirement pgp='GROUP' checksum='NONE' />
+              <ignored-keys />
               <trusted-keys>
                 <trusted-key id='bcf4173966770193' group='org.jetbrains' />
                 <trusted-key id='cafebabecafebabe' group='org.jetbrains' />

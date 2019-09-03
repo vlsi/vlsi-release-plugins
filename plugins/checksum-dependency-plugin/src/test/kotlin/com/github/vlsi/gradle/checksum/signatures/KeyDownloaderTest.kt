@@ -28,7 +28,7 @@ class KeyDownloaderTest {
     internal fun goodKey() {
         val keyId = `java.lang`.Long.parseUnsignedLong("bcf4173966770193", 16)
         val bytes = downloader.findKey(keyId, "KeyDownloaderTest")
-        val keys = bytes.inputStream().readPgpPublicKeys()
+        val keys = bytes!!.inputStream().readPgpPublicKeys()
         val basicInfo = keys.getPublicKey(keyId).let {
             """
                algorithm: ${it.algorithm}

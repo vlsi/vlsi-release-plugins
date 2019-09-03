@@ -63,6 +63,8 @@ class ChecksumVerificationTest {
             <?xml version='1.0' encoding='utf-8'?>
             <dependency-verification version='1'>
               <trust-requirement pgp='GROUP' checksum='NONE' />
+              <ignored-keys />
+              <ignored-keys />
               <trusted-keys>
                 <trusted-key id='72475fd306b9cab7' group='com.googlecode.javaewah' />
                 <trusted-key id='a50569c7ca7fa1f0' group='com.jcraft' />
@@ -87,6 +89,7 @@ class ChecksumVerificationTest {
             <?xml version='1.0' encoding='utf-8'?>
             <dependency-verification version='1'>
               <trust-requirement pgp='GROUP' checksum='NONE' />
+              <ignored-keys />
               <trusted-keys>
                 <trusted-key id='72475fd306b9cab7' group='com.googlecode.javaewah' />
                 <trusted-key id='a50569c7ca7fa1f0' group='com.jcraft' />
@@ -131,6 +134,7 @@ class ChecksumVerificationTest {
             <?xml version='1.0' encoding='utf-8'?>
             <dependency-verification version='1'>
               <trust-requirement pgp='GROUP' checksum='NONE' />
+              <ignored-keys />
               <trusted-keys>
                 <trusted-key id='72475fd306b9cab7' group='com.googlecode.javaewah' />
                 <trusted-key id='a50569c7ca7fa1f0' group='com.jcraft' />
@@ -211,6 +215,7 @@ class ChecksumVerificationTest {
             <?xml version='1.0' encoding='utf-8'?>
             <dependency-verification version='1'>
               <trust-requirement pgp='MODULE' checksum='MODULE' />
+              <ignored-keys />
               <trusted-keys />
               <dependencies>
                 <dependency group='com.github.vlsi.gradle' module='crlf-plugin' version='1.20.0'>
@@ -291,6 +296,7 @@ class ChecksumVerificationTest {
             <?xml version='1.0' encoding='utf-8'?>
             <dependency-verification version='1'>
               <trust-requirement pgp='GROUP' checksum='MODULE' />
+              <ignored-keys />
               <trusted-keys>
                 <trusted-key id='72475fd306b9cab7' group='com.googlecode.javaewah' />
                 <trusted-key id='a50569c7ca7fa1f0' group='com.jcraft' />
@@ -377,6 +383,7 @@ class ChecksumVerificationTest {
             <?xml version='1.0' encoding='utf-8'?>
             <dependency-verification version='1'>
               <trust-requirement pgp='GROUP' checksum='NONE' />
+              <ignored-keys />
               <trusted-keys>
                 <trusted-key id='72475fd306b9cab7' group='com.googlecode.javaewah' />
                 <trusted-key id='a50569c7ca7fa1f0' group='com.jcraft' />
