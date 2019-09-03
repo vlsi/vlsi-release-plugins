@@ -44,6 +44,11 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
             if (it.has(name)) it.get(name) as String else default
         }
 
+    private fun Settings.property(name: String, default: () -> String) =
+        settings.extra.let {
+            if (it.has(name)) it.get(name) as String else default()
+        }
+
     private fun Settings.boolProperty(name: String) =
         settings.extra.let {
             when {
@@ -69,15 +74,14 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
         val checksumPrint = settings.boolProperty("checksumPrint")
 
         val failOn =
-            settings.property(
-                "checksumFailOn",
+            settings.property("checksumFailOn") {
                 if (checksumUpdate && !checksums.exists()) {
                     logger.lifecycle("Checksums file is missing ($checksums), and checksum update was requested (-PchecksumUpdate). Will refrain from failing the build on the first checksum/pgp violation")
                     "NEVER"
                 } else {
                     "FIRST_ERROR"
                 }
-            ).toUpperCase().let {
+            }.toUpperCase().let {
                 try {
                     FailOn.valueOf(it)
                 } catch (e: IllegalArgumentException) {
