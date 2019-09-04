@@ -95,9 +95,9 @@ TODD: update samples to match PGP-based implementation
 // Checksum plugin sources can be validated at https://github.com/vlsi/vlsi-release-plugins
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.21.0")
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.23.0")
         // Alternative option is to use a local jar file via
-        // classpath(files("checksum-dependency-plugin-1.21.0.jar"))
+        // classpath(files("checksum-dependency-plugin-1.23.0.jar"))
         // bouncycastle implements PGP verification
         classpath("org.bouncycastle:bcpg-jdk15on:1.62")
     }
@@ -146,9 +146,9 @@ Groovy DSL:
 // See https://github.com/vlsi/vlsi-release-plugins
 buildscript {
   dependencies {
-    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.21.0')
+    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.23.0')
     // Note: replace with below to use a locally-built jar file
-    // classpath(files('checksum-dependency-plugin-1.21.0.jar'))
+    // classpath(files('checksum-dependency-plugin-1.23.0.jar'))
     classpath("org.bouncycastle:bcpg-jdk15on:1.62")
   }
   repositories {
