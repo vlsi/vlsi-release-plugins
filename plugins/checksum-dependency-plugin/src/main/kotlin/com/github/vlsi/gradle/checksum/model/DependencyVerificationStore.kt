@@ -158,17 +158,18 @@ object DependencyVerificationStore {
                     "trust-requirement"(verification.defaultVerificationConfig.toMap())
                     "ignored-keys" {
                         verification.ignoredKeys
+                            .map { it.hexKey }
                             .sorted()
                             .forEach {
-                                "ignored-key"(mapOf("id" to it.hexKey))
+                                "ignored-key"(mapOf("id" to it))
                             }
                     }
                     "trusted-keys" {
                         verification.groupKeys
-                            .flatMap { it.value.map { pgp -> it.key to pgp } }
+                            .flatMap { (group, keys) -> keys.map { group to it.hexKey } }
                             .sortedWith(compareBy({ it.first }, { it.second }))
                             .forEach {
-                                "trusted-key"(mapOf("id" to it.second.hexKey, "group" to it.first))
+                                "trusted-key"(mapOf("id" to it.second, "group" to it.first))
                             }
                     }
                     "dependencies" {
