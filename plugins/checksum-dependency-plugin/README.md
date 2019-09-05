@@ -7,7 +7,7 @@ In other words, it prevents unexpected use of the patched dependencies.
 Unfortunately Gradle (e.g. 5.6) does not verify dependency integrity, and it might easily download and
 execute untrusted code (e.g. plugin or dependency). The goal of the plugin is to fill that gap.
 
-See [gradle/issues/5633: save and verify hashes when locking dependencies](https://github.com/gradle/gradle/issues/5633)
+See [gradle/issues/10443: Verify hashes and PGP signatures for dependencies and plugins](https://github.com/gradle/gradle/issues/10443)
 
 Just in case: Maven (e.g. 3.6.0) does not verify dependency integrity, however there's
 [pgpverify-maven-plugin](https://github.com/s4u/pgpverify-maven-plugin). It is not clear if
@@ -25,6 +25,14 @@ Gradle configuration explicitly adds a dependency on `pom.xml` file.
 It is believed that it is a very minimal risk since malicious edits to `pom.xml` would be either
 detected (e.g. when an untrusted artifact is added) or they would be harmless (e.g. when
 dependency is removed from pom file, or when a new dependency is added and it turns out to be trusted).
+
+Why dependency verification is required?
+----------------------------------------
+
+Here's an example when a malicious package was resolved from JCenter: https://blog.autsoft.hu/a-confusing-dependency/ , https://twitter.com/jakewharton/status/1073102730443526144
+
+An attacker can't forge a PGP signature, so PGP-based verification can identify a case when
+the file is signed with an "unknown" key.
 
 Why should I trust Checksum Dependency Plugin?
 ----------------------------------------------
@@ -62,6 +70,7 @@ Expected checksums for `checksum-dependency-plugin.jar`
 
 SHA-512
 
+v v1.24.0: `558112887E357F43F07E71C4BEA90EF0C1170962E43FF930689FDF5DB5392B8B73123B6AA5F873025BE3D39E8C56C6194DC5DE9C527B2D8314C0C22F4209EEC2`
 * v1.23.0: `1BB240CA435BCE1AD14905514D9B245D7C922D31956789EF6EE672591D27C8861D04B8012F710798EC4DCD243CFFCAB9F4FA3D2B4521E2736DABCE2C9947ABF0`
 * v1.22.0: `9187EB58C166ED22FB7E8813F9611F51D682F5C7304F2E43FCC1EB1E25C88D077AC2E3B1ADDEB5F95CC667E8050A1BA680EB3BFFD7898D3A3FA929EBC12AC2D3`
 * v1.21.0: `1AA18B47D3F868D60DC0D5418797984B7CE09439181BEEA51DDF6E54D28740412C19FC5A10572C975CC3216EBFE786FD929FF605291B721159FAD9F1DB261F7A`
@@ -86,20 +95,19 @@ to capture all the dependency resolutions so the plugin can verify other plugins
 The plugin can be downloaded from Gradle Plugin Portal, or you can add it as a jar file to the project
 repository.
 
-Kotlin DSL:
+* Update `settings.gradle`
 
-TODD: update samples to match PGP-based implementation
+Kotlin DSL:
 
 ```kotlin
 // The below code snippet is provided under CC0 (Public Domain)
 // Checksum plugin sources can be validated at https://github.com/vlsi/vlsi-release-plugins
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.23.0")
-        // Alternative option is to use a local jar file via
-        // classpath(files("checksum-dependency-plugin-1.23.0.jar"))
-        // bouncycastle implements PGP verification
-        classpath("org.bouncycastle:bcpg-jdk15on:1.62")
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.24.0") {
+            // Gradle ships kotlin-stdlib which is good enough
+            exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+        }
     }
     repositories {
         gradlePluginPortal()
@@ -112,8 +120,12 @@ val expectedSha512 = mapOf(
             to "bcpg-jdk15on-1.62.jar",
     "2BA6A5DEC9C8DAC2EB427A65815EB3A9ADAF4D42D476B136F37CD57E6D013BF4E9140394ABEEA81E42FBDB8FC59228C7B85C549ED294123BF898A7D048B3BD95"
             to "bcprov-jdk15on-1.62.jar",
-    "1BB240CA435BCE1AD14905514D9B245D7C922D31956789EF6EE672591D27C8861D04B8012F710798EC4DCD243CFFCAB9F4FA3D2B4521E2736DABCE2C9947ABF0"
-            to "checksum-dependency-plugin-1.23.0.jar"
+    "17DAAF511BE98F99007D7C6B3762C9F73ADD99EAB1D222985018B0258EFBE12841BBFB8F213A78AA5300F7A3618ACF252F2EEAD196DF3F8115B9F5ED888FE827"
+            to "okhttp-4.1.0.jar",
+    "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
+            to "okio-2.2.2.jar",
+    "558112887E357F43F07E71C4BEA90EF0C1170962E43FF930689FDF5DB5392B8B73123B6AA5F873025BE3D39E8C56C6194DC5DE9C527B2D8314C0C22F4209EEC2"
+            to "checksum-dependency-plugin-1.24.0.jar"
 )
 
 fun File.sha512(): String {
@@ -146,10 +158,10 @@ Groovy DSL:
 // See https://github.com/vlsi/vlsi-release-plugins
 buildscript {
   dependencies {
-    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.23.0')
-    // Note: replace with below to use a locally-built jar file
-    // classpath(files('checksum-dependency-plugin-1.23.0.jar'))
-    classpath("org.bouncycastle:bcpg-jdk15on:1.62")
+    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.24.0') {
+      // Gradle ships kotlin-stdlib which is good enough
+      exclude(group: "org.jetbrains.kotlin", module:"kotlin-stdlib")
+    }
   }
   repositories {
     gradlePluginPortal()
@@ -162,8 +174,12 @@ def expectedSha512 = [
     'bcpg-jdk15on-1.62.jar',
   '2BA6A5DEC9C8DAC2EB427A65815EB3A9ADAF4D42D476B136F37CD57E6D013BF4E9140394ABEEA81E42FBDB8FC59228C7B85C549ED294123BF898A7D048B3BD95':
     'bcprov-jdk15on-1.62.jar',
-  '1BB240CA435BCE1AD14905514D9B245D7C922D31956789EF6EE672591D27C8861D04B8012F710798EC4DCD243CFFCAB9F4FA3D2B4521E2736DABCE2C9947ABF0':
-    'checksum-dependency-plugin-1.23.0.jar'
+  '17DAAF511BE98F99007D7C6B3762C9F73ADD99EAB1D222985018B0258EFBE12841BBFB8F213A78AA5300F7A3618ACF252F2EEAD196DF3F8115B9F5ED888FE827':
+    'okhttp-4.1.0.jar',
+  '93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7':
+    'okio-2.2.2.jar',
+  '558112887E357F43F07E71C4BEA90EF0C1170962E43FF930689FDF5DB5392B8B73123B6AA5F873025BE3D39E8C56C6194DC5DE9C527B2D8314C0C22F4209EEC2':
+    'checksum-dependency-plugin-1.24.0.jar'
 ]
 
 static def sha512(File file) {
@@ -189,6 +205,20 @@ if (!violations.isEmpty()) {
 
 apply plugin: 'com.github.vlsi.checksum-dependency'
 ```
+
+* Optionally add checksum configuration file (*:
+
+```xml
+<?xml version='1.0' encoding='utf-8'?>
+<dependency-verification version='1'>
+    <trust-requirement pgp='GROUP' checksum='NONE' />
+    <ignored-keys />
+    <trusted-keys />
+    <dependencies />
+</dependency-verification>
+```
+
+* Run `gradlew allDependencies -PchecksumUpdate`
 
 Configuration
 -------------
@@ -321,14 +351,22 @@ Configuration properties
 
     This is suitable for CI environments when you have no access to the filesystem, so you can grab "updated" `checksum.xml`
 
-* `pgpKeyserver` (default: `hkp://hkps.pool.sks-keyservers.net`) specifies keyserver for retrieval of the keys.
+* `pgpKeyserver` (string, comma separated) specifies keyserver for retrieval of the keys.
 
-    `*.asc` signatures are not sufficient to verify validity, and PGP public keys are required for validation.
+    `*.asc` signatures alone are not sufficient for signature validation, so PGP public keys needs to be downloaded
+     to verify signatures.
 
-* `pgpRetryCount` (default: `10`) specifies the number of attempts to download a PGP key. If the key cannot be downloaded the build is failed.
+    1.24.0+: default to `hkp://pool.sks-keyservers.net,https://keys.fedoraproject.org,https://keyserver.ubuntu.com,https://keys.openpgp.org`
+    1.23.0: defaults to `hkp://hkps.pool.sks-keyservers.net`
+
+* `pgpRetryCount` (default: `30`) specifies the number of attempts to download a PGP key. If the key cannot be downloaded the build is failed.
 
     The list of retried response codes include: `HTTP_CLIENT_TIMEOUT` (408), `HTTP_INTERNAL_ERROR` (500),
     `HTTP_BAD_GATEWAY` (502), `HTTP_UNAVAILABLE` (503), `HTTP_GATEWAY_TIMEOUT` (504) 
+
+* `pgpResolutionTimeout` (seconds, default: `40`) specifies maximum duration for resolution of a single key (including all retry attempts)
+
+    since: 1.24.0
 
 * `pgpInitialRetryDelay` (milliseconds, default: `100`) specifies the initial delay between the retry attempts.
 
@@ -396,6 +434,12 @@ Verification options
 
 Changelog
 ---------
+
+v1.24.0
+* New dependency: `com.squareup.okhttp3:okhttp:4.1.0` and `com.squareup.okio:okio:2.2.2`
+* Failover across multiple PGP keyservers
+* Failover across DNS results
+* Use keyserver that responds the fastest
 
 v1.23.0
 * Support Gradle 4.10.2

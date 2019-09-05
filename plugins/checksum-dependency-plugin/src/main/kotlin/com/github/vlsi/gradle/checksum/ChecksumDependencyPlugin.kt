@@ -17,10 +17,7 @@
 package com.github.vlsi.gradle.checksum
 
 import com.github.vlsi.gradle.checksum.model.* // ktlint-disable
-import com.github.vlsi.gradle.checksum.pgp.KeyDownloader
-import com.github.vlsi.gradle.checksum.pgp.KeyStore
-import com.github.vlsi.gradle.checksum.pgp.Retry
-import com.github.vlsi.gradle.checksum.pgp.Timeouts
+import com.github.vlsi.gradle.checksum.pgp.* // ktlint-disable
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.GradleException
@@ -89,25 +86,31 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
                 }
             }
 
-        val pgpKeyserver = settings.property("pgpKeyserver", "hkp://hkps.pool.sks-keyservers.net")
+        val pgpKeyserver = settings.property("pgpKeyserver",
+            "hkp://pool.sks-keyservers.net,https://keys.fedoraproject.org,https://keyserver.ubuntu.com,hkp://keys.openpgp.org")
 
         val pgpConnectTimeout = settings.property("pgpConnectTimeout", "5").toLong()
         val pgpReadTimeout = settings.property("pgpReadTimeout", "20").toLong()
 
-        val pgpRetryCount = settings.property("pgpRetryCount", "10").toInt()
+        val pgpRetryCount = settings.property("pgpRetryCount", "40").toInt()
         val pgpInitialRetryDelay = settings.property("pgpInitialRetryDelay", "100").toLong()
         val pgpMaximumRetryDelay = settings.property("pgpMaximumRetryDelay", "10000").toLong()
 
+        val pgpResolutionTimeout = settings.property("pgpResolutionTimeout", "30").toLong()
+
         val keyDownloader = KeyDownloader(
-            keyServer = URI(pgpKeyserver),
+            retry = Retry(
+                uris = pgpKeyserver.split(',').map { URI(it) },
+                retrySchedule = RetrySchedule(
+                    initialDelay = pgpInitialRetryDelay,
+                    maximumDelay = pgpMaximumRetryDelay
+                ),
+                retryCount = pgpRetryCount,
+                keyResolutionTimeout = Duration.ofSeconds(pgpResolutionTimeout)
+            ),
             timeouts = Timeouts(
                 connectTimeout = Duration.ofSeconds(pgpConnectTimeout),
                 readTimeout = Duration.ofSeconds(pgpReadTimeout)
-            ),
-            retry = Retry(
-                retryCount = pgpRetryCount,
-                initialDelay = pgpInitialRetryDelay,
-                maximumDelay = pgpMaximumRetryDelay
             )
         )
         val keyStore = KeyStore(File(buildFolder, "keystore"), keyDownloader)

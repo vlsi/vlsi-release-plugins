@@ -16,12 +16,13 @@
  */
 package com.github.vlsi.gradle.checksum.pgp
 
+import com.github.vlsi.gradle.checksum.debug
 import com.github.vlsi.gradle.checksum.hexKey
+import okhttp3.Dns
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.gradle.api.logging.Logging
-import java.io.ByteArrayOutputStream
-import java.io.FileNotFoundException
-import java.net.HttpURLConnection
-import java.net.SocketTimeoutException
+import java.net.InetAddress
 import java.net.URI
 import java.time.Duration
 
@@ -29,15 +30,23 @@ private val logger = Logging.getLogger(KeyDownloader::class.java)
 
 data class Timeouts(
     val connectTimeout: Duration = Duration.ofSeconds(5),
-    val readTimeout: Duration = Duration.ofSeconds(20)
+    val readTimeout: Duration = Duration.ofSeconds(10)
 )
 
+data class SingleHostDns(val host: String, val inetAddress: InetAddress) : Dns {
+    override fun lookup(hostname: String): List<InetAddress> =
+        if (hostname == host) listOf(inetAddress) else listOf()
+}
+
 class KeyDownloader(
-    keyServer: URI = URI("hkp://hkps.pool.sks-keyservers.net"),
-    val timeouts: Timeouts = Timeouts(),
-    val retry: Retry = Retry()
+    val retry: Retry = Retry(),
+    val timeouts: Timeouts = Timeouts()
 ) {
-    private val keyServer = keyServer.prepare
+    private val client =
+        OkHttpClient.Builder()
+            .connectTimeout(timeouts.connectTimeout)
+            .readTimeout(timeouts.readTimeout)
+            .build()
 
     private val URI.prepare: URI get() =
         URI(
@@ -46,56 +55,42 @@ class KeyDownloader(
                 else -> "https"
             },
             userInfo, host,
-            if (port == -1 && scheme == "khp") 11371 else port,
+            if (port == -1 && scheme == "hkp") 11371 else port,
             path, query, fragment
         )
 
-    protected fun URI.retrieveKeyUri(keyId: Long) =
+    // Sample URL: http://pool.sks-keyservers.net/pks/lookup?op=vindex&fingerprint=on&search=0xbcf4173966770193
+    private fun URI.retrieveKeyUri(keyId: Long, inetAddress: InetAddress) =
         URI(
             scheme, userInfo, host, port, "/pks/lookup",
             "op=get&options=mr&search=0x${keyId.hexKey}", null
         )
 
-    // http://hkps.pool.sks-keyservers.net/pks/lookup?op=vindex&fingerprint=on&search=0xbcf4173966770193
-
     fun findKey(keyId: String, comment: String) = findKey(`java.lang`.Long.parseUnsignedLong(keyId, 16), comment)
 
-    fun findKey(keyId: Long, comment: String) = retry("Downloading key ${"%016x".format(keyId)} from $keyServer for $comment") {
-        val urlConnection = keyServer.retrieveKeyUri(keyId)
-            .toURL().openConnection() as HttpURLConnection
-        with(urlConnection) {
-            connectTimeout = timeouts.connectTimeout.toMillis().toInt()
-            readTimeout = timeouts.readTimeout.toMillis().toInt()
-        }
-        retryIf {
-            if (it is SocketTimeoutException) {
-                return@retryIf true
-            }
-            when (val code = urlConnection.responseCode) {
-                HttpURLConnection.HTTP_CLIENT_TIMEOUT,
-                HttpURLConnection.HTTP_INTERNAL_ERROR,
-                HttpURLConnection.HTTP_BAD_GATEWAY,
-                HttpURLConnection.HTTP_UNAVAILABLE,
-                HttpURLConnection.HTTP_GATEWAY_TIMEOUT -> {
-                    logger.info("Got HTTP $code from $keyServer. Will retry the download")
-                    true
+    fun findKey(keyId: Long, comment: String): ByteArray? =
+        retry("Downloading key ${keyId.hexKey} for $comment") {
+            val url = uri.prepare.retrieveKeyUri(keyId, inetAddress)
+                .toURL()
+            logger.debug { "Downloading PGP key ${keyId.hexKey} from $inetAddress, url: $url" }
+            val request = Request.Builder()
+                .url(url)
+                .build()
+
+            val newClient = client.newBuilder()
+                .dns(SingleHostDns(url.host, inetAddress))
+                .connectTimeout(Duration.ofMillis(maxTimeout.coerceAtMost(timeouts.connectTimeout.toMillis())))
+                .readTimeout(Duration.ofMillis(maxTimeout.coerceAtMost(timeouts.readTimeout.toMillis())))
+                .build()
+            newClient
+                .newCall(request).execute().use { response ->
+                    val code = response.code
+                    latency = response.receivedResponseAtMillis - response.sentRequestAtMillis
+                    if (!response.isSuccessful) {
+                        retry("Keyserver should respond with successful HTTP codes (200..300), actual code is $code, url: $url")
+                    }
+                    val body = response.body ?: retry("Empty response body for url: $url")
+                    body.bytes()
                 }
-                else -> false
-            }
         }
-        try {
-            urlConnection.inputStream.use {
-                // Support Gradle 4.10.2, so InputStream.readBytes() is not available
-                val baos = ByteArrayOutputStream()
-                it.copyTo(baos)
-                baos.toByteArray()
-            }
-        } catch (e: FileNotFoundException) {
-            val formattedKey = "%016x".format(keyId)
-            logger.info("Unable to find key $formattedKey at $keyServer." +
-                    " Please ask $comment to publish public key. Otherwise the verification is not possible." +
-                    " You can ignore the key by adding <ignored-key id='$formattedKey'/> to checksum.xml")
-            null
-        }
-    }
 }

@@ -28,10 +28,18 @@ include(
 
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.23.0")
-        // Note: replace with below to use locally-built jar file
-        // classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.23.0.jar"))
-        classpath("org.bouncycastle:bcpg-jdk15on:1.62")
+        if (true) {
+            classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.24.0") {
+                exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+            }
+        } else {
+            // Below enables use of locally built file for testing purposes
+            classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.24.0.jar"))
+            classpath("org.bouncycastle:bcpg-jdk15on:1.62")
+            classpath("com.squareup.okhttp3:okhttp:4.1.0") {
+                exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+            }
+        }
     }
     repositories {
         gradlePluginPortal()
@@ -44,8 +52,12 @@ val expectedSha512 = mapOf(
             to "bcpg-jdk15on-1.62.jar",
     "2BA6A5DEC9C8DAC2EB427A65815EB3A9ADAF4D42D476B136F37CD57E6D013BF4E9140394ABEEA81E42FBDB8FC59228C7B85C549ED294123BF898A7D048B3BD95"
             to "bcprov-jdk15on-1.62.jar",
-    "1BB240CA435BCE1AD14905514D9B245D7C922D31956789EF6EE672591D27C8861D04B8012F710798EC4DCD243CFFCAB9F4FA3D2B4521E2736DABCE2C9947ABF0"
-            to "checksum-dependency-plugin-1.23.0.jar"
+    "17DAAF511BE98F99007D7C6B3762C9F73ADD99EAB1D222985018B0258EFBE12841BBFB8F213A78AA5300F7A3618ACF252F2EEAD196DF3F8115B9F5ED888FE827"
+            to "okhttp-4.1.0.jar",
+    "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
+            to "okio-2.2.2.jar",
+    "558112887E357F43F07E71C4BEA90EF0C1170962E43FF930689FDF5DB5392B8B73123B6AA5F873025BE3D39E8C56C6194DC5DE9C527B2D8314C0C22F4209EEC2"
+            to "checksum-dependency-plugin-1.24.0.jar"
 )
 
 fun File.sha512(): String {

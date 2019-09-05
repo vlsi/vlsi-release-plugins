@@ -17,6 +17,7 @@
 
 dependencies {
     implementation("org.bouncycastle:bcpg-jdk15on:1.62")
+    implementation("com.squareup.okhttp3:okhttp:4.1.0")
 }
 
 fun File.sha512(): String {

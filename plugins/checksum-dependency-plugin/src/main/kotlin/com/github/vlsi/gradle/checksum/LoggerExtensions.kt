@@ -29,3 +29,9 @@ internal inline fun Logger.info(message: () -> String) {
         info(message())
     }
 }
+
+internal inline fun Logger.lifecycle(message: () -> String) {
+    if (isLifecycleEnabled) {
+        lifecycle(message())
+    }
+}
