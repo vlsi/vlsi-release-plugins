@@ -435,6 +435,9 @@ Verification options
 Changelog
 ---------
 
+v1.25.0
+* checksum-dependency-plugin: fix logging for "PGP key...download time: 0ms"
+
 v1.24.0
 * New dependency: `com.squareup.okhttp3:okhttp:4.1.0` and `com.squareup.okio:okio:2.2.2`
 * Failover across multiple PGP keyservers

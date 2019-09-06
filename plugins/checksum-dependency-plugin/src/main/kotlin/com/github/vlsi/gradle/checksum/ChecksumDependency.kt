@@ -330,7 +330,7 @@ class ChecksumDependency(
         val keyTime = keyResolutionTimer.elapsed
         logger.log(
             if (keyTime > 1000) LogLevel.LIFECYCLE else LogLevel.INFO,
-            "PGP key resolution time: ${keyTime}ms, resolution requests: ${keyResolutionTimer.starts}, download time: ${keyStore.downloadTimer.elapsed.mib()}ms, keys downloaded: ${keyStore.downloadTimer.starts}"
+            "PGP key resolution time: ${keyTime}ms, resolution requests: ${keyResolutionTimer.starts}, download time: ${keyStore.downloadTimer.elapsed}ms, keys downloaded: ${keyStore.downloadTimer.starts}"
         )
         val pgpTime = signatureVerificationTimer.elapsed
         logger.log(

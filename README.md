@@ -139,6 +139,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.25.0
+* checksum-dependency-plugin: fix logging for "PGP key...download time: 0ms"
+
 v1.24.0
 * checksum-dependency-plugin: failover across multiple keyservers and DNS responses
 
