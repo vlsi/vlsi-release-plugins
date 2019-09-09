@@ -85,7 +85,7 @@ class DnsLookupTask(
     }
 }
 
-class RetryException(message: String) : Exception(message)
+class RetryException(message: String, val httpCode: Int) : Exception(message)
 
 class ShouldRetrySpec(
     val attempt: Int,
@@ -101,7 +101,7 @@ class ShouldRetrySpec(
     fun retryIf(condition: (Throwable) -> Boolean?) =
         conditions.add(condition)
 
-    fun retry(comment: String): Nothing = throw RetryException(comment)
+    fun retry(comment: String, httpCode: Int): Nothing = throw RetryException(comment, httpCode)
 
     fun shouldRetry(throwable: Throwable): Boolean {
         for (condition in conditions) {
@@ -154,10 +154,11 @@ class Retry(
         }
     }
 
-    operator fun <T> invoke(description: String, action: ShouldRetrySpec.() -> T): T {
+    operator fun <T> invoke(description: String, action: ShouldRetrySpec.() -> T): T? {
         val startTime = System.currentTimeMillis()
         val deadline = startTime + keyResolutionTimeout.toMillis()
         var attempt = 0
+        var seen404 = false
         while (attempt < retryCount) {
             attempt += 1
 
@@ -180,6 +181,7 @@ class Retry(
                 success = false
                 when {
                     throwable is RetryException -> {
+                        seen404 = seen404 || throwable.httpCode == HttpURLConnection.HTTP_NOT_FOUND
                         logger.lifecycle("Retrying $description (attempt $attempt of $retryCount, ${address.inetAddress.hostAddress}, ${address.uri}): ${throwable.message}")
                     }
                     throwable is ConnectException ||
@@ -203,6 +205,10 @@ class Retry(
                 }
                 queue.add(address)
             }
+        }
+        if (seen404) {
+            logger.lifecycle("Assuming 404 NOT_FOUND for <<$description>> after $attempt iterations and ${System.currentTimeMillis() - startTime}ms")
+            return null
         }
         throw TimeoutException("Stopping retry attempts for <<$description>> after $attempt iterations and ${System.currentTimeMillis() - startTime}ms")
     }

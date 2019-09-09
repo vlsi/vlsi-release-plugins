@@ -87,9 +87,9 @@ class KeyDownloader(
                     val code = response.code
                     latency = response.receivedResponseAtMillis - response.sentRequestAtMillis
                     if (!response.isSuccessful) {
-                        retry("Keyserver should respond with successful HTTP codes (200..300), actual code is $code, url: $url")
+                        retry("Keyserver should respond with successful HTTP codes (200..300), actual code is $code, url: $url", code)
                     }
-                    val body = response.body ?: retry("Empty response body for url: $url")
+                    val body = response.body ?: retry("Empty response body for url: $url", code)
                     body.bytes()
                 }
         }

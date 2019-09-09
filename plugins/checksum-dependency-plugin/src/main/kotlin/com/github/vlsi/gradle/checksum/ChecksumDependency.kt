@@ -155,6 +155,10 @@ class ChecksumDependency(
                         logger.debug { "Resolved signature $signatureDependency" }
                         receivedSignatures.add(signatureDependency)
                         for (sign in art.file.toSignatureList()) {
+                            if (verificationDb.isIgnored(sign.keyID)) {
+                                logger.info("Public key ${sign.keyID.hexKey} is ignored via <ignored-keys>, so ${art.id.artifactDependency} is assumed to be not signed with that key")
+                                continue
+                            }
                             val publicKey = keyResolutionTimer { keyStore.getKey(sign.keyID, signatureDependency) }
                             if (publicKey == null) {
                                 logger.warn("Public key ${sign.keyID.hexKey} is not found. The key was used to sign ${art.id.artifactDependency}." +

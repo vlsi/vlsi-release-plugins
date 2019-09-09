@@ -123,6 +123,8 @@ class DependencyVerificationDb(
     fun getConfigFor(id: Id): VerificationConfig =
         verification.dependencies[id]?.verificationConfig ?: verification.defaultVerificationConfig
 
+    fun isIgnored(key: Long) = verification.ignoredKeys.contains(key)
+
     fun ignoreKey(key: Long) {
         updatedVerification.ignoredKeys += key
         hasUpdates = true
