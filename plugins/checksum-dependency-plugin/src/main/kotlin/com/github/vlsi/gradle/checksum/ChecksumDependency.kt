@@ -298,6 +298,10 @@ class ChecksumDependency(
             sb.appendln("\nYou might want to add -PchecksumFailOn=build_finish if you are brave enough")
             sb.append("It will collect all the violations, however untrusted code might be executed (e.g. from a plugin)")
         }
+        sb.append("\nYou can find updated checksum.xml file at $computedChecksumFile.")
+        if (!checksumUpdateRequested) {
+            sb.append("\nYou might add -PchecksumUpdate to update root checksum.xml file.")
+        }
         throw GradleException(sb.toString())
     }
 
