@@ -34,6 +34,8 @@ Here's an example when a malicious package was resolved from JCenter: https://bl
 An attacker can't forge a PGP signature, so PGP-based verification can identify a case when
 the file is signed with an "unknown" key.
 
+Here's an article that explains why PGP and signature verification is required: https://medium.com/@vladimirsitniko/dependency-verification-checksum-vs-pgp-582e76207019?sk=7485298b76eaf9f935b899b002f4c3b5
+
 Why should I trust Checksum Dependency Plugin?
 ----------------------------------------------
 
