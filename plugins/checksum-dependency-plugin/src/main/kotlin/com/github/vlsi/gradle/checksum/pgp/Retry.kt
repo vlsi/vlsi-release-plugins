@@ -124,6 +124,8 @@ class Retry(
     val retrySchedule: RetrySchedule = RetrySchedule(),
     val retryCount: Int = 30
 ) {
+    private fun <T> Iterable<T>.shuffled(): List<T> = toMutableList().apply { shuffle() }
+
     private val queue = DelayQueue<DelayedTask>(
         uris.shuffled().map { DnsLookupTask(retrySchedule, it, 0) }
     )

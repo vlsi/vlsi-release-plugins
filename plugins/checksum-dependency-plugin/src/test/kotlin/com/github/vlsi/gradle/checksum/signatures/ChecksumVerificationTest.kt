@@ -30,10 +30,10 @@ class ChecksumVerificationTest {
         @JvmStatic
         private fun gradleVersionAndSettings(): Iterable<Arguments> {
             return listOf(
-                Arguments.of("4.10.2"),
+                Arguments.of("4.4.1"),
+                Arguments.of("5.6.2"),
                 Arguments.of("5.4.1"),
-                Arguments.of("5.5.1"),
-                Arguments.of("5.6.1")
+                Arguments.of("4.10.2")
             )
         }
     }

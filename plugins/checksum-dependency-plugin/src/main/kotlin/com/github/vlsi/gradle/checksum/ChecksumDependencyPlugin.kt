@@ -27,8 +27,10 @@ import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.HelpTasksPlugin
 import org.gradle.api.tasks.diagnostics.DependencyReportTask
+import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.register
+import org.gradle.util.GradleVersion
 import java.io.File
 import java.net.URI
 import java.time.Duration
@@ -138,12 +140,16 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
 
         if (allDeps) {
             settings.gradle.rootProject {
-                addAllDependenciesTask()
+                if (GradleVersion.current() >= GradleVersion.version("4.8")) {
+                    registerAddAllDependenciesTask()
+                } else {
+                    createAddAllDependenciesTask()
+                }
             }
         }
     }
 
-    private fun Project.addAllDependenciesTask() {
+    private fun Project.registerAddAllDependenciesTask() {
         tasks.register("allDependencies", DependencyReportTask::class) {
             group = HelpTasksPlugin.HELP_GROUP
             description = "Shows dependencies of all projects"
@@ -151,6 +157,18 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
 
         subprojects {
             tasks.register("allDependencies", DependencyReportTask::class) {
+            }
+        }
+    }
+
+    private fun Project.createAddAllDependenciesTask() {
+        tasks.create("allDependencies", DependencyReportTask::class) {
+            group = HelpTasksPlugin.HELP_GROUP
+            description = "Shows dependencies of all projects"
+        }
+
+        subprojects {
+            tasks.create("allDependencies", DependencyReportTask::class) {
             }
         }
     }

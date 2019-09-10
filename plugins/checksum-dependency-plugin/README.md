@@ -72,6 +72,7 @@ Expected checksums for `checksum-dependency-plugin.jar`
 
 SHA-512
 
+* v1.27.0: `BD0CBF7BC430F78E306907963ED25334C1D58C7BBF73EB441BC8D074E4B18160C60B98FA9DDDD6EC0C223CF0C8EAEF81765C50713388CF26F615B3B8281A3DE7`
 * v1.26.0: `2AB28DC6026A9CFC869C6287501D1002B8F2B61C7C3896B61A5616CE686DD41FD22EE9FD2D122111E4DABAA8359A4947C3F43B9DF29B1AFC8AA5D809A8188CAD`
 * v1.25.0: skipped
 * v1.24.0: `558112887E357F43F07E71C4BEA90EF0C1170962E43FF930689FDF5DB5392B8B73123B6AA5F873025BE3D39E8C56C6194DC5DE9C527B2D8314C0C22F4209EEC2`
@@ -86,7 +87,7 @@ SHA-512
 Requirements
 ------------
 
-Gradle 4.10.2 or newer
+Gradle 4.4.1 or newer
 
 Installation
 ------------
@@ -108,7 +109,7 @@ Kotlin DSL:
 // Checksum plugin sources can be validated at https://github.com/vlsi/vlsi-release-plugins
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.26.0") {
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.27.0") {
             // Gradle ships kotlin-stdlib which is good enough
             exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         }
@@ -128,8 +129,8 @@ val expectedSha512 = mapOf(
             to "okhttp-4.1.0.jar",
     "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
             to "okio-2.2.2.jar",
-    "2AB28DC6026A9CFC869C6287501D1002B8F2B61C7C3896B61A5616CE686DD41FD22EE9FD2D122111E4DABAA8359A4947C3F43B9DF29B1AFC8AA5D809A8188CAD"
-            to "checksum-dependency-plugin-1.26.0.jar"
+    "BD0CBF7BC430F78E306907963ED25334C1D58C7BBF73EB441BC8D074E4B18160C60B98FA9DDDD6EC0C223CF0C8EAEF81765C50713388CF26F615B3B8281A3DE7"
+            to "checksum-dependency-plugin-1.27.0.jar"
 )
 
 fun File.sha512(): String {
@@ -162,7 +163,7 @@ Groovy DSL:
 // See https://github.com/vlsi/vlsi-release-plugins
 buildscript {
   dependencies {
-    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.26.0') {
+    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.27.0') {
       // Gradle ships kotlin-stdlib which is good enough
       exclude(group: "org.jetbrains.kotlin", module:"kotlin-stdlib")
     }
@@ -182,8 +183,8 @@ def expectedSha512 = [
     'okhttp-4.1.0.jar',
   '93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7':
     'okio-2.2.2.jar',
-  '2AB28DC6026A9CFC869C6287501D1002B8F2B61C7C3896B61A5616CE686DD41FD22EE9FD2D122111E4DABAA8359A4947C3F43B9DF29B1AFC8AA5D809A8188CAD':
-    'checksum-dependency-plugin-1.26.0.jar'
+  'BD0CBF7BC430F78E306907963ED25334C1D58C7BBF73EB441BC8D074E4B18160C60B98FA9DDDD6EC0C223CF0C8EAEF81765C50713388CF26F615B3B8281A3DE7':
+    'checksum-dependency-plugin-1.27.0.jar'
 ]
 
 static def sha512(File file) {
@@ -438,6 +439,9 @@ Verification options
 
 Changelog
 ---------
+
+v1.26.0
+* checksum-dependency-plugin: support Gradle 4.4.1
 
 v1.26.0
 * checksum-dependency-plugin: fix logging for "PGP key...download time: 0ms"
