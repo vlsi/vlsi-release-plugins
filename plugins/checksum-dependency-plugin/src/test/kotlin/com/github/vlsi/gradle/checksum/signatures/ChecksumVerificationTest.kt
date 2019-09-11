@@ -16,6 +16,7 @@
  */
 package com.github.vlsi.gradle.checksum.signatures
 
+import org.gradle.api.JavaVersion
 import org.gradle.testkit.runner.BuildTask
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions
@@ -29,12 +30,18 @@ class ChecksumVerificationTest {
     companion object {
         @JvmStatic
         private fun gradleVersionAndSettings(): Iterable<Arguments> {
-            return listOf(
-                Arguments.of("4.4.1"),
-                Arguments.of("5.6.2"),
-                Arguments.of("5.4.1"),
-                Arguments.of("4.10.2")
-            )
+            return mutableListOf<Arguments>().apply {
+                if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
+                    add(Arguments.of("4.4.1"))
+                }
+                addAll(
+                    listOf(
+                        Arguments.of("5.6.2"),
+                        Arguments.of("5.4.1"),
+                        Arguments.of("4.10.2")
+                    )
+                )
+            }
         }
     }
 
