@@ -440,7 +440,7 @@ Verification options
 Changelog
 ---------
 
-v1.26.0
+v1.27.0
 * checksum-dependency-plugin: support Gradle 4.4.1
 
 v1.26.0
