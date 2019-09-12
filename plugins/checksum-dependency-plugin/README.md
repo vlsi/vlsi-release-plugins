@@ -1,3 +1,6 @@
+[![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/github/vlsi/gradle/checksum-dependency-plugin/maven-metadata.xml.svg
+?colorB=007ec6&label=gradle)](https://plugins.gradle.org/plugin/com.github.vlsi.checksum-dependency)
+
 Checksum Dependency Plugin
 ==========================
 
