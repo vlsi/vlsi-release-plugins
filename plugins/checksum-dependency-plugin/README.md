@@ -353,6 +353,8 @@ Gradle allows to pass properties via environment variables, so you pass the same
 Configuration properties
 ------------------------
 
+* `checksumIgnore` (bool, default: `false`) disables `checksum-dependency-plugin`
+
 * `checksumUpdate` (bool, default: `false`) updates `checksum.xml` file with new entries
 
 * `checksumPrint` (bool, default: `false`) prints `checksum.xml` to the build log in case there are updates.
@@ -445,6 +447,7 @@ Changelog
 
 v1.28.0
 * Fix resolution of copied configurations (== fix compatibility with https://github.com/ben-manes/gradle-versions-plugin)
+* Add checksumIgnore property for disabling the plugin (e.g. when certain tasks are not compatible with verification)
 
 v1.27.0
 * Support Gradle 4.4.1

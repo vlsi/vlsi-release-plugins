@@ -60,6 +60,12 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
         }
 
     override fun apply(settings: Settings) {
+        val checksumIgnore = settings.boolProperty("checksumIgnore")
+        if (checksumIgnore) {
+            logger.lifecycle("checksum-dependency-plugin is disabled since checksumIgnore property is present")
+            return
+        }
+
         val checksumFileName =
             settings.property("checksum.xml", "checksum.xml")
         val checksums = File(settings.rootDir, checksumFileName)
