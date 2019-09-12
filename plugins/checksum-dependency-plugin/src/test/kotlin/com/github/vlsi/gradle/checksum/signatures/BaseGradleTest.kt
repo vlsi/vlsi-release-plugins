@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 package com.github.vlsi.gradle.checksum.signatures
 
 import org.gradle.testkit.runner.GradleRunner

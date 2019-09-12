@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
-class ChecksumVerificationTest: BaseGradleTest() {
+class ChecksumVerificationTest : BaseGradleTest() {
     companion object {
         @JvmStatic
         private fun gradleVersionAndSettings(): Iterable<Arguments> {
@@ -510,7 +510,6 @@ class ChecksumVerificationTest: BaseGradleTest() {
             .build()
     }
 
-
     @ParameterizedTest
     @MethodSource("gradleVersionAndSettings")
     internal fun `_classpath resolves`(gradleVersion: String) {
@@ -550,5 +549,4 @@ class ChecksumVerificationTest: BaseGradleTest() {
         prepare(gradleVersion, ":run", "--info", "--stacktrace")
             .build()
     }
-
 }

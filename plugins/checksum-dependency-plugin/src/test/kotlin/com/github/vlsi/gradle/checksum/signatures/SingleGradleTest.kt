@@ -14,13 +14,12 @@
  * limitations under the License.
  *
  */
-
 package com.github.vlsi.gradle.checksum.signatures
 
 import org.junit.jupiter.api.Test
 
 // Parameterized tests are hard to execute/debug one by one, and this class simplifies development
-class SingleGradleTest: BaseGradleTest() {
+class SingleGradleTest : BaseGradleTest() {
     @Test
     internal fun run() {
         val gradleVersion = "5.5.1"
