@@ -440,12 +440,15 @@ Verification options
 Changelog
 ---------
 
+v1.28.0
+* Fix resolution of copied configurations (== fix compatibility with https://github.com/ben-manes/gradle-versions-plugin)
+
 v1.27.0
-* checksum-dependency-plugin: support Gradle 4.4.1
+* Support Gradle 4.4.1
 
 v1.26.0
-* checksum-dependency-plugin: fix logging for "PGP key...download time: 0ms"
-* checksum-dependency-plugin: fix handling of 404 for signatures
+* Fix logging for "PGP key...download time: 0ms"
+* Fix handling of 404 for signatures
 
 v1.24.0
 * New dependency: `com.squareup.okhttp3:okhttp:4.1.0` and `com.squareup.okio:okio:2.2.2`

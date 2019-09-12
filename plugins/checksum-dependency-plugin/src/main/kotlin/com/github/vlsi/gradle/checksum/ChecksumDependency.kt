@@ -30,6 +30,8 @@ import org.gradle.api.artifacts.DependencyResolutionListener
 import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.artifacts.component.ComponentArtifactIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.LogLevel
@@ -41,6 +43,16 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
 private val logger = Logging.getLogger(ChecksumDependency::class.java)
+
+val COPY_SUFFIX_REGEX = Regex("Copy[0-9]*$")
+
+private tailrec fun ConfigurationContainer.hasConfiguration(name: String): Boolean {
+    if (findByName(name) != null) {
+        return true
+    }
+    val nextName = name.replace(COPY_SUFFIX_REGEX, "")
+    return if (nextName == name) false else hasConfiguration(nextName)
+}
 
 class ChecksumDependency(
     private val settings: Settings,
@@ -220,37 +232,29 @@ class ChecksumDependency(
 
             private val ResolvableDependencies.configurationContainer: ConfigurationContainer get() {
                 val path = path
+                fun RepositoryHandler.toStr(): String =
+                    toList().map {
+                        when (it) {
+                            is MavenArtifactRepository -> "${it.name}: maven, ${it.url}"
+                            is IvyArtifactRepository -> "${it.name}: ivy, ${it.url}"
+                            else -> it.name
+                        }
+                    }.toString()
+
                 if (!path.startsWith(":")) {
-                    logger.debug { "Will resolve checksums from $path via settings.buildscript" }
+                    logger.info { "Will resolve checksums from $path via settings.buildscript (${settings.buildscript.repositories.toStr()})" }
                     return settings.buildscript.configurations
                 }
                 val rootProject = settings.gradle.rootProject
-                return when (path) {
-                    ":classpath" -> {
-                        logger.debug { "Will resolve checksums from $path via rootProject.buildscript" }
-                        rootProject.buildscript.configurations
-                    }
-                    else -> {
-                        val prj = rootProject.project(path.removeSuffix(":$name").ifBlank { ":" })
-                        val projectConfigurations = prj.configurations
-                        return when {
-                            projectConfigurations.findByName(name) != null -> {
-                                logger.debug {
-                                    "Will resolve checksums from $path via $prj (${prj.repositories.toList().map {
-                                        when (it) {
-                                            is MavenArtifactRepository -> "maven: ${it.url}"
-                                            else -> it.toString()
-                                        }
-                                    }}"
-                                }
-                                projectConfigurations
-                            }
-                            else -> {
-                                logger.debug { "Will resolve checksums from $path via $prj.buildscript" }
-                                prj.buildscript.configurations
-                            }
-                        }
-                    }
+                val prj = rootProject.project(path.removeSuffix(":$name").ifBlank { ":" })
+
+                return if (prj.buildscript.configurations.hasConfiguration(name)) {
+                    logger.info { "Will resolve checksums from $path via $prj.buildscript.repositories = ${prj.buildscript.repositories.toStr()}" }
+                    prj.buildscript.configurations
+                } else {
+                    // detachedConfigurationXX goes here. We assume that no-one would ever use prj.buildscript.configurations.detachedConfiguration()
+                    logger.info { "Will resolve checksums from $path via $prj.repositories = ${prj.repositories.toStr()}" }
+                    prj.configurations
                 }
             }
 

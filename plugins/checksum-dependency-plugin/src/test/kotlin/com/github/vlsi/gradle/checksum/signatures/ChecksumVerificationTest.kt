@@ -18,15 +18,12 @@ package com.github.vlsi.gradle.checksum.signatures
 
 import org.gradle.api.JavaVersion
 import org.gradle.testkit.runner.BuildTask
-import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import java.nio.file.Path
 
-class ChecksumVerificationTest {
+class ChecksumVerificationTest: BaseGradleTest() {
     companion object {
         @JvmStatic
         private fun gradleVersionAndSettings(): Iterable<Arguments> {
@@ -44,14 +41,6 @@ class ChecksumVerificationTest {
             }
         }
     }
-
-    private val gradleRunner = GradleRunner.create().withPluginClasspath()
-
-    @TempDir
-    lateinit var projectDir: Path
-
-    fun Path.write(text: String) = this.toFile().writeText(text)
-    fun Path.read(): String = this.toFile().readText()
 
     @ParameterizedTest
     @MethodSource("gradleVersionAndSettings")
@@ -71,7 +60,6 @@ class ChecksumVerificationTest {
             <?xml version='1.0' encoding='utf-8'?>
             <dependency-verification version='1'>
               <trust-requirement pgp='GROUP' checksum='NONE' />
-              <ignored-keys />
               <ignored-keys />
               <trusted-keys>
                 <trusted-key id='72475fd306b9cab7' group='com.googlecode.javaewah' />
@@ -480,33 +468,87 @@ class ChecksumVerificationTest {
         }
     }
 
-    private fun createSettings() {
-        val cp = gradleRunner.pluginClasspath.joinToString { "'${it.absolutePath}'" }
+    @ParameterizedTest
+    @MethodSource("gradleVersionAndSettings")
+    internal fun `_child_classpath resolves`(gradleVersion: String) {
+        createSettings("include('child')")
 
-        projectDir.resolve("settings.gradle").write(
-            """
-                rootProject.name = 'sample'
+        projectDir.resolve("build.gradle").write("""
+             configurations { tmp }
 
-                buildscript {
+             project(':child') {
+               buildscript {
                   dependencies {
-                    classpath(files($cp))
+                    classpath 'org.jodd:jodd-core:5.0.6'
                   }
-                  repositories {
-                    gradlePluginPortal()
-                  }
-                }
-
-                apply plugin: 'com.github.vlsi.checksum-dependency'
-            """
+                  repositories { mavenCentral() }
+               }
+               tasks.create('run') {
+               }
+             }
+        """
         )
+
+        projectDir.resolve("checksum.xml").write("""
+            <?xml version='1.0' encoding='utf-8'?>
+            <dependency-verification version='1'>
+              <trust-requirement pgp='GROUP' checksum='NONE' />
+              <ignored-keys />
+              <trusted-keys>
+                <trusted-key id='72475fd306b9cab7' group='com.googlecode.javaewah' />
+                <trusted-key id='a50569c7ca7fa1f0' group='com.jcraft' />
+                <trusted-key id='b341ddb020fcb6ab' group='org.bouncycastle' />
+                <trusted-key id='5b05ccde140c2876' group='org.eclipse.jgit' />
+                <trusted-key id='91ae1504568ec4dd' group='org.jodd' />
+                <trusted-key id='2c7b12f2a511e325' group='org.slf4j' />
+              </trusted-keys>
+              <dependencies />
+            </dependency-verification>
+        """.trimIndent())
+
+        prepare(gradleVersion, ":child:run", "--info", "--stacktrace")
+            .build()
     }
 
-    private fun String.normalizeEol() = replace(Regex("[\r\n]+"), "\n")
 
-    private fun prepare(gradleVersion: String, vararg arguments: String) =
-        gradleRunner
-            .withGradleVersion(gradleVersion)
-            .withProjectDir(projectDir.toFile())
-            .withArguments(*arguments)
-            .forwardOutput()
+    @ParameterizedTest
+    @MethodSource("gradleVersionAndSettings")
+    internal fun `_classpath resolves`(gradleVersion: String) {
+        createSettings()
+
+        projectDir.resolve("build.gradle").write("""
+             configurations { tmp }
+
+             buildscript {
+                dependencies {
+                  classpath 'org.jodd:jodd-core:5.0.6'
+                }
+                repositories { mavenCentral() }
+             }
+             tasks.create('run') {
+             }
+        """
+        )
+
+        projectDir.resolve("checksum.xml").write("""
+            <?xml version='1.0' encoding='utf-8'?>
+            <dependency-verification version='1'>
+              <trust-requirement pgp='GROUP' checksum='NONE' />
+              <ignored-keys />
+              <trusted-keys>
+                <trusted-key id='72475fd306b9cab7' group='com.googlecode.javaewah' />
+                <trusted-key id='a50569c7ca7fa1f0' group='com.jcraft' />
+                <trusted-key id='b341ddb020fcb6ab' group='org.bouncycastle' />
+                <trusted-key id='5b05ccde140c2876' group='org.eclipse.jgit' />
+                <trusted-key id='91ae1504568ec4dd' group='org.jodd' />
+                <trusted-key id='2c7b12f2a511e325' group='org.slf4j' />
+              </trusted-keys>
+              <dependencies />
+            </dependency-verification>
+        """.trimIndent())
+
+        prepare(gradleVersion, ":run", "--info", "--stacktrace")
+            .build()
+    }
+
 }

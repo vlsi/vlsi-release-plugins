@@ -139,6 +139,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.28.0
+* checksum-dependency-plugin: fix resolution of copied configurations (== fix compatibility with https://github.com/ben-manes/gradle-versions-plugin)
+
 v1.27.0
 * checksum-dependency-plugin: support Gradle 4.4.1
 
