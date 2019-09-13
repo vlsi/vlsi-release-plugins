@@ -14,14 +14,19 @@ cache:
 
 matrix:
   include:
-    - name: Tests with OpenJDK 8
+#    - name: Tests with OpenJDK 8
+#      jdk: openjdk8
+#      script:
+#        - ./gradlew validateTaskProperties build
+#        - openssl dgst -sha512 plugins/*/build/libs/*.jar
+#    - name: Tests with OpenJDK 11
+#      jdk: openjdk11
+#      script:
+#        # https://youtrack.jetbrains.com/issue/KT-31710 Dokka javadoc task fails with JDK 11 reporting missing HtmlDoclet
+#        - ./gradlew validateTaskProperties build -x dokka
+#        - openssl dgst -sha512 plugins/*/build/libs/*.jar
+    - name: Compatibility - Caffeine
       jdk: openjdk8
       script:
-        - ./gradlew validateTaskProperties build
-        - openssl dgst -sha512 plugins/*/build/libs/*.jar
-    - name: Tests with OpenJDK 11
-      jdk: openjdk11
-      script:
-        # https://youtrack.jetbrains.com/issue/KT-31710 Dokka javadoc task fails with JDK 11 reporting missing HtmlDoclet
-        - ./gradlew validateTaskProperties build -x dokka
-        - openssl dgst -sha512 plugins/*/build/libs/*.jar
+        - .travis/prepare_e2e.sh https://github.com/ben-manes/caffeine.git
+        - cd e2e && ./gradlew allDependencies build -x test -x compileJava -x compileTestJava -x compileJmhJava -x javadoc
