@@ -34,6 +34,7 @@ import org.gradle.util.GradleVersion
 import java.io.File
 import java.net.URI
 import java.time.Duration
+import java.util.concurrent.ForkJoinPool
 
 private val logger = Logging.getLogger(ChecksumDependencyPlugin::class.java)
 
@@ -77,6 +78,7 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
             if (checksumUpdate) checksums else File(buildFolder, "checksum.xml")
 
         val checksumPrint = settings.boolProperty("checksumPrint")
+        val checksumTimingsPrint = settings.boolProperty("checksumTimingsPrint")
 
         val failOn =
             settings.property("checksumFailOn") {
@@ -105,6 +107,8 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
         val pgpMaximumRetryDelay = settings.property("pgpMaximumRetryDelay", "10000").toLong()
 
         val pgpResolutionTimeout = settings.property("pgpResolutionTimeout", "30").toLong()
+        val checksumCpuThreads = settings.property("checksumCpuThreads", ForkJoinPool.getCommonPoolParallelism().toString()).toInt()
+        val checksumIoThreads = settings.property("checksumIoThreads", "50").toInt()
 
         val keyDownloader = KeyDownloader(
             retry = Retry(
@@ -130,8 +134,9 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
             }
 
         val verificationDb = DependencyVerificationDb(verification)
+        val executors = Executors("checksum-dependency", checksumCpuThreads, checksumIoThreads)
         val checksum =
-            ChecksumDependency(settings, checksumUpdate, checksumPrint, computedChecksumFile, keyStore, verificationDb, failOn)
+            ChecksumDependency(settings, checksumUpdate, checksumPrint, checksumTimingsPrint, computedChecksumFile, keyStore, verificationDb, failOn, executors)
         settings.gradle.addListener(checksum.resolutionListener)
         settings.gradle.addBuildListener(checksum.buildListener)
 
@@ -139,6 +144,8 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
             override fun buildFinished(result: BuildResult) {
                 settings.gradle.removeListener(checksum.resolutionListener)
                 settings.gradle.removeListener(checksum.buildListener)
+                executors.cpu.shutdown()
+                executors.io.shutdown()
             }
         })
 

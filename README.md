@@ -151,6 +151,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.29.0
+* checksum-dependency-plugin: resolve and verify PGP in parallel, compute SHA in parallel
+
 v1.28.0
 * checksum-dependency-plugin: fix resolution of copied configurations (== fix compatibility with https://github.com/ben-manes/gradle-versions-plugin)
 * checksum-dependency-plugin: add checksumIgnore property for disabling the plugin (e.g. when certain tasks are not compatible with verification)

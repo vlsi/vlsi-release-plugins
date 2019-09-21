@@ -16,12 +16,15 @@
  */
 package com.github.vlsi.gradle.checksum.pgp
 
+import com.github.vlsi.gradle.checksum.Executors
 import com.github.vlsi.gradle.checksum.Stopwatch
 import com.github.vlsi.gradle.checksum.readPgpPublicKeys
 import org.bouncycastle.openpgp.PGPPublicKey
 import org.gradle.api.logging.Logging
 import java.io.File
 import java.nio.file.Files
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
@@ -39,39 +42,52 @@ class KeyStore(
             }
         }
 
+    private val loadRequests =
+        ConcurrentHashMap<Long, CompletableFuture<PGPPublicKey?>>()
+
     private val lock = ReentrantReadWriteLock()
     val downloadTimer = Stopwatch()
 
-    fun getKey(keyId: Long, comment: String): PGPPublicKey? {
+    fun getKeyAsync(keyId: Long, comment: String, executors: Executors): CompletableFuture<PGPPublicKey?> {
         lock.read {
             if (keys.containsKey(keyId)) {
-                return keys[keyId]
+                return CompletableFuture.completedFuture(keys[keyId])
             }
-        }
-        lock.write {
-            return keys.computeIfAbsent(keyId) {
-                // try filesystem
-                val fileName = "%02x/%016x.asc".format(keyId ushr 56, keyId)
-                val cacheFile = File(storePath, fileName)
-                val keyStream = if (cacheFile.exists()) {
-                    cacheFile.inputStream().buffered()
-                } else {
-                    val keyBytes =
-                        downloadTimer { keyDownloader.findKey(it, comment) } ?: return@computeIfAbsent null
-
-                    File(storePath, "$fileName.tmp").apply {
-                        // It will throw exception should create fail (e.g. permission or something)
-                        Files.createDirectories(parentFile.toPath())
-                        writeBytes(keyBytes)
-                        if (!renameTo(cacheFile)) {
-                            logger.warn("Unable to rename $this to $cacheFile")
+            return loadRequests.computeIfAbsent(keyId) {
+                CompletableFuture
+                    .supplyAsync({ ->
+                        loadKey(keyId, comment).also { pgp ->
+                            lock.write {
+                                keys[keyId] = pgp
+                                loadRequests.remove(keyId)
+                            }
                         }
-                    }
-                    keyBytes.inputStream()
-                }
-
-                keyStream.readPgpPublicKeys().getPublicKey(it)
+                    }, executors.io)
             }
         }
+    }
+
+    private fun loadKey(keyId: Long, comment: String): PGPPublicKey? {
+        // try filesystem
+        val fileName = "%02x/%016x.asc".format(keyId ushr 56, keyId)
+        val cacheFile = File(storePath, fileName)
+        val keyStream = if (cacheFile.exists()) {
+            cacheFile.inputStream().buffered()
+        } else {
+            val keyBytes =
+                downloadTimer { keyDownloader.findKey(keyId, comment) } ?: return null
+
+            File(storePath, "$fileName.tmp").apply {
+                // It will throw exception should create fail (e.g. permission or something)
+                Files.createDirectories(parentFile.toPath())
+                writeBytes(keyBytes)
+                if (!renameTo(cacheFile)) {
+                    logger.warn("Unable to rename $this to $cacheFile")
+                }
+            }
+            keyBytes.inputStream()
+        }
+
+        return keyStream.readPgpPublicKeys().getPublicKey(keyId)
     }
 }
