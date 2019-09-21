@@ -69,7 +69,9 @@ Usage
 
 Gradle (Groovy DSL):
 ```groovy
-id('com.github.vlsi.license-gather') version '1.0.0'
+plugins {
+    id('com.github.vlsi.license-gather') version '1.0.0'
+}
 
 tasks.register('generateLicense', GatherLicenseTask.class) {
     configurations.add(project.configurations.runtime)
@@ -83,7 +85,9 @@ tasks.register('generateLicense', GatherLicenseTask.class) {
 
 Gradle (Kotlin DSL):
 ```groovy
-id("com.github.vlsi.license-gather") version "1.0.0"
+plugins {
+    id("com.github.vlsi.license-gather") version "1.0.0"
+}
 
 tasks.register("generateLicense", GatherLicenseTask::class) {
     configurations.add(project.configurations.runtime)
@@ -104,7 +108,9 @@ Enables to use `.gitignore` and `.gitattributes` for building `CopySpec`.
 Usage
 -----
 
-```groovy
+Kotlin DSL:
+
+```kotlin
 // Loads .gitattributes and .gitignore from rootDir (and subdirs)
 val gitProps by tasks.registering(FindGitAttributes::class) {
     // Scanning for .gitignore and .gitattributes files in a task avoids doing that
@@ -126,10 +132,16 @@ fun CrLfSpec.sourceLayout() = copySpec {
     }
 }
 
-tasks.register("distZip", Zip::class) {
-  CrLfSpec(LineEndings.CRLF).run {
-    with(sourceLayout())
-  }
+for (archive in listOf(Zip::class, Tar::class)) {
+    tasks.register("dist${archive.simpleName}", archive) {
+        val eol = if (archive == Tar::class) LineEndings.LF else LineEndings.CRLF
+        if (this is Tar) {
+            compression = Compression.GZIP
+        }
+        CrLfSpec(eol).run {
+            with(sourceLayout())
+        }
+    }
 }
 ```
 
