@@ -24,6 +24,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.HelpTasksPlugin
 import org.gradle.api.tasks.diagnostics.DependencyReportTask
@@ -66,6 +67,7 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
             logger.lifecycle("checksum-dependency-plugin is disabled since checksumIgnore property is present")
             return
         }
+        val checksumIgnoreOnTask = settings.property("checksumIgnoreOnTask", "dependencyUpdates")
 
         val checksumFileName =
             settings.property("checksum.xml", "checksum.xml")
@@ -141,9 +143,28 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
         settings.gradle.addBuildListener(checksum.buildListener)
 
         settings.gradle.addBuildListener(object : BuildAdapter() {
-            override fun buildFinished(result: BuildResult) {
+            private fun unregisterChecksumListeners() {
                 settings.gradle.removeListener(checksum.resolutionListener)
                 settings.gradle.removeListener(checksum.buildListener)
+            }
+
+            override fun projectsEvaluated(gradle: Gradle) {
+                if (checksumIgnoreOnTask.isBlank()) {
+                    return
+                }
+                val tasks = checksumIgnoreOnTask.split(Regex("\\s*,\\s*")).toSet()
+                gradle.taskGraph.whenReady {
+                    val stopTask = allTasks.firstOrNull { tasks.contains(it.name) }
+                    if (stopTask != null) {
+                        logger.lifecycle("checksum-dependency is disabled because task execution graph contains task $stopTask," +
+                                " and checksumIgnoreOnTask is set to '$checksumIgnoreOnTask'")
+                        unregisterChecksumListeners()
+                    }
+                }
+            }
+
+            override fun buildFinished(result: BuildResult) {
+                unregisterChecksumListeners()
                 executors.cpu.shutdown()
                 executors.io.shutdown()
             }

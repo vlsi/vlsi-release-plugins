@@ -356,6 +356,11 @@ Configuration properties
 
 * `checksumIgnore` (bool, default: `false`) disables `checksum-dependency-plugin`
 
+* `checksumIgnoreOnTask` (comma separated string, default: `dependencyUpdates`) disables `checksum-dependency-plugin` when one of the listed tasks is present on the task execution graph
+
+    since 1.30.0. [dependencyUpdates](https://github.com/ben-manes/gradle-versions-plugin) is known to resolve new dependencies,
+    and it does not make much sense to validate dependencies when resolving the available updates.
+
 * `checksumUpdate` (bool, default: `false`) updates `checksum.xml` file with new entries
 
 * `checksumPrint` (bool, default: `false`) prints `checksum.xml` to the build log in case there are updates.
@@ -459,6 +464,7 @@ Changelog
 ---------
 v1.30.0
 * Show PGP signature resolution time (#21)
+* Automatically disable checksum verification when `dependencyUpdates` task is present on the task execution graph (#22)
 
 v1.29.0
 * Resolve and verify PGP in parallel, compute SHA in parallel
