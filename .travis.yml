@@ -29,4 +29,4 @@ matrix:
       jdk: openjdk8
       script:
         - .travis/prepare_e2e.sh https://github.com/ben-manes/caffeine.git
-        - cd e2e && ./gradlew allDependencies build -x test -x compileJava -x compileTestJava -x compileJmhJava -x javadoc
+        - cd e2e && ./gradlew -PchecksumIgnore=false allDependencies build -x test -x compileJava -x compileTestJava -x compileJmhJava -x javadoc
