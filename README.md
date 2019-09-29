@@ -153,7 +153,7 @@ Change log
 ----------
 v1.30.0
 * checksum-dependency-plugin: show PGP signature resolution time (#21)
-* checksum-dependency-plugin: disable verification when `dependencyUpdates` task is present on the task execution graph (#22)
+* checksum-dependency-plugin: disable verification when `dependencyUpdates` task is present on the task execution graph (#20)
 
 v1.29.0
 * checksum-dependency-plugin: resolve and verify PGP in parallel, compute SHA in parallel

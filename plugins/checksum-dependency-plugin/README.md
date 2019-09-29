@@ -465,7 +465,7 @@ Changelog
 ---------
 v1.30.0
 * Show PGP signature resolution time (#21)
-* Automatically disable checksum verification when `dependencyUpdates` task is present on the task execution graph (#22)
+* Automatically disable checksum verification when `dependencyUpdates` task is present on the task execution graph (#20)
 
 v1.29.0
 * Resolve and verify PGP in parallel, compute SHA in parallel
