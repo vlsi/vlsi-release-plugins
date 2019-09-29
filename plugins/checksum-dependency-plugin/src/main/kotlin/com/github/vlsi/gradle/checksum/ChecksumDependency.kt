@@ -79,6 +79,7 @@ class ChecksumDependency(
     private val checksumComputationTimer = Stopwatch()
     private val keyResolutionTimer = Stopwatch()
     private val signatureVerificationTimer = Stopwatch()
+    private val signatureResolutionTimer = Stopwatch()
     private val sha512BytesSkipped = AtomicLong()
     private val pgpBytesSkipped = AtomicLong()
     private val overhead = Stopwatch()
@@ -205,7 +206,7 @@ class ChecksumDependency(
         }
         val resolve = pgpConfiguration.resolvedConfiguration.lenientConfiguration
         logger.debug { "Resolve $pgpConfiguration@${pgpConfiguration.hashCode()}" }
-        val checksumArtifacts = resolve.artifacts
+        val checksumArtifacts = signatureResolutionTimer { resolve.artifacts }
         logger.debug { "Resolved ${checksumArtifacts.size} checksums" }
         val keysToVerify = mutableMapOf<ResolvedArtifact, PGPSignatureList>()
         for (art in checksumArtifacts) {
@@ -398,17 +399,22 @@ class ChecksumDependency(
 
         val sha512Time = checksumComputationTimer.elapsed
         val keyTime = keyResolutionTimer.elapsed
+        val ascTime = signatureResolutionTimer.elapsed
         val pgpTime = signatureVerificationTimer.elapsed
         val overheadTime = overhead.elapsed
         val showProfile = overheadTime > 1000 || checksumTimingsPrint
         val printDetailedTimings = overheadTime > 20000 || checksumTimingsPrint
         logger.log(
             if (showProfile) LogLevel.LIFECYCLE else LogLevel.INFO,
-            "checksum-dependency elapsed time: ${overheadTime}ms, configurations processed: ${overhead.starts}${if (!printDetailedTimings) " (add -PchecksumTimingsPrint to print detailed timings)" else ""}"
+            "checksum-dependency elapsed time: ${overheadTime}ms, configurations processed: ${overhead.starts / 2}${if (!printDetailedTimings) " (add -PchecksumTimingsPrint to print detailed timings)" else ""}"
         )
         logger.log(
             if (printDetailedTimings) LogLevel.LIFECYCLE else LogLevel.DEBUG,
             "    SHA-512 computation time: ${sha512Time}ms (goes in parallel, it might exceed wall-clock time), files processed: ${checksumComputationTimer.starts}, processed: ${checksumComputationTimer.bytes.mib()}MiB, skipped: ${sha512BytesSkipped.get().mib()}MiB"
+        )
+        logger.log(
+            if (printDetailedTimings) LogLevel.LIFECYCLE else LogLevel.DEBUG,
+            "    PGP signature resolution time: ${ascTime}ms (wall-clock), resolution requests: ${signatureResolutionTimer.starts}, signatures resolved: ${receivedSignatures.size}"
         )
         logger.log(
             if (printDetailedTimings) LogLevel.LIFECYCLE else LogLevel.DEBUG,

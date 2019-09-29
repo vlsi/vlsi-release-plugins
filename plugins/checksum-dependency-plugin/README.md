@@ -457,6 +457,9 @@ Verification options
 
 Changelog
 ---------
+v1.30.0
+* Show PGP signature resolution time (#21)
+
 v1.29.0
 * Resolve and verify PGP in parallel, compute SHA in parallel
 

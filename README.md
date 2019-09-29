@@ -151,6 +151,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.30.0
+* checksum-dependency-plugin: show PGP signature resolution time (#21)
+
 v1.29.0
 * checksum-dependency-plugin: resolve and verify PGP in parallel, compute SHA in parallel
 
