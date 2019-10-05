@@ -103,6 +103,7 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
 
         val pgpConnectTimeout = settings.property("pgpConnectTimeout", "5").toLong()
         val pgpReadTimeout = settings.property("pgpReadTimeout", "20").toLong()
+        val pgpMinLoggableTimeout = settings.property("pgpMinLoggableTimeout", "4").toLong()
 
         val pgpRetryCount = settings.property("pgpRetryCount", "40").toInt()
         val pgpInitialRetryDelay = settings.property("pgpInitialRetryDelay", "100").toLong()
@@ -120,7 +121,8 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
                     maximumDelay = pgpMaximumRetryDelay
                 ),
                 retryCount = pgpRetryCount,
-                keyResolutionTimeout = Duration.ofSeconds(pgpResolutionTimeout)
+                keyResolutionTimeout = Duration.ofSeconds(pgpResolutionTimeout),
+                minLoggableTimeout = Duration.ofSeconds(pgpMinLoggableTimeout)
             ),
             timeouts = Timeouts(
                 connectTimeout = Duration.ofSeconds(pgpConnectTimeout),

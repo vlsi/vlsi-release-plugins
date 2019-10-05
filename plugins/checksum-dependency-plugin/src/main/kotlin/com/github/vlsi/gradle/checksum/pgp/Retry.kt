@@ -122,7 +122,8 @@ class Retry(
     ),
     val keyResolutionTimeout: Duration = Duration.ofSeconds(40),
     val retrySchedule: RetrySchedule = RetrySchedule(),
-    val retryCount: Int = 30
+    val retryCount: Int = 30,
+    val minLoggableTimeout: Duration = Duration.ofSeconds(4)
 ) {
     private fun <T> Iterable<T>.shuffled(): List<T> = toMutableList().apply { shuffle() }
 
@@ -188,12 +189,21 @@ class Retry(
                     }
                     throwable is ConnectException ||
                             throwable is SocketTimeoutException -> {
-                        val message =
-                            "${throwable::class.simpleName}: $description (attempt $attempt of $retryCount, ${address.inetAddress.hostAddress}, ${address.uri})"
-                        if (logger.isDebugEnabled) {
-                            logger.debug(message, throwable)
-                        } else {
-                            logger.lifecycle(message)
+                        val isSevere = address.maxTimeout >= minLoggableTimeout.toMillis()
+                        // Build message only in case it will be printed
+                        if (isSevere || logger.isDebugEnabled) {
+                            val message =
+                                "${throwable::class.simpleName}: $description (timeout ${address.maxTimeout}ms, attempt $attempt of $retryCount, ${address.inetAddress.hostAddress}, ${address.uri})"
+                            if (!isSevere) {
+                                // Not severe => log debug only
+                                logger.debug(message)
+                            } else if (logger.isDebugEnabled) {
+                                // Debug enabled => log stacktrace as well
+                                logger.debug(message, throwable)
+                            } else {
+                                // Otherwise log to the console
+                                logger.lifecycle(message)
+                            }
                         }
                         address.maxTimeout =
                             120000L.coerceAtMost((address.maxTimeout * 1.5).toLong())

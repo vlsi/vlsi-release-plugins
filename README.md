@@ -151,6 +151,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.31.0
+* checksum-dependency-plugin: added `pgpMinLoggableTimeout` (default 4 seconds) to reduce the verbosity of the plugin
+
 v1.30.0
 * checksum-dependency-plugin: show PGP signature resolution time (#21)
 * checksum-dependency-plugin: disable verification when `dependencyUpdates` task is present on the task execution graph (#20)

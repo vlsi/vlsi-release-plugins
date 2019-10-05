@@ -397,6 +397,10 @@ Configuration properties
 
     since: 1.24.0
 
+* `pgpMinLoggableTimeout` (seconds, default: `4`) allows to hide `ConnectException` messages from the build log when the timeout value was less than the configured minimum.
+
+    since: 1.31.0
+
 * `pgpInitialRetryDelay` (milliseconds, default: `100`) specifies the initial delay between the retry attempts.
 
 * `pgpMaximumRetryDelay` (milliseconds, default: `10000`) specifies the maximum delay between the retry attempts.
@@ -463,6 +467,9 @@ Verification options
 
 Changelog
 ---------
+v1.31.0
+* Added `pgpMinLoggableTimeout` (default 4 seconds) to reduce the verbosity of the plugin
+
 v1.30.0
 * Show PGP signature resolution time (#21)
 * Automatically disable checksum verification when `dependencyUpdates` task is present on the task execution graph (#20)
