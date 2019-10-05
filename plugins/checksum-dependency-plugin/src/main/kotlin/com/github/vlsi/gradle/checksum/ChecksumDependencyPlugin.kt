@@ -75,7 +75,8 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
         val buildDir = settings.property("checksumBuildDir", "build/checksum")
         val buildFolder = File(settings.rootDir, buildDir)
 
-        val checksumUpdate = settings.boolProperty("checksumUpdate")
+        val checksumUpdateAll = settings.boolProperty("checksumUpdateAll")
+        val checksumUpdate = checksumUpdateAll || settings.boolProperty("checksumUpdate")
         val computedChecksumFile =
             if (checksumUpdate) checksums else File(buildFolder, "checksum.xml")
 
@@ -86,6 +87,9 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
             settings.property("checksumFailOn") {
                 if (checksumUpdate && !checksums.exists()) {
                     logger.lifecycle("Checksums file is missing ($checksums), and checksum update was requested (-PchecksumUpdate). Will refrain from failing the build on the first checksum/pgp violation")
+                    "NEVER"
+                } else if (checksumUpdateAll) {
+                    logger.lifecycle("-PchecksumUpdateAll is specified, so the build won't fail in case of the checksum mismatch")
                     "NEVER"
                 } else {
                     "FIRST_ERROR"

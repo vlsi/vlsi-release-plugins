@@ -153,6 +153,7 @@ Change log
 ----------
 v1.31.0
 * checksum-dependency-plugin: added `pgpMinLoggableTimeout` (default 4 seconds) to reduce the verbosity of the plugin
+* checksum-dependency-plugin: added `checksumUpdateAll` property for simplified `checksum.xml` update without build failure
 
 v1.30.0
 * checksum-dependency-plugin: show PGP signature resolution time (#21)

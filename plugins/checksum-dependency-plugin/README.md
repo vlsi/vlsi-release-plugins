@@ -339,7 +339,7 @@ the plugin would overwrite `$rootDir/checksum.xml`.
 
 This is the most automatic (and the least secure option ◔_◔):
 
-    ./gradlew allDependencies -PchecksumUpdate -PchecksumFailOn=build_finish
+    ./gradlew allDependencies -PchecksumUpdateAll
 
 CI configuration
 ----------------
@@ -363,6 +363,10 @@ Configuration properties
     and it does not make much sense to validate dependencies when resolving the available updates.
 
 * `checksumUpdate` (bool, default: `false`) updates `checksum.xml` file with new entries
+
+* `checksumUpdateAll` (bool, default: `false`) it is a shortcut for `-PchecksumUpdate -PchecksumFailOn=build_finish`
+
+    since 1.31.0
 
 * `checksumPrint` (bool, default: `false`) prints `checksum.xml` to the build log in case there are updates.
 
@@ -469,6 +473,7 @@ Changelog
 ---------
 v1.31.0
 * Added `pgpMinLoggableTimeout` (default 4 seconds) to reduce the verbosity of the plugin
+* Added `checksumUpdateAll` property for simplified `checksum.xml` update without build failure
 
 v1.30.0
 * Show PGP signature resolution time (#21)
