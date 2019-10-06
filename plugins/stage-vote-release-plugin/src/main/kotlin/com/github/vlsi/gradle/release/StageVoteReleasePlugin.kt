@@ -43,7 +43,10 @@ import javax.inject.Inject
 class StageVoteReleasePlugin @Inject constructor(private val instantiator: Instantiator) :
     Plugin<Project> {
     companion object {
+        @Deprecated(replaceWith = ReplaceWith("StageVoteReleasePlugin.RELEASE_PARAMS_EXTENSION_NAME"), message = "There are multiple extensions, so prefer clarified name")
         const val EXTENSION_NAME = "releaseParams"
+        const val RELEASE_PARAMS_EXTENSION_NAME = "releaseParams"
+        const val RELEASE_ARTIFACTS_EXTENSION_NAME = "releaseArtifacts"
 
         const val RELEASE_GROUP = "release"
 
@@ -66,12 +69,25 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         const val VALIDATE_SVN_PARAMS_TASK_NAME = "validateSvnParams"
         const val VALIDATE_NEXUS_PARAMS_TASK_NAME = "validateNexusParams"
         const val VALIDATE_RELEASE_PARAMS_TASK_NAME = "validateReleaseParams"
+
+        // Configurations
+        const val RELEASE_FILES_CONFIGURATION_NAME = "releaseFiles"
+        const val RELEASE_SIGNATURES_CONFIGURATION_NAME = "releaseSignatures"
+        const val PREVIEW_SITE_CONFIGURATION_NAME = "previewSite"
     }
 
     override fun apply(project: Project) {
+        project.configureAll()
         if (project.parent == null) {
             project.configureRoot()
         }
+    }
+
+    private fun Project.configureAll() {
+        extensions.create<ReleaseArtifacts>(RELEASE_ARTIFACTS_EXTENSION_NAME, project)
+        configurations.create(RELEASE_FILES_CONFIGURATION_NAME)
+        configurations.create(RELEASE_SIGNATURES_CONFIGURATION_NAME)
+        configurations.create(PREVIEW_SITE_CONFIGURATION_NAME)
     }
 
     private fun Project.configureRoot() {
@@ -79,8 +95,14 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         apply(plugin = "io.codearte.nexus-staging")
         apply(plugin = "de.marcphilipp.nexus-publish")
 
+        val releaseFilesConfiguration = configurations[RELEASE_FILES_CONFIGURATION_NAME]
+        val releaseSignaturesConfiguration = configurations[RELEASE_SIGNATURES_CONFIGURATION_NAME]
+
         // Save stagingRepoId. We don't know which
-        val releaseExt = extensions.create<ReleaseExtension>(EXTENSION_NAME, project)
+        val releaseExt = extensions.create<ReleaseExtension>(RELEASE_PARAMS_EXTENSION_NAME, project)
+
+        releaseExt.archives.add(releaseFilesConfiguration)
+        releaseExt.checksums.add(releaseSignaturesConfiguration)
 
         val validateNexusParams = tasks.register(VALIDATE_NEXUS_PARAMS_TASK_NAME)
         val validateSvnParams = tasks.register(VALIDATE_SVN_PARAMS_TASK_NAME)
@@ -319,46 +341,32 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val releaseExt = project.the<ReleaseExtension>()
         val preparePreviewSiteRepo =
             tasks.register("preparePreviewSiteRepo", GitPrepareRepo::class) {
+                onlyIf { releaseExt.sitePreviewEnabled.get() }
                 repository.set(releaseExt.sitePreview)
             }
 
         val syncPreviewSiteRepo = tasks.register("syncPreviewSiteRepo", Sync::class) {
+            onlyIf { releaseExt.sitePreviewEnabled.get() }
             dependsOn(preparePreviewSiteRepo)
+            dependsOn(configurations[PREVIEW_SITE_CONFIGURATION_NAME])
 
-            val repo = releaseExt.sitePreview.get()
-            val repoDir = File(buildDir, repo.name)
-            into(repoDir)
+            into(File(buildDir, releaseExt.sitePreview.name))
             // Just reuse .gitattributes for text/binary and crlf/lf attributes
             from("${rootProject.rootDir}/.gitattributes")
+            with(releaseExt.previewSiteSpec)
         }
 
         val pushPreviewSite = tasks.register(PUSH_PREVIEW_SITE_TASK_NAME, GitCommitAndPush::class) {
             group = PublishingPlugin.PUBLISH_TASK_GROUP
             description = "Builds and publishes site preview"
-            val rcSuffix = if (releaseExt.rc.isPresent) " " + releaseExt.rcTag.get() else ""
-            commitMessage.set("Update preview for ${releaseExt.componentName.get()}$rcSuffix")
+            onlyIf { releaseExt.sitePreviewEnabled.get() }
+            commitMessage.set(project.provider {
+                val rcSuffix = if (releaseExt.rc.isPresent) " " + releaseExt.rcTag.get() else ""
+                "Update preview for ${releaseExt.componentName.get()}$rcSuffix"
+            })
             repository.set(releaseExt.sitePreview)
 
             dependsOn(syncPreviewSiteRepo)
-        }
-
-        // previewSiteContents can be populated from different places, so we defer to afterEvaluate
-        afterEvaluate {
-            val sitePreviewEnabled = releaseExt.sitePreviewEnabled.get()
-            if (!sitePreviewEnabled) {
-                preparePreviewSiteRepo {
-                    enabled = false
-                }
-                pushPreviewSite {
-                    enabled = false
-                }
-            }
-            syncPreviewSiteRepo {
-                enabled = sitePreviewEnabled
-                for (c in releaseExt.previewSiteContents.get()) {
-                    with(c)
-                }
-            }
         }
 
         return pushPreviewSite

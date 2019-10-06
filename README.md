@@ -151,6 +151,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.32.0
+* stage-vote-release-plugin: add releaseArtifacts {...} extension to pass artifacts across Gradle's modules
+
 v1.31.0
 * checksum-dependency-plugin: added `pgpMinLoggableTimeout` (default 4 seconds) to reduce the verbosity of the plugin
 * checksum-dependency-plugin: added `checksumUpdateAll` property for simplified `checksum.xml` update without build failure

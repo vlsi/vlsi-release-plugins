@@ -178,39 +178,19 @@ open class ReleaseExtension @Inject constructor(
 
     val checksums = objects.listProperty<Any>()
 
+    @Deprecated(message = "Please use releaseArtifacts { artifact(...) }")
     fun archive(taskProvider: TaskProvider<out AbstractArchiveTask>) {
-        val task = taskProvider.get()
-        archives.add(task)
-        val project = task.project
-        val shaTask = project.tasks.register(taskProvider.name + "Sha512") {
-            val archiveFile = task.archiveFile
-            inputs.file(archiveFile)
-            outputs.file(archiveFile.map { File(it.asFile.absolutePath + ".sha512") })
-            doLast {
-                ant.withGroovyBuilder {
-                    "checksum"(
-                        "file" to archiveFile.get(),
-                        "algorithm" to "SHA-512",
-                        "fileext" to ".sha512"
-                    )
-                }
-            }
-        }
-        checksums.add(shaTask.get())
-        project.configure<SigningExtension> {
-            val signTask = sign(task)
-            // Note signTask does not hav
-            checksums.add(signTask)
-            project.tasks.named(BasePlugin.ASSEMBLE_TASK_NAME) {
-                dependsOn(shaTask, signTask)
-            }
-        }
+        project.the<ReleaseArtifacts>().artifact(taskProvider)
     }
 
+    @Deprecated(message = "Please use previewSiteSpec", replaceWith = ReplaceWith("previewSiteSpec"), level = DeprecationLevel.ERROR)
     val previewSiteContents = objects.listProperty<CopySpec>()
 
+    val previewSiteSpec = project.copySpec()
+
+    @Deprecated(message = "Please use releaseArtifacts { previewSite { ... }", level = DeprecationLevel.ERROR)
     fun previewSiteContents(action: Action<CopySpec>) {
-        previewSiteContents.add(project.copySpec(action))
+        previewSiteSpec.with(project.copySpec(action))
     }
 
     val svnDist = objects.newInstance<SvnDistConfig>(this, project)
