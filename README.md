@@ -153,6 +153,7 @@ Change log
 ----------
 v1.32.0
 * stage-vote-release-plugin: add releaseArtifacts {...} extension to pass artifacts across Gradle's modules
+* stage-vote-release-plugin: validate Git username/password before release starts
 
 v1.31.0
 * checksum-dependency-plugin: added `pgpMinLoggableTimeout` (default 4 seconds) to reduce the verbosity of the plugin

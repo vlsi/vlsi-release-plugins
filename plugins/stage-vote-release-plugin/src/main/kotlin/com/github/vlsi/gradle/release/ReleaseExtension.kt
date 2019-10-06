@@ -24,12 +24,9 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.kotlin.dsl.* // ktlint-disable
-import org.gradle.plugins.signing.SigningExtension
-import java.io.File
 import java.net.URI
 import javax.inject.Inject
 
@@ -47,18 +44,19 @@ open class ReleaseExtension @Inject constructor(
 ) {
     internal val repositoryIdStore = NexusRepositoryIdStore(project)
 
-    internal fun validateCredentials(credentials: Credentials) =
-        Runnable {
-            credentials.username(project, required = true)
-            credentials.password(project, required = true)
-        }
-
     val validateSvnParams = mutableListOf<Runnable>().apply {
         add(Runnable {
             // Validate that credentials should be present
             if (repositoryType.get() == RepositoryType.PROD) {
                 svnDist {
                     credentials.username(project, required = true)
+                }
+            }
+        })
+        add(Runnable {
+            // Validate that credentials should be present
+            if (repositoryType.get() == RepositoryType.PROD) {
+                svnDist {
                     credentials.password(project, required = true)
                 }
             }
@@ -71,6 +69,13 @@ open class ReleaseExtension @Inject constructor(
             if (repositoryType.get() == RepositoryType.PROD) {
                 nexus {
                     credentials.username(project, required = true)
+                }
+            }
+        })
+        add(Runnable {
+            // Validate that credentials should be present
+            if (repositoryType.get() == RepositoryType.PROD) {
+                nexus {
                     credentials.password(project, required = true)
                 }
             }
@@ -216,12 +221,12 @@ open class ReleaseExtension @Inject constructor(
         })
     }
 
-    val source by git.registering {
+    val source by git.creating {
         branch.convention("master")
         gitUrlConvention()
     }
 
-    val sitePreview by git.registering {
+    val sitePreview by git.creating {
         branch.convention("gh-pages")
         gitUrlConvention("-site-preview")
     }
@@ -229,7 +234,7 @@ open class ReleaseExtension @Inject constructor(
     val sitePreviewEnabled = objects.property<Boolean>()
         .convention(project.stringProperty("sitePreviewEnabled").toBool(nullAs = true))
 
-    val site by git.registering {
+    val site by git.creating {
         branch.convention("asf-site")
         gitUrlConvention("-site")
     }
@@ -346,8 +351,8 @@ open class Credentials @Inject constructor(
 
     fun password(project: Project, required: Boolean = false): String? {
         val property = password.get()
-        val value = project.stringProperty(password.get(), required)
-        project.logger.debug("Using username from property {}", property, value?.let { "***" })
+        val value = project.stringProperty(property, required)
+        project.logger.debug("Using password from property {}", property, value?.let { "***" })
         return value
     }
 }

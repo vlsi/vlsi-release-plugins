@@ -24,7 +24,6 @@ import org.ajoberstar.grgit.Grgit
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.provider.Provider
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.publish.maven.tasks.GenerateMavenPom
 import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
@@ -126,8 +125,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             mustRunAfter(pushRcTag)
             dependsOn(validateSvnParams)
             dependsOn(validateReleaseParams)
-            files.from(releaseExt.archives.get())
-            files.from(releaseExt.checksums.get())
+            files.from(releaseExt.archives)
+            files.from(releaseExt.checksums)
         }
 
         val publishSvnDist = tasks.register<PromoteSvnRelease>(PUBLISH_SVN_DIST_TASK_NAME) {
@@ -138,8 +137,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             mustRunAfter(stageSvnDist)
             // pushReleaseTag is easier to rollback, so we push it first
             dependsOn(pushReleaseTag)
-            files.from(releaseExt.archives.get())
-            files.from(releaseExt.checksums.get())
+            files.from(releaseExt.archives)
+            files.from(releaseExt.checksums)
         }
 
         // Tasks from NexusStagingPlugin
@@ -211,22 +210,28 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             if (hasTask(validateSvnParams.get())) {
                 validations += releaseExt.validateSvnParams
             }
-            if ((hasTask(pushRcTag.get()) || hasTask(pushReleaseTag.get())) &&
-                releaseExt.repositoryType.get() == RepositoryType.PROD) {
+            if (hasTask(pushRcTag.get()) || hasTask(pushReleaseTag.get())) {
                 validations += Runnable {
-                    releaseExt.source {
-                        credentials.username(project, required = true)
-                        credentials.password(project, required = true)
+                    releaseExt.source.credentials {
+                        username(project, required = true)
+                    }
+                }
+                validations += Runnable {
+                    releaseExt.source.credentials {
+                        password(project, required = true)
                     }
                 }
             }
             if (releaseExt.sitePreviewEnabled.get() &&
-                hasTask(pushPreviewSite.get()) &&
-                releaseExt.repositoryType.get() == RepositoryType.PROD) {
+                hasTask(pushPreviewSite.get())) {
                 validations += Runnable {
-                    releaseExt.sitePreview {
-                        credentials.username(project, required = true)
-                        credentials.password(project, required = true)
+                    releaseExt.sitePreview.credentials {
+                        username(project, required = true)
+                    }
+                }
+                validations += Runnable {
+                    releaseExt.sitePreview.credentials {
+                        password(project, required = true)
                     }
                 }
             }
@@ -290,7 +295,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         }
     }
 
-    private fun DefaultGitTask.rootGitRepository(repo: Provider<GitConfig>) {
+    private fun DefaultGitTask.rootGitRepository(repo: GitConfig) {
         repository.set(repo)
         repositoryLocation.set(project.rootDir)
     }
@@ -511,8 +516,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                         },
                     svnStagingUri = svnDist.url.get().let { it.replacePath(it.path + "/" + svnDist.stageFolder.get()) },
                     nexusRepositoryUri = repoUri,
-                    previewSiteUri = releaseExt.sitePreview.get().urls.get().pagesUri,
-                    sourceCodeTagUrl = releaseExt.source.get().urls.get().tagUri(releaseExt.rcTag.get())
+                    previewSiteUri = releaseExt.sitePreview.urls.get().pagesUri,
+                    sourceCodeTagUrl = releaseExt.source.urls.get().tagUri(releaseExt.rcTag.get())
                 )
                 val voteText = releaseExt.voteText.get().invoke(releaseParams)
                 file(voteMailFile).writeText(voteText)

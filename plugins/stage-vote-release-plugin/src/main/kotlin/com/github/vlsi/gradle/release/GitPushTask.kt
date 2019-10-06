@@ -49,7 +49,7 @@ open class GitPushTask : DefaultGitTask() {
         jgit {
             updateRemoteParams(repository)
             val remoteName = repository.remote.get()
-            logger.lifecycle("Pushing release tag to Git remote $remoteName: ${repository.urls.get().pushUrl}")
+            logger.lifecycle("Pushing tag to Git remote $remoteName: ${repository.urls.get().pushUrl}")
             val pushResults = push {
                 setCredentials(repository, project)
                 remote = remoteName
