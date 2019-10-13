@@ -151,6 +151,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.33.0
+* checksum-dependency-plugin: reduce verbosity by using the actual duration of "PGP key retrieval" to decide if the timeout is loggable or not
+
 v1.32.0
 * stage-vote-release-plugin: add releaseArtifacts {...} extension to pass artifacts across Gradle's modules
 * stage-vote-release-plugin: validate Git username/password before release starts

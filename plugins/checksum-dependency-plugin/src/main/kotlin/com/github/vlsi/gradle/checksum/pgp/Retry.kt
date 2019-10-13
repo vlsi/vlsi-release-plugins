@@ -36,7 +36,7 @@ abstract class DelayedTask(
     val retrySchedule: RetrySchedule,
     var timestamp: Long
 ) : Delayed {
-    var nextDelay: Long = 0
+    var nextDelay: Long = retrySchedule.initialDelay
     var latency: Long = 0
     var maxTimeout: Long = 500
 
@@ -164,7 +164,7 @@ class Retry(
         var seen404 = false
         while (attempt < retryCount) {
             attempt += 1
-
+            val attemptStart = System.currentTimeMillis()
             val address = borrowAddress(deadline) ?: break
             val spec = ShouldRetrySpec(
                 attempt,
@@ -189,7 +189,8 @@ class Retry(
                     }
                     throwable is ConnectException ||
                             throwable is SocketTimeoutException -> {
-                        val isSevere = address.maxTimeout >= minLoggableTimeout.toMillis()
+                        val attemptDuration = System.currentTimeMillis() - attemptStart
+                        val isSevere = attemptDuration >= minLoggableTimeout.toMillis()
                         // Build message only in case it will be printed
                         if (isSevere || logger.isDebugEnabled) {
                             val message =

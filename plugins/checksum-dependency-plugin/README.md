@@ -472,6 +472,9 @@ Verification options
 
 Changelog
 ---------
+v1.33.0
+* Reduce verbosity by using the actual duration of "PGP key retrieval" to decide if the timeout is loggable or not
+
 v1.31.0
 * Added `pgpMinLoggableTimeout` (default 4 seconds) to reduce the verbosity of the plugin
 * Added `checksumUpdateAll` property for simplified `checksum.xml` update without build failure
