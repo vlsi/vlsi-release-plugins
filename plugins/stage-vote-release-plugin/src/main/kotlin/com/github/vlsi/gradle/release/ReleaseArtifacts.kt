@@ -68,6 +68,7 @@ open class ReleaseArtifacts @Inject constructor(
         val archiveFile = task.archiveFile
         val sha512File = archiveFile.map { File(it.asFile.absolutePath + ".sha512") }
         val shaTask = project.tasks.register(taskProvider.name + "Sha512") {
+            onlyIf { task.didWork }
             inputs.file(archiveFile)
             outputs.file(sha512File)
             doLast {
