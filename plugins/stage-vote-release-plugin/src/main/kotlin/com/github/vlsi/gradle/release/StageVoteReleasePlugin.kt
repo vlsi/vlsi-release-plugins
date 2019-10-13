@@ -478,8 +478,10 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
     ) =
         tasks.register(GENERATE_VOTE_TEXT_TASK_NAME) {
             mustRunAfter(pushPreviewSite, stageDist)
-            // Note: task is not incremental, and inputs are deliberatly not declared here
+            // Note: task is not incremental, and we enforce Gradle to re-execute it
             // Otherwise we would have to duplicate ReleaseParams logic as "inputs"
+            outputs.upToDateWhen { false }
+
             val releaseExt = project.the<ReleaseExtension>()
             dependsOn(releaseExt.archives)
             dependsOn(releaseExt.checksums)

@@ -153,6 +153,7 @@ Change log
 ----------
 v1.33.0
 * checksum-dependency-plugin: reduce verbosity by using the actual duration of "PGP key retrieval" to decide if the timeout is loggable or not
+* stage-vote-release-plugin: treat generateVoteText as non-incremental task (avoid caching of the mails between rc1, rc2, and so on)
 
 v1.32.0
 * stage-vote-release-plugin: add releaseArtifacts {...} extension to pass artifacts across Gradle's modules
