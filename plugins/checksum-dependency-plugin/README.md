@@ -267,7 +267,7 @@ It works as follows:
 
 * Key `1122334455667788` would be ignored as if it did not exist. The plugin won't try downloading it.
 
-    This might help when `.asc` signature references a key that known to be absent on public keyservers (e.g. when private/public part is lost).  
+    This might help when `.asc` signature references a key that known to be absent on public keyservers (e.g. when private/public part is lost).
 
 * When dependency has neither dependency-specific configuration nor `trusted-keys`, the artifact would be matched against `<trust-requirement` (==default trust configuration).
 
@@ -275,10 +275,10 @@ It works as follows:
 
     `<trust-requirement pgp='GROUP'` means that artifacts are trusted if they are signed with a `group` key (see "When dependency-specific configuration is missing" below)
     `<trust-requirement pgp='MODULE'` means that artifacts are trusted if they are signed with a `module` key (see "When dependency-specific configuration is present" below)
-    `<trust-requirement pgp='NONE'` means that PGP is not verified by default (== it implies that checksums would have to be specified for all the artifacts) 
+    `<trust-requirement pgp='NONE'` means that PGP is not verified by default (== it implies that checksums would have to be specified for all the artifacts)
 
-    `<trust-requirement checksum='NONE'` means that checksums are not  
-    `<trust-requirement pgp='NONE'` means that PGP is not verified by default (== it implies that checksums would have to be specified for all the artifacts) 
+    `<trust-requirement checksum='NONE'` means that checksums are not
+    `<trust-requirement pgp='NONE'` means that PGP is not verified by default (== it implies that checksums would have to be specified for all the artifacts)
 
     For instance, the above configuration has no entries for `com.google.guava:guava:...` because
     `trusted-keys` has no entries for `com.google.guava`, and the only listed `<dependency` is different.
@@ -287,20 +287,20 @@ It works as follows:
 
     Suggested options:
 
-    * `<trust-requirement pgp='GROUP' checksum='NONE' />` (default) 
+    * `<trust-requirement pgp='GROUP' checksum='NONE' />` (default)
 
         Use `group` PGP keys for verification, and fall back to SHA-512 when no signatures are present.
         This configuration simplifies dependency updates.
- 
-    * `<trust-requirement pgp='MODULE' checksum='NONE' />` 
+
+    * `<trust-requirement pgp='MODULE' checksum='NONE' />`
 
         Use `module` PGP keys for verification. Note: as of now, module means `group:artifact:version:classifier@extension`,
-        so dependency version update would require to add new section to `checksum.xml`.  
+        so dependency version update would require to add new section to `checksum.xml`.
 
-    * `<trust-requirement pgp='MODULE' checksum='MODULE' />` 
+    * `<trust-requirement pgp='MODULE' checksum='MODULE' />`
 
-        It is the most secure setting, however it might be more complicated to maintain.  
- 
+        It is the most secure setting, however it might be more complicated to maintain.
+
 * When dependency-specific configuration is missing, `trusted-keys` are used to verify the dependency via `group`
 
     For instance, `org.jetbrains:annotations:17.0.0` would be accepted if the artifact is signed via key `bcf4173966770193`.
@@ -396,7 +396,7 @@ Configuration properties
 * `pgpRetryCount` (default: `30`) specifies the number of attempts to download a PGP key. If the key cannot be downloaded the build is failed.
 
     The list of retried response codes include: `HTTP_CLIENT_TIMEOUT` (408), `HTTP_INTERNAL_ERROR` (500),
-    `HTTP_BAD_GATEWAY` (502), `HTTP_UNAVAILABLE` (503), `HTTP_GATEWAY_TIMEOUT` (504) 
+    `HTTP_BAD_GATEWAY` (502), `HTTP_UNAVAILABLE` (503), `HTTP_GATEWAY_TIMEOUT` (504)
 
 * `pgpResolutionTimeout` (seconds, default: `40`) specifies maximum duration for resolution of a single key (including all retry attempts)
 
