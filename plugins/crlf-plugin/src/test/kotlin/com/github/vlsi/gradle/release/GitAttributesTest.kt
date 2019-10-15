@@ -21,8 +21,14 @@ import org.eclipse.jgit.attributes.AttributesNode
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.nio.file.Paths
+import org.junit.jupiter.api.assertAll
+
 
 class GitAttributesTest {
+    private fun String.toAttributes() =
+        byteInputStream()
+            .use { stream -> AttributesNode().also { it.parse(stream) } }
+
     @Test
     internal fun name() {
         val m = GitAttributesMerger(Paths.get(".", "attributetest"))
@@ -34,12 +40,62 @@ class GitAttributesTest {
                 *.sh     text eol=lf
                 *.png    binary
             """.trimIndent()
-                .byteInputStream()
-                .use { stream -> AttributesNode().also { it.parse(stream) } }
+                .toAttributes()
 
         Assertions.assertEquals(
             "Attributes[ text=auto ]",
             m.compute("/dir/test.bat", true).toString()
         ) { "/dir/test.bat" }
+    }
+
+    @Test
+    fun subdirWithSlashPath() {
+        val m = GitAttributesMerger(Paths.get(".", "attributetest"))
+
+        m["/"] =
+            """
+                *        text=auto
+                /root.txt eol=crlf
+            """.trimIndent()
+                .toAttributes()
+
+        m["/test"] =
+            """
+                /test.txt eol=crlf
+            """.trimIndent()
+                .toAttributes()
+
+        assertAll(
+            {
+                Assertions.assertEquals(
+                    "Attributes[ text=auto ]",
+                    m.compute("/test.txt", true).toString()
+                ) { "/test.txt" }
+            },
+            {
+                Assertions.assertEquals(
+                    "Attributes[ eol=crlf text=auto ]",
+                    m.compute("/test/test.txt", true).toString()
+                ) { "/test/test.txt" }
+            },
+            {
+                Assertions.assertEquals(
+                    "Attributes[ text=auto ]",
+                    m.compute("/test/test/test.txt", true).toString()
+                ) { "/test/test/test.txt" }
+            },
+            {
+                Assertions.assertEquals(
+                    "Attributes[ eol=crlf text=auto ]",
+                    m.compute("/root.txt", true).toString()
+                ) { "/root.txt" }
+            },
+            {
+                Assertions.assertEquals(
+                    "Attributes[ text=auto ]",
+                    m.compute("/test/root.txt", true).toString()
+                ) { "/test/root.txt" }
+            }
+        )
     }
 }

@@ -38,6 +38,9 @@ open class ParentAndPrefix<T>(
 )
 
 abstract class GitNode<E : GitNode<E>>(val parent: ParentAndPrefix<E>?) {
+    val totalPrefixLength: Int =
+        parent?.let { it.prefix.length + it.ref.totalPrefixLength + 1 } ?: 0
+
     protected fun appendPrefix(sb: StringBuilder) {
         if (parent == null) {
             sb.append("/")
@@ -110,7 +113,7 @@ abstract class GitHolder<T, V>(rootPath: Path) {
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun compute(path: RelativePath): V =
-        compute(path.segments.joinToString("/", "/", "/"), path.isFile)
+        compute(path.segments.joinToString("/", "/", ""), path.isFile)
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun compute(element: FileTreeElement): V =
@@ -271,7 +274,9 @@ class GitAttributesMerger(rootPath: Path) : GitHolder<GitAttributesNode, Attribu
     override fun compute(entryPath: String?, isFile: Boolean) =
         Attributes().also {
             if (entryPath != null) {
-                findNode(entryPath)?.mergeTo(it, entryPath, isFile)
+                findNode(entryPath)?.run {
+                    mergeTo(it, entryPath.substring(totalPrefixLength), isFile)
+                }
                 // Remove unspecified attributes
                 for (attribute in it.all) {
                     if (attribute.state == Attribute.State.UNSPECIFIED) {

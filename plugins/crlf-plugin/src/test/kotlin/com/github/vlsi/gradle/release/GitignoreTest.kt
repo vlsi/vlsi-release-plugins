@@ -43,6 +43,21 @@ class GitignoreTest {
             """.trimIndent(),
             ignores.toString()
         )
+        Assertions.assertEquals(
+            """
+                # /
+                /**/* text=auto
+                /**/*.txt text
+                /**/*.sh text eol=lf
+                /**/*.png binary
+
+                # /non_ignored/
+                /non_ignored/**/*.txt eol=lf
+                /non_ignored/crlf.txt eol=crlf
+
+            """.trimIndent(),
+            attrs.toString()
+        )
         ignores.assertSatisfy(true, "ignored", "abcd")
         ignores.assertNotSatisfy(true, "ignoredd", "abcd")
         ignores.assertNotSatisfy(true, "subdir", "abcd")
@@ -51,6 +66,7 @@ class GitignoreTest {
         ignores.assertNotSatisfy(true, "subdir", "signored", "abcd")
         attrs.assertType("Attributes[ text ]", true, "subsdir", "test.txt")
         attrs.assertType("Attributes[ eol=lf text ]", true, "non_ignored", "test.txt")
+        attrs.assertType("Attributes[ eol=crlf text ]", true, "non_ignored", "crlf.txt")
     }
 
     private fun absoluteSegments(vararg segments: String): Array<String> =
