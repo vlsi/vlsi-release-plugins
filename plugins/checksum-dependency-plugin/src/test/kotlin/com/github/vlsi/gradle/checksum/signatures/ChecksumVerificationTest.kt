@@ -108,6 +108,53 @@ class ChecksumVerificationTest : BaseGradleTest() {
 
     @ParameterizedTest
     @MethodSource("gradleVersionAndSettings")
+    fun `unresolvable dependencies`(gradleVersion: String) {
+        createSettings()
+
+        // tmp configuration is unresolvable, and it should not stop the plugin
+        projectDir.resolve("build.gradle").write("""
+             plugins { id 'java-library' }
+
+             configurations { tmp { extendsFrom(runtimeOnly) } }
+             dependencies { constraints { runtime("org.jodd:jodd-core:5.0.6") } }
+             dependencies { runtimeOnly("org.jodd:jodd-core") }
+             repositories { mavenCentral() }
+        """
+        )
+        projectDir.resolve("checksum.xml").write("""
+            <?xml version='1.0' encoding='utf-8'?>
+            <dependency-verification version='1'>
+              <trust-requirement pgp='GROUP' checksum='NONE' />
+              <ignored-keys />
+              <trusted-keys>
+                <trusted-key id='91ae1504568ec4dd' group='org.jodd' />
+              </trusted-keys>
+              <dependencies />
+            </dependency-verification>
+        """.trimIndent())
+        val result =
+            prepare(gradleVersion, "allDependencies", "--quiet", "--info", "--stacktrace")
+                .build()
+        val updatedChecksums = projectDir.resolve("build/checksum/checksum.xml").read()
+        Assertions.assertEquals(
+            """
+            <?xml version='1.0' encoding='utf-8'?>
+            <dependency-verification version='1'>
+              <trust-requirement pgp='GROUP' checksum='NONE' />
+              <ignored-keys />
+              <trusted-keys>
+                <trusted-key id='91ae1504568ec4dd' group='org.jodd' />
+              </trusted-keys>
+              <dependencies />
+            </dependency-verification>
+            """.trimIndent().normalizeEol() + "\n", updatedChecksums.normalizeEol()
+        ) {
+            "Build output: ${result.output}"
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("gradleVersionAndSettings")
     fun `plugin and dependencies detected, fail_on=build_finish`(gradleVersion: String) {
         createSettings()
 

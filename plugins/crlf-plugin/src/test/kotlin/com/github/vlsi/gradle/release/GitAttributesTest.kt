@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Paths
 import org.junit.jupiter.api.assertAll
 
-
 class GitAttributesTest {
     private fun String.toAttributes() =
         byteInputStream()

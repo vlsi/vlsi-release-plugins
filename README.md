@@ -153,6 +153,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.35.0
+* checksum-dependency-plugin: ignore unresovable dependencies (see https://youtrack.jetbrains.com/issue/KT-34394 )
+
 v1.34.0
 * crlf-plugin: proper support of absolute paths in non-root gitignore files
 

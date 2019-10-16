@@ -145,6 +145,8 @@ class ChecksumDependency(
         val originalArtifacts =
             dependencies.artifactView {
                 componentFilter { it is ModuleComponentIdentifier }
+                // Ignore unresolvable dependencies
+                isLenient = true
             }.artifacts
         val originalFiles = mutableMapOf<Id, File>()
         val actualChecksums = ActualChecksums()
@@ -354,7 +356,19 @@ class ChecksumDependency(
             sb.appendViolations(configuration, violations)
         }
         if (failOn == FailOn.FIRST_ERROR) {
-            sb.appendln("\nYou might want to add -PchecksumFailOn=build_finish if you are brave enough")
+            sb.appendln("\nThere might be more checksum violations," +
+                    " however, current configuration specifies the build to fail on the first violation.")
+            sb.append("You might use the following properties:" +
+                    "\n  * -PchecksumIgnore temporary disables checksum-dependency-plugin (e.g. to try new dependencies)")
+            if (!checksumUpdateRequested) {
+                sb.append(
+                    "\n  * -PchecksumUpdate updates checksum.xml and it will fail after the first violation so you can review the diff"
+                )
+            }
+            sb.appendln(
+                    "\n  * -PchecksumUpdateAll (insecure) updates checksum.xml with all the new discovered checksums" +
+                    "\n  * -PchecksumFailOn=build_finish (insecure) It will postpone the failure till the build finish"
+            )
             sb.append("It will collect all the violations, however untrusted code might be executed (e.g. from a plugin)")
         }
         sb.append("\nYou can find updated checksum.xml file at $computedChecksumFile.")
