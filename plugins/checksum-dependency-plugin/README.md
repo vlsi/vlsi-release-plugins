@@ -118,7 +118,7 @@ Kotlin DSL:
 // Checksum plugin sources can be validated at https://github.com/vlsi/vlsi-release-plugins
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.33.0") {
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.35.0") {
             // Gradle ships kotlin-stdlib which is good enough
             exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         }
@@ -138,8 +138,8 @@ val expectedSha512 = mapOf(
             to "okhttp-4.1.0.jar",
     "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
             to "okio-2.2.2.jar",
-    "A9064CB324A9F8936B897ADAEAABC759F8F61C27D1985D5DA87B5DB6B995D02D1F395ACD5D3BC1056CB652ABC5B99B7B110BFAD825D0C0A4819039A04F4D2CE"
-            to "checksum-dependency-plugin-1.33.0.jar"
+    "748480D8C328C7F3D4923C22DDEC796CDDB62207BC851DD2CE10B678F7F98FB6AFDF1CD5AB2F239E8D831D3DD333F340323006123A07231F4E165CC3F0E16B6C"
+            to "checksum-dependency-plugin-1.35.0.jar"
 )
 
 fun File.sha512(): String {
@@ -172,7 +172,7 @@ Groovy DSL:
 // See https://github.com/vlsi/vlsi-release-plugins
 buildscript {
   dependencies {
-    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.33.0') {
+    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.35.0') {
       // Gradle ships kotlin-stdlib which is good enough
       exclude(group: "org.jetbrains.kotlin", module:"kotlin-stdlib")
     }
@@ -192,8 +192,8 @@ def expectedSha512 = [
     'okhttp-4.1.0.jar',
   '93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7':
     'okio-2.2.2.jar',
-  'A9064CB324A9F8936B897ADAEAABC759F8F61C27D1985D5DA87B5DB6B995D02D1F395ACD5D3BC1056CB652ABC5B99B7B110BFAD825D0C0A4819039A04F4D2CE':
-    'checksum-dependency-plugin-1.33.0.jar'
+  '748480D8C328C7F3D4923C22DDEC796CDDB62207BC851DD2CE10B678F7F98FB6AFDF1CD5AB2F239E8D831D3DD333F340323006123A07231F4E165CC3F0E16B6C':
+    'checksum-dependency-plugin-1.35.0.jar'
 ]
 
 static def sha512(File file) {
