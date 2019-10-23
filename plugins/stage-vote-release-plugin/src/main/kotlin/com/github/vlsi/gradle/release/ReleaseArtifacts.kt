@@ -76,7 +76,8 @@ open class ReleaseArtifacts @Inject constructor(
                     "checksum"(
                         "file" to archiveFile.get(),
                         "algorithm" to "SHA-512",
-                        "fileext" to ".sha512"
+                        "fileext" to ".sha512",
+                        "format" to "MD5SUM"
                     )
                 }
             }
