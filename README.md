@@ -153,6 +153,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.36.0
+* checksum-dependency-plugin: use `MD5SUM` format for `.sha512` files so the checkums can be verified with `shasum -c *.sha512`
+
 v1.35.0
 * checksum-dependency-plugin: ignore unresovable dependencies (see https://youtrack.jetbrains.com/issue/KT-34394 )
 
