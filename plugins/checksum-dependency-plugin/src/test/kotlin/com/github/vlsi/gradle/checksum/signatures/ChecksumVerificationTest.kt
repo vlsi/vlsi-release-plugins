@@ -18,7 +18,9 @@ package com.github.vlsi.gradle.checksum.signatures
 
 import org.gradle.api.JavaVersion
 import org.gradle.testkit.runner.BuildTask
+import org.gradle.util.GradleVersion
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -109,6 +111,7 @@ class ChecksumVerificationTest : BaseGradleTest() {
     @ParameterizedTest
     @MethodSource("gradleVersionAndSettings")
     fun `unresolvable dependencies`(gradleVersion: String) {
+        Assumptions.assumeTrue(GradleVersion.version(gradleVersion) >= GradleVersion.version("5.0"), "Dependency constraints are suported in Gradle 5.0+ only")
         createSettings()
 
         // tmp configuration is unresolvable, and it should not stop the plugin
