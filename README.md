@@ -153,6 +153,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.37.0
+* stage-vote-release-plugin: execute sha512 and signing tasks only when input files exist
+
 v1.36.0
 * checksum-dependency-plugin: use `MD5SUM` format for `.sha512` files so the checkums can be verified with `shasum -c *.sha512`
 
