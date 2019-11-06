@@ -16,9 +16,9 @@
  */
 package com.github.vlsi.gradle.checksum.signatures
 
+import java.nio.file.Path
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.io.TempDir
-import java.nio.file.Path
 
 open class BaseGradleTest {
     protected val gradleRunner = GradleRunner.create().withPluginClasspath()

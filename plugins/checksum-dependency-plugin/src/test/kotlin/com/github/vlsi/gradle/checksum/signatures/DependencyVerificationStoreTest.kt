@@ -17,9 +17,9 @@
 package com.github.vlsi.gradle.checksum.signatures
 
 import com.github.vlsi.gradle.checksum.model.DependencyVerificationStore
+import java.io.StringWriter
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.io.StringWriter
 
 val CHECKSUMS = """
     <?xml version='1.0' encoding='utf-8'?>

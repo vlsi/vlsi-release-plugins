@@ -19,6 +19,8 @@ package com.github.vlsi.gradle.ide
 import com.github.vlsi.gradle.ide.dsl.copyright
 import com.github.vlsi.gradle.ide.dsl.settings
 import com.github.vlsi.gradle.ide.dsl.taskTriggers
+import java.io.File
+import java.net.URI
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.JavaPlugin
@@ -29,8 +31,6 @@ import org.gradle.kotlin.dsl.get
 import org.gradle.plugins.ide.eclipse.model.EclipseModel
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.gradle.ext.ProjectSettings
-import java.io.File
-import java.net.URI
 
 open class IdeExtension(private val project: Project) {
     var ideaInstructionsUri: URI? = null

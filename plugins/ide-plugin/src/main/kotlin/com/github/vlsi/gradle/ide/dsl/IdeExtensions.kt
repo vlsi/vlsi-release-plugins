@@ -17,7 +17,7 @@
 package com.github.vlsi.gradle.ide.dsl
 
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.kotlin.dsl.* // ktlint-disable
+import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.ide.idea.model.IdeaProject
 import org.jetbrains.gradle.ext.CopyrightConfiguration
 import org.jetbrains.gradle.ext.GroovyCompilerConfiguration

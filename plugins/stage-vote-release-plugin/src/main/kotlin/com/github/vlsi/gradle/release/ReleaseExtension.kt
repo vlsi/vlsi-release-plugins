@@ -16,9 +16,9 @@
  */
 package com.github.vlsi.gradle.release
 
+import java.net.URI
+import javax.inject.Inject
 import org.ajoberstar.grgit.Grgit
-import org.eclipse.jgit.lib.Constants
-import org.eclipse.jgit.lib.Repository
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -26,9 +26,7 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
-import org.gradle.kotlin.dsl.* // ktlint-disable
-import java.net.URI
-import javax.inject.Inject
+import org.gradle.kotlin.dsl.*
 
 /**
  * Setting up local release environment:

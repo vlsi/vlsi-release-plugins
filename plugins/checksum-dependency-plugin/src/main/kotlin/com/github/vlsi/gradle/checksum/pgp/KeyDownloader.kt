@@ -18,13 +18,13 @@ package com.github.vlsi.gradle.checksum.pgp
 
 import com.github.vlsi.gradle.checksum.debug
 import com.github.vlsi.gradle.checksum.hexKey
+import java.net.InetAddress
+import java.net.URI
+import java.time.Duration
 import okhttp3.Dns
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.gradle.api.logging.Logging
-import java.net.InetAddress
-import java.net.URI
-import java.time.Duration
 
 private val logger = Logging.getLogger(KeyDownloader::class.java)
 

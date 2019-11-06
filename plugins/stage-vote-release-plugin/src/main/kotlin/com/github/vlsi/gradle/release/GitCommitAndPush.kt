@@ -16,7 +16,7 @@
  */
 package com.github.vlsi.gradle.release
 
-import com.github.vlsi.gradle.release.jgit.dsl.* // ktlint-disable
+import com.github.vlsi.gradle.release.jgit.dsl.*
 import org.eclipse.jgit.api.errors.EmptyCommitException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction

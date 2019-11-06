@@ -23,6 +23,7 @@ import com.github.vlsi.gradle.git.FilterTextLf
 import com.github.vlsi.gradle.git.FindGitAttributes
 import com.github.vlsi.gradle.git.GitAttributesMerger
 import com.github.vlsi.gradle.git.GitProperties
+import java.nio.charset.StandardCharsets
 import org.eclipse.jgit.attributes.Attributes
 import org.eclipse.jgit.lib.CoreConfig
 import org.gradle.api.Task
@@ -30,8 +31,7 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCopyDetails
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.kotlin.dsl.* // ktlint-disable
-import java.nio.charset.StandardCharsets
+import org.gradle.kotlin.dsl.*
 
 class CrLfSpec(val textEol: LineEndings = LineEndings.SYSTEM) {
     fun CopySpec.textFrom(o: Any, eol: LineEndings = textEol) =

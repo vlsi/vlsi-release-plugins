@@ -16,6 +16,9 @@
  */
 package com.github.vlsi.gradle.git
 
+import java.io.File
+import java.nio.file.Path
+import java.util.*
 import org.eclipse.jgit.attributes.Attribute
 import org.eclipse.jgit.attributes.Attributes
 import org.eclipse.jgit.attributes.AttributesHandler
@@ -28,9 +31,6 @@ import org.eclipse.jgit.treewalk.TreeWalk
 import org.gradle.api.file.FileTreeElement
 import org.gradle.api.file.RelativePath
 import org.gradle.api.specs.Spec
-import java.io.File
-import java.nio.file.Path
-import java.util.* // ktlint-disable
 
 open class ParentAndPrefix<T>(
     val ref: T,

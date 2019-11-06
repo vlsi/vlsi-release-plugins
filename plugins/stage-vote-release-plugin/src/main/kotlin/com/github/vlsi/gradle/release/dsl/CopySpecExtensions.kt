@@ -22,7 +22,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.kotlin.dsl.* // ktlint-disable
+import org.gradle.kotlin.dsl.*
 
 fun CopySpec.dependencyLicenses(task: BuildLicenseCopySpec) {
     from(task) // dependency

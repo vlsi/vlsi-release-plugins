@@ -16,7 +16,7 @@
  */
 package com.github.vlsi.gradle.checksum
 
-import java.util.* // ktlint-disable
+import java.util.*
 
 class SortedProperties(props: Properties) : Properties() {
     init {

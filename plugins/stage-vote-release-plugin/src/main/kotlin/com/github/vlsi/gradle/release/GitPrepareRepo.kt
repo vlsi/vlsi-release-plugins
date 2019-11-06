@@ -16,7 +16,7 @@
  */
 package com.github.vlsi.gradle.release
 
-import com.github.vlsi.gradle.release.jgit.dsl.* // ktlint-disable
+import com.github.vlsi.gradle.release.jgit.dsl.*
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.ResetCommand
 import org.eclipse.jgit.util.FileUtils

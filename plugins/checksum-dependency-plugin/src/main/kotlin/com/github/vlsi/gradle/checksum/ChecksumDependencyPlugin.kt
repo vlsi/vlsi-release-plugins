@@ -16,8 +16,12 @@
  */
 package com.github.vlsi.gradle.checksum
 
-import com.github.vlsi.gradle.checksum.model.* // ktlint-disable
-import com.github.vlsi.gradle.checksum.pgp.* // ktlint-disable
+import com.github.vlsi.gradle.checksum.model.*
+import com.github.vlsi.gradle.checksum.pgp.*
+import java.io.File
+import java.net.URI
+import java.time.Duration
+import java.util.concurrent.ForkJoinPool
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.GradleException
@@ -32,10 +36,6 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.register
 import org.gradle.util.GradleVersion
-import java.io.File
-import java.net.URI
-import java.time.Duration
-import java.util.concurrent.ForkJoinPool
 
 private val logger = Logging.getLogger(ChecksumDependencyPlugin::class.java)
 

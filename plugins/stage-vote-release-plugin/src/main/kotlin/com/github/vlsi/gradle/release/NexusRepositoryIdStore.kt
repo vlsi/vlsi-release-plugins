@@ -16,9 +16,9 @@
  */
 package com.github.vlsi.gradle.release
 
-import org.gradle.api.Project
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import org.gradle.api.Project
 
 class NexusRepositoryIdStore(private val project: Project) {
     private val savedIds = ConcurrentHashMap<String, String>()

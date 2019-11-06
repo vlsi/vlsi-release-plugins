@@ -16,8 +16,15 @@
  */
 package com.github.vlsi.gradle.checksum
 
-import com.github.vlsi.gradle.checksum.model.* // ktlint-disable
+import com.github.vlsi.gradle.checksum.model.*
 import com.github.vlsi.gradle.checksum.pgp.KeyStore
+import java.io.File
+import java.util.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Future
+import java.util.concurrent.atomic.AtomicLong
 import org.bouncycastle.openpgp.PGPPublicKey
 import org.bouncycastle.openpgp.PGPSignature
 import org.bouncycastle.openpgp.PGPSignatureList
@@ -25,7 +32,7 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.GradleException
-import org.gradle.api.artifacts.* // ktlint-disable
+import org.gradle.api.artifacts.*
 import org.gradle.api.artifacts.component.ComponentArtifactIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.dsl.RepositoryHandler
@@ -35,13 +42,6 @@ import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.internal.component.external.model.DefaultModuleComponentArtifactIdentifier
-import java.io.File
-import java.util.* // ktlint-disable
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CompletionException
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Future
-import java.util.concurrent.atomic.AtomicLong
 
 private val logger = Logging.getLogger(ChecksumDependency::class.java)
 

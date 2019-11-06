@@ -23,11 +23,12 @@
     <trusted-key id='86fdc7e2a11262cb' group='commons-codec' />
     <trusted-key id='1861c322c56014b2' group='commons-collections' />
     <trusted-key id='1241bc872c5e4ec0' group='commons-lang' />
-    <trusted-key id='a41f13c999945293' group='commons-logging' />
     <trusted-key id='33cd6733af5ec452' group='commons-logging' />
+    <trusted-key id='a41f13c999945293' group='commons-logging' />
     <trusted-key id='6449005f96bc97a3' group='de.undercouch' />
     <trusted-key id='379ce192d401ab61' group='info.picocli' />
     <trusted-key id='5b30d3b10694f057' group='io.codearte.gradle.nexus' />
+    <trusted-key id='efe8086f9e93774e' group='junit' />
     <trusted-key id='098a31f381819057' group='net.sourceforge.nekohtml' />
     <trusted-key id='c84125c13bf6f2f2' group='org.ajoberstar.grgit' />
     <trusted-key id='9daadc1c9fcc82d0' group='org.apache.commons' />
@@ -43,8 +44,10 @@
     <trusted-key id='466caed6e0747d50' group='org.codehaus.plexus' />
     <trusted-key id='c7bf26d0bb617866' group='org.eclipse.aether' />
     <trusted-key id='5b05ccde140c2876' group='org.eclipse.jgit' />
+    <trusted-key id='a6adfc93ef34893e' group='org.hamcrest' />
     <trusted-key id='bcf4173966770193' group='org.jetbrains' />
     <trusted-key id='379ce192d401ab61' group='org.jetbrains.intellij.deps' />
+    <trusted-key id='6a0975f8b1127b83' group='org.jetbrains.kotlin' />
     <trusted-key id='98fe03a974ce0a0b' group='org.jetbrains.kotlin' />
     <trusted-key id='379ce192d401ab61' group='org.jetbrains.kotlinx' />
     <trusted-key id='85911f425ec61b51' group='org.junit.jupiter' />
@@ -79,6 +82,9 @@
     </dependency>
     <dependency group='org.gradle.kotlin' module='plugins' version='1.2.9'>
       <sha512>F672FEB39919B2A78E0AEFA95E8BE023C856EA802FBB652EE97FF6BC935BB6E29B9E5E36CC62B9B52D970DE6C49AC0D07C1EC5588771FC2B89787AB94CAE6AC7</sha512>
+    </dependency>
+    <dependency group='org.gradle.kotlin' module='plugins' version='1.3.1'>
+      <sha512>8563C160EF97CF2E2C62875B438177212AC247304E4A94466C687F3E4D354E34D69BC31E790F8409BE55C16A25F2B0BABFC9C6311ECA64ADF932F68AB8B2B484</sha512>
     </dependency>
     <dependency group='org.jetbrains.dokka' module='dokka-fatjar' version='0.9.17'>
       <sha512>599E1F17E2160C5B04F23D4E58A7DD54B7C18D1722497A0CA314C920DC56A0ABA312BD8C871F015937526D004CC9F2C01BD8265A4F83E8556FF1854F35BFC662</sha512>

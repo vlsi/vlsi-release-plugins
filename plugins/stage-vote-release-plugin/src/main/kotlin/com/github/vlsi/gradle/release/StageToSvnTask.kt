@@ -16,7 +16,7 @@
  */
 package com.github.vlsi.gradle.release
 
-import org.gradle.api.tasks.* // ktlint-disable
+import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental

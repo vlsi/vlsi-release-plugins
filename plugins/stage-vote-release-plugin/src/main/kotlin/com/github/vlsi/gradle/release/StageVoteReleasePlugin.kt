@@ -20,6 +20,9 @@ import de.marcphilipp.gradle.nexus.InitializeNexusStagingRepository
 import de.marcphilipp.gradle.nexus.NexusPublishExtension
 import io.codearte.gradle.nexus.NexusStagingExtension
 import io.codearte.gradle.nexus.NexusStagingPlugin
+import java.io.File
+import java.net.URI
+import javax.inject.Inject
 import org.ajoberstar.grgit.Grgit
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.ObjectId
@@ -37,10 +40,7 @@ import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.reflect.Instantiator
-import org.gradle.kotlin.dsl.* // ktlint-disable
-import java.io.File
-import java.net.URI
-import javax.inject.Inject
+import org.gradle.kotlin.dsl.*
 
 class StageVoteReleasePlugin @Inject constructor(private val instantiator: Instantiator) :
     Plugin<Project> {

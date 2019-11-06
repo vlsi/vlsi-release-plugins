@@ -16,6 +16,7 @@
  */
 package com.github.vlsi.gradle.ide
 
+import java.io.File
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -23,7 +24,6 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.ide.idea.IdeaPlugin
-import java.io.File
 
 open class IdePlugin : Plugin<Project> {
     lateinit var ext: IdeExtension

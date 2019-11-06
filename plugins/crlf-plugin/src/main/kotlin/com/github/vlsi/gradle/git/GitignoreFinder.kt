@@ -16,12 +16,12 @@
  */
 package com.github.vlsi.gradle.git
 
+import java.io.IOException
+import java.nio.file.*
+import java.nio.file.attribute.BasicFileAttributes
+import java.util.*
 import org.eclipse.jgit.attributes.AttributesNode
 import org.eclipse.jgit.ignore.IgnoreNode
-import java.io.IOException
-import java.nio.file.* // ktlint-disable
-import java.nio.file.attribute.BasicFileAttributes
-import java.util.* // ktlint-disable
 
 private fun <E> MutableList<E>.removeLast() = removeAt(size - 1)
 

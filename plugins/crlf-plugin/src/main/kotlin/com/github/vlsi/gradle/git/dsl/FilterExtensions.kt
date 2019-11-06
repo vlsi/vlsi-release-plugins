@@ -19,13 +19,13 @@ package com.github.vlsi.gradle.git.dsl
 import com.github.vlsi.gradle.git.FindGitAttributes
 import com.github.vlsi.gradle.git.GitProperties
 import com.github.vlsi.gradle.git.findGitproperties
+import java.io.File
 import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.util.PatternFilterable
-import org.gradle.kotlin.dsl.* // ktlint-disable
-import java.io.File
+import org.gradle.kotlin.dsl.*
 
 fun PatternFilterable.gitignore(props: GitProperties) {
     val filter = props.ignores

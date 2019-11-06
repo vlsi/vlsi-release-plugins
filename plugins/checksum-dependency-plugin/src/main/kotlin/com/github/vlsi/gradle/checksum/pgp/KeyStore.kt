@@ -19,8 +19,6 @@ package com.github.vlsi.gradle.checksum.pgp
 import com.github.vlsi.gradle.checksum.Executors
 import com.github.vlsi.gradle.checksum.Stopwatch
 import com.github.vlsi.gradle.checksum.readPgpPublicKeys
-import org.bouncycastle.openpgp.PGPPublicKey
-import org.gradle.api.logging.Logging
 import java.io.File
 import java.nio.file.Files
 import java.util.concurrent.CompletableFuture
@@ -28,6 +26,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
+import org.bouncycastle.openpgp.PGPPublicKey
+import org.gradle.api.logging.Logging
 
 private val logger = Logging.getLogger(KeyStore::class.java)
 

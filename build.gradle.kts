@@ -23,7 +23,7 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     id("com.gradle.plugin-publish") version "0.10.1" apply false
-    id("com.diffplug.gradle.spotless") version "3.23.0"
+    id("com.diffplug.gradle.spotless") version "3.25.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "0.5"
     id("com.github.ben-manes.versions") version "0.21.0"
     id("org.jetbrains.dokka") version "0.9.17"
@@ -67,7 +67,7 @@ allprojects {
             kotlin {
                 // Generated build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
                 // has wrong indentation, and it is not clear how to exclude it
-                ktlint()
+                ktlint().userData(mapOf("disabled_rules" to "no-wildcard-imports"))
                 // It prints errors regarding build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
                 // so comment it for now :(
                 licenseHeaderFile(licenseHeaderFile)

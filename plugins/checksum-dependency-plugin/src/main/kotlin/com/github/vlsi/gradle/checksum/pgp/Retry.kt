@@ -17,13 +17,13 @@
 package com.github.vlsi.gradle.checksum.pgp
 
 import com.github.vlsi.gradle.checksum.info
-import org.gradle.api.logging.Logging
-import java.net.* // ktlint-disable
+import java.net.*
 import java.time.Duration
 import java.util.concurrent.DelayQueue
 import java.util.concurrent.Delayed
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import org.gradle.api.logging.Logging
 
 private val logger = Logging.getLogger(Retry::class.java)
 

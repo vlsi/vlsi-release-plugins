@@ -16,11 +16,11 @@
  */
 package com.github.vlsi.gradle.checksum
 
-import org.bouncycastle.openpgp.* // ktlint-disable
-import org.bouncycastle.openpgp.bc.BcPGPObjectFactory
-import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator
 import java.io.File
 import java.io.InputStream
+import org.bouncycastle.openpgp.*
+import org.bouncycastle.openpgp.bc.BcPGPObjectFactory
+import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator
 
 fun InputStream.toSignatureList() =
     buffered()

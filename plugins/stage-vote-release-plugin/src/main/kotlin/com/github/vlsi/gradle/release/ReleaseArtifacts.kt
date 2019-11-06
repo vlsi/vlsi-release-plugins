@@ -19,6 +19,8 @@ package com.github.vlsi.gradle.release
 import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.PREVIEW_SITE_CONFIGURATION_NAME
 import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.RELEASE_FILES_CONFIGURATION_NAME
 import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.RELEASE_SIGNATURES_CONFIGURATION_NAME
+import java.io.File
+import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
@@ -32,8 +34,6 @@ import org.gradle.kotlin.dsl.project
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.plugins.signing.SigningExtension
-import java.io.File
-import javax.inject.Inject
 
 open class ReleaseArtifacts @Inject constructor(
     private val project: Project

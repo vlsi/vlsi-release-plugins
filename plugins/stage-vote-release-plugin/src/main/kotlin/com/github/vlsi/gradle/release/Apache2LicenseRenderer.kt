@@ -21,6 +21,8 @@ import com.github.vlsi.gradle.license.MetadataStore
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.text
+import java.util.*
+import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
@@ -33,9 +35,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.* // ktlint-disable
-import java.util.* // ktlint-disable
-import javax.inject.Inject
+import org.gradle.kotlin.dsl.*
 
 /**
  * This class converts license analysis of com.github.jk1.license to a LICENSE-compatible format

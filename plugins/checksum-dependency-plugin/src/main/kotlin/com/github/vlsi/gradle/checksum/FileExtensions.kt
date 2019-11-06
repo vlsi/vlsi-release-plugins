@@ -19,7 +19,7 @@ package com.github.vlsi.gradle.checksum
 import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
-import java.util.* // ktlint-disable
+import java.util.*
 
 internal fun File.loadProperties(): Properties =
     Properties().apply {

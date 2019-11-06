@@ -16,6 +16,10 @@
  */
 package com.github.vlsi.gradle.release
 
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.net.URI
+import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
@@ -23,10 +27,6 @@ import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
 import org.gradle.process.ExecSpec
 import org.gradle.work.InputChanges
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.net.URI
-import javax.inject.Inject
 
 abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
     @Input

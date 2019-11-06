@@ -20,12 +20,12 @@ import com.github.vlsi.gradle.checksum.hexKey
 import groovy.util.XmlSlurper
 import groovy.util.slurpersupport.GPathResult
 import groovy.xml.MarkupBuilder
-import org.gradle.api.GradleException
-import org.gradle.api.artifacts.DependencyArtifact
-import org.gradle.kotlin.dsl.withGroovyBuilder
 import java.io.File
 import java.io.InputStream
 import java.io.Writer
+import org.gradle.api.GradleException
+import org.gradle.api.artifacts.DependencyArtifact
+import org.gradle.kotlin.dsl.withGroovyBuilder
 
 private operator fun GPathResult.get(name: String) = getProperty(name) as GPathResult
 
