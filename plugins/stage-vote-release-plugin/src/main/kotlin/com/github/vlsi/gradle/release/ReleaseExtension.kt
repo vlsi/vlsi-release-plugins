@@ -107,26 +107,7 @@ open class ReleaseExtension @Inject constructor(
                     }
                 }
             })
-            add(Runnable {
-                val grgit = project.property("grgit") as Grgit
-                val repository = grgit.repository.jgit.repository
-                assertHeadTag(repository, releaseTag.get(), "Release")
-                if (rc.isPresent) {
-                    assertHeadTag(repository, rcTag.get(), "Release candidate")
-                }
-            })
         }
-
-    private fun assertHeadTag(repository: Repository, tagName: String, title: String) {
-        val taggedId = repository.exactRef(Constants.R_TAGS + tagName)?.peeledObjectId ?: return
-        val headId = repository.exactRef(Constants.HEAD).peeledObjectId
-        if (headId != taggedId) {
-            throw GradleException(
-                "$title must be built from a Git HEAD." +
-                        " $tagName points to $taggedId, HEAD points to $headId"
-            )
-        }
-    }
 
     val allowUncommittedChanges = objects.property<Boolean>()
         .value(

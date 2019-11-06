@@ -153,6 +153,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.38.0
+* stage-vote-release-plugin: release tag should be created for release candidate commit, not the current HEAD
+
 v1.37.0
 * stage-vote-release-plugin: execute sha512 and signing tasks only when input files exist
 

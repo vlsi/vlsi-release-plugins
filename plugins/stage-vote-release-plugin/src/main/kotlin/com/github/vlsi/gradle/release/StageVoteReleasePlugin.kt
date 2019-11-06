@@ -21,6 +21,9 @@ import de.marcphilipp.gradle.nexus.NexusPublishExtension
 import io.codearte.gradle.nexus.NexusStagingExtension
 import io.codearte.gradle.nexus.NexusStagingPlugin
 import org.ajoberstar.grgit.Grgit
+import org.eclipse.jgit.lib.Constants
+import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.Ref
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -240,10 +243,28 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             }
             if (hasTask(validateReleaseParams.get())) {
                 validations += releaseExt.validateReleaseParams
+                if (!hasTask(pushRcTag.get())) {
+                    // Tag won't be created as a part of the release
+                    validations += Runnable {
+                        if (releaseExt.release.get()) {
+                            val grgit = project.property("grgit") as Grgit
+                            val repository = grgit.repository.jgit.repository
+                            val tagName = releaseExt.rcTag.get()
+                            repository.exactRef(Constants.R_TAGS + tagName)?.commitId
+                                ?: throw GradleException(
+                                    "Tag $tagName is not found. " +
+                                            "Please ensure you are using the existing release candidate index " +
+                                            "for publishing a release"
+                                )
+                        }
+                    }
+                }
             }
             runValidations(validations)
         }
     }
+
+    private val Ref.commitId: ObjectId? get() = peeledObjectId ?: objectId
 
     private fun TaskCollection<*>.hide() = configureEach {
         group = ""
@@ -331,6 +352,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             dependsOn(validateReleaseParams)
             rootGitRepository(releaseExt.source)
             tag.set(releaseExt.releaseTag)
+            taggedRef.set(releaseExt.rcTag)
         }
 
         return tasks.register(PUSH_RELEASE_TAG_TASK_NAME, GitPushTask::class) {

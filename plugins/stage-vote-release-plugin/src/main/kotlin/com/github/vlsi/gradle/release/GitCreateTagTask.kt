@@ -19,12 +19,17 @@ package com.github.vlsi.gradle.release
 import com.github.vlsi.gradle.release.jgit.dsl.tag
 import org.eclipse.jgit.lib.Constants
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 
 open class GitCreateTagTask : DefaultGitTask() {
     @Input
     val tag = project.objects.property<String>()
+
+    @Input
+    @Optional
+    val taggedRef = project.objects.property<String>()
 
     init {
         onlyIf {
@@ -40,6 +45,9 @@ open class GitCreateTagTask : DefaultGitTask() {
         jgit {
             val tagRef = tag {
                 name = tagName
+                objectId = taggedRef.orNull?.let {
+                    repository.parseCommit(repository.resolve(it))
+                }
             }
             logger.lifecycle("Created tag $tagName -> $tagRef")
         }
