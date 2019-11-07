@@ -44,38 +44,26 @@ open class ReleaseExtension @Inject constructor(
 
     val validateSvnParams = mutableListOf<Runnable>().apply {
         add(Runnable {
-            // Validate that credentials should be present
-            if (repositoryType.get() == RepositoryType.PROD) {
-                svnDist {
-                    credentials.username(project, required = true)
-                }
+            svnDist {
+                credentials.username(project, required = true)
             }
         })
         add(Runnable {
-            // Validate that credentials should be present
-            if (repositoryType.get() == RepositoryType.PROD) {
-                svnDist {
-                    credentials.password(project, required = true)
-                }
+            svnDist {
+                credentials.password(project, required = true)
             }
         })
     }
 
     val validateNexusParams = mutableListOf<Runnable>().apply {
         add(Runnable {
-            // Validate that credentials should be present
-            if (repositoryType.get() == RepositoryType.PROD) {
-                nexus {
-                    credentials.username(project, required = true)
-                }
+            nexus {
+                credentials.username(project, required = true)
             }
         })
         add(Runnable {
-            // Validate that credentials should be present
-            if (repositoryType.get() == RepositoryType.PROD) {
-                nexus {
-                    credentials.password(project, required = true)
-                }
+            nexus {
+                credentials.password(project, required = true)
             }
         })
     }

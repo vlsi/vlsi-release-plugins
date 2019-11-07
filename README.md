@@ -153,6 +153,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.39.0
+* stage-vote-release-plugin: validate asfTest...Username and asfTest...Password properties
+
 v1.38.0
 * stage-vote-release-plugin: release tag should be created for release candidate commit, not the current HEAD
 
