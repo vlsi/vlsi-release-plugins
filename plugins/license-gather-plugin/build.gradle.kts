@@ -80,7 +80,7 @@ tasks {
     val generateStaticTfIdf by registering(JavaExec::class) {
         val output = "$buildDir/tfidf"
         dependsOn(copyTexts)
-        inputs.files(sourceSets.main.map { it.runtimeClasspath })
+        inputs.files(sourceSets.main.map { it.runtimeClasspath.filter { f -> f.name != "tfidf_licenses.bin" } })
         inputs.files(copyLicenses)
         inputs.dir(allLicenseTextsDir)
         outputs.dir(output)
@@ -89,23 +89,21 @@ tasks {
         classpath(allLicenseTextsDir)
         main = "com.github.vlsi.gradle.license.SpdxPredictorKt"
         args("$output/com/github/vlsi/gradle/license/api/models/tfidf_licenses.bin")
+    }
 
-        doLast {
-            // This resource is generated after compile, so we copy it manually
-            copy {
-                into("$buildDir/resources/main")
-                from(output) {
-                    include("**/tfidf_licenses.bin")
-                }
-            }
+    val copyTfidf by registering(Copy::class) {
+        // This resource is generated after compile, so we copy it manually
+        into("$buildDir/resources/main")
+        from(generateStaticTfIdf) {
+            include("**/tfidf_licenses.bin")
         }
     }
 
     jar {
-        dependsOn(generateStaticTfIdf)
+        dependsOn(copyTfidf)
     }
 
     test {
-        dependsOn(generateStaticTfIdf)
+        dependsOn(copyTfidf)
     }
 }
