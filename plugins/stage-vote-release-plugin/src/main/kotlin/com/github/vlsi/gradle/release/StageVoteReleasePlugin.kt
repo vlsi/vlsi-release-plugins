@@ -535,7 +535,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                         .map {
                             ReleaseArtifact(
                                 it.name,
-                                file(it.absolutePath + ".sha512").readText().trim()
+                                file(it.absolutePath + ".sha512").readText().trim().substringBefore(" ")
                             )
                         },
                     svnStagingUri = svnDist.url.get().let { it.replacePath(it.path + "/" + svnDist.stageFolder.get()) },

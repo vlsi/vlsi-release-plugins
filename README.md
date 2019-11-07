@@ -153,6 +153,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.40.0
+* stage-vote-release-plugin: avoid including artifact name in ReleaseArtifact.getSha512
+
 v1.39.0
 * stage-vote-release-plugin: validate asfTest...Username and asfTest...Password properties
 
