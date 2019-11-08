@@ -155,6 +155,7 @@ Change log
 ----------
 v1.41.0
 * stage-vote-release-plugin: implement removeStaleArtifacts task to cleanup dist.apache.org
+* stage-vote-release-plugin: hide technical tasks
 
 v1.40.0
 * stage-vote-release-plugin: avoid including artifact name in ReleaseArtifact.getSha512

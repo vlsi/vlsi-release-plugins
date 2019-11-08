@@ -30,6 +30,7 @@ import org.eclipse.jgit.lib.Ref
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.publish.maven.tasks.GenerateMavenPom
 import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
@@ -41,6 +42,7 @@ import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.kotlin.dsl.*
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 class StageVoteReleasePlugin @Inject constructor(private val instantiator: Instantiator) :
     Plugin<Project> {
@@ -126,6 +128,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val stageSvnDist = tasks.register<StageToSvnTask>(STAGE_SVN_DIST_TASK_NAME) {
             description = "Stage release artifacts to SVN dist repository"
             group = RELEASE_GROUP
+            hide()
             mustRunAfter(pushRcTag)
             dependsOn(validateSvnParams)
             dependsOn(validateReleaseParams)
@@ -136,6 +139,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val publishSvnDist = tasks.register<PromoteSvnRelease>(PUBLISH_SVN_DIST_TASK_NAME) {
             description = "Publish release artifacts to SVN dist repository"
             group = RELEASE_GROUP
+            hide()
             dependsOn(validateSvnParams)
             dependsOn(validateReleaseParams)
             mustRunAfter(stageSvnDist)
@@ -152,6 +156,10 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         closeRepository {
             dependsOn(validateReleaseParams)
         }
+        closeRepository.hide()
+        releaseRepository.hide()
+        tasks.named("closeAndReleaseRepository").hide()
+        tasks.named("getStagingProfile").hide()
 
         releaseRepository {
             // Note: publishSvnDist might fail, and it is easier to rollback than "rollback Nexus"
@@ -173,6 +181,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val stageDist = tasks.register(STAGE_DIST_TASK_NAME) {
             description = "Stage release artifacts to SVN and Nexus"
             group = RELEASE_GROUP
+            hide()
             dependsOn(pushRcTag)
             dependsOn(stageSvnDist)
             dependsOn(closeRepository)
@@ -278,6 +287,10 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         group = ""
     }
 
+    private fun Task.hide() = apply {
+        group = ""
+    }
+
     private fun TaskProvider<*>.hide() = configure {
         group = ""
     }
@@ -292,8 +305,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                     val generatePomTasks = tasks.withType<GenerateMavenPom>()
                     generatePomTasks.hide()
                     tasks.register("generatePom") {
-                        group = "test"
-                        description = "test"
+                        group = LifecycleBasePlugin.BUILD_GROUP
+                        description = "Generate pom.xml files (see build/publications/core/pom*.xml)"
                         dependsOn(generatePomTasks)
                     }
                 }
@@ -336,6 +349,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val createTag = tasks.register(CREATE_RC_TAG_TASK_NAME, GitCreateTagTask::class) {
             description = "Create release candidate tag if missing"
             group = RELEASE_GROUP
+            hide()
             dependsOn(validateReleaseParams)
             rootGitRepository(releaseExt.source)
             tag.set(releaseExt.rcTag)
@@ -344,6 +358,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         return tasks.register(PUSH_RC_TAG_TASK_NAME, GitPushTask::class) {
             description = "Push release candidate tag to a remote repository"
             group = RELEASE_GROUP
+            hide()
             dependsOn(createTag)
             rootGitRepository(releaseExt.source)
             tag(releaseExt.rcTag)
@@ -357,6 +372,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val createTag = tasks.register(CREATE_RELEASE_TAG_TASK_NAME, GitCreateTagTask::class) {
             description = "Create release tag if missing"
             group = RELEASE_GROUP
+            hide()
             dependsOn(validateReleaseParams)
             rootGitRepository(releaseExt.source)
             tag.set(releaseExt.releaseTag)
@@ -366,6 +382,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         return tasks.register(PUSH_RELEASE_TAG_TASK_NAME, GitPushTask::class) {
             description = "Push release tag to a remote repository"
             group = RELEASE_GROUP
+            hide()
             dependsOn(createTag)
             rootGitRepository(releaseExt.source)
             tag(releaseExt.releaseTag)
