@@ -16,6 +16,8 @@
  */
 package com.github.vlsi.gradle.release
 
+import com.github.vlsi.gradle.properties.dsl.stringProperty
+import com.github.vlsi.gradle.properties.dsl.toBool
 import java.net.URI
 import javax.inject.Inject
 import org.ajoberstar.grgit.Grgit
@@ -102,7 +104,7 @@ open class ReleaseExtension @Inject constructor(
 
     val repositoryType = objects.property<RepositoryType>()
         .value(
-            when (project.stringProperty("asf").toBool()) {
+            when ((project.stringProperty("asf") ?: project.stringProperty("asfDryRun")).toBool()) {
                 true -> RepositoryType.PROD
                 else -> RepositoryType.TEST
             }
@@ -240,6 +242,26 @@ open class SvnDistConfig @Inject constructor(
         })
 
     val releaseSubfolder = objects.mapProperty<Regex, String>()
+
+    val staleRemovalFilters = objects.newInstance<StaleRemovalFilters>().apply {
+        validates.add(project.provider {
+            val nonSnapshotVersion = project.version.toString().removeSuffix("-SNAPSHOT")
+            Regex("release/.*-${Regex.escape(nonSnapshotVersion)}([_.].*|$)")
+        })
+        excludes.add(project.provider {
+            Regex("release/[^/]+/KEYS")
+        })
+    }
+}
+
+open class StaleRemovalFilters @Inject constructor(
+    objects: ObjectFactory
+) {
+    operator fun invoke(action: StaleRemovalFilters.() -> Unit) = apply { action() }
+
+    val includes = objects.listProperty<Regex>()
+    val excludes = objects.listProperty<Regex>()
+    val validates = objects.listProperty<Regex>()
 }
 
 open class NexusConfig @Inject constructor(
@@ -323,29 +345,6 @@ open class Credentials @Inject constructor(
         return value
     }
 }
-
-private fun Project.stringProperty(property: String, required: Boolean = false): String? {
-    val value = project.findProperty(property)
-    if (value == null) {
-        if (required) {
-            throw GradleException("Property $property is not specified")
-        }
-        logger.debug("Using null value for $property")
-        return null
-    }
-    if (value !is String) {
-        throw GradleException("Project property '$property' should be a String")
-    }
-    return value
-}
-
-fun String?.toBool(nullAs: Boolean = false, blankAs: Boolean = true, default: Boolean = false) =
-    when {
-        this == null -> nullAs
-        isBlank() -> blankAs
-        default -> !equals("false", ignoreCase = true)
-        else -> equals("true", ignoreCase = true)
-    }
 
 private val kebabDelimeters = Regex("""(\p{Lower})\s*(\p{Upper})""")
 private fun String.toKebabCase() =

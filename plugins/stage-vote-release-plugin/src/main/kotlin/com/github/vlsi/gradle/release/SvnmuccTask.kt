@@ -16,6 +16,9 @@
  */
 package com.github.vlsi.gradle.release
 
+import com.github.vlsi.gradle.properties.dsl.stringProperty
+import com.github.vlsi.gradle.properties.dsl.toBool
+import com.github.vlsi.gradle.release.svn.SvnCredentials
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URI
@@ -38,7 +41,14 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
     abstract fun operations(inputChanges: InputChanges): List<SvnOperation>
     abstract fun message(): String
 
-    private fun ExecSpec.svnCredentials() {
+    protected fun SvnCredentials.withCredentials() {
+        project.the<ReleaseExtension>().svnDist.credentials {
+            this@withCredentials.username = username(project)
+            this@withCredentials.password = password(project)
+        }
+    }
+
+    protected fun ExecSpec.svnCredentials() {
         project.the<ReleaseExtension>().svnDist.credentials {
             username(project)?.let { args("--username", it) }
             password(project)?.let { args("--password", it) }
@@ -103,13 +113,32 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
         commandsFile.parentFile.mkdir()
         commandsFile.writeText(commands)
 
-        logger.lifecycle("Svnmucc: executing {}", commands)
+        val commitMessage = message()
+        if (project.stringProperty("asfDryRun").toBool()) {
+            logger.lifecycle(
+                "Dry run svnmucc. root={}, message={}, commands:\n{}",
+                repository.get(),
+                commitMessage,
+                commands
+            )
+            return
+        }
+        if (commands.isBlank()) {
+            logger.lifecycle("Svnmucc skipped")
+            return
+        }
+        logger.lifecycle(
+            "Executing svnmucc. root={}, message={}, commands:\n{}",
+            repository.get(),
+            commitMessage,
+            commands
+        )
         project.exec {
             workingDir = project.projectDir
             commandLine("svnmucc", "--non-interactive", "--root-url", repository.get())
             svnCredentials()
             args("--extra-args", commandsFile)
-            args("--message", message())
+            args("--message", commitMessage)
             standardOutput = System.out
         }
     }

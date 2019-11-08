@@ -153,6 +153,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.41.0
+* stage-vote-release-plugin: implement removeStaleArtifacts task to cleanup dist.apache.org
+
 v1.40.0
 * stage-vote-release-plugin: avoid including artifact name in ReleaseArtifact.getSha512
 

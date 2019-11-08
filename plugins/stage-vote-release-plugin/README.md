@@ -53,6 +53,20 @@ Publishing a release
 
     ./gradlew publishRelease -Pasf -Prc=2
 
+Removing stale artifacts
+------------------------
+
+Stale artifacts needs to be removed from time to time, and there's a command for that
+
+    ./gradlew removeStaleArtifacts -Pasf
+
+You can preview the set of files to be removed asf follows:
+
+    ./gradlew removeStaleArtifacts -PasfDryRun
+
+By default it removes everything in `/dev/$tlp/` folder, and it keeps the current artifacts
+in `/release/...`
+
 Testing release procedure
 -------------------------
 
@@ -85,6 +99,11 @@ releaseParams {
         credentials {
             username.set(String) // -PasfSvnUsername or -PasfTestSvnUsername
             password.set(String) // -PasfSvnPassword or -PasfTestSvnPassword
+        }
+        staleRemovalFilters {
+            excludes.add(Regex("release/.*/HEADER\\.html")) // Keep the entries
+            validates.add(Regex("...")) // The removal would fail if none of the entries match. The entries are not removed
+            includes.add(Regex("...")) // Only the entries that match the regexp would be removed
         }
     }
     nexus { // Configures Nexus repository
