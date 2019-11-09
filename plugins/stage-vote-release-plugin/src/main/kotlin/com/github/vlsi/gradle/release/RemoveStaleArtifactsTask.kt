@@ -18,9 +18,9 @@ package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.release.svn.Svn
 import javax.inject.Inject
-import org.gradle.api.GradleException
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.the
@@ -45,6 +45,7 @@ abstract class RemoveStaleArtifactsTask @Inject constructor(
             }
         })
 
+    @Internal
     val staleRemovalFilters = objects.newInstance<StaleRemovalFilters>()
         .apply {
             includes.addAll(project.provider {
