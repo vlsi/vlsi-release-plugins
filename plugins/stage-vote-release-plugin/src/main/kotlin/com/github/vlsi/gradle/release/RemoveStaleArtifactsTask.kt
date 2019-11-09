@@ -97,7 +97,7 @@ abstract class RemoveStaleArtifactsTask @Inject constructor(
                 "None of $validates match the contents of $prefix. " +
                         "It might be caused by unexpected 'current' version of ${project.version}. Entries are:\n  ${entries.map {
                             it.path.removePrefix(prefix) + "/" + it.name
-                        }.sorted().joinToString { "\n  " }}"
+                        }.sorted().joinToString("\n  ")}"
             )
             return listOf()
         }
