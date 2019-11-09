@@ -33,13 +33,16 @@ class ChecksumVerificationTest : BaseGradleTest() {
                 if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
                     add(Arguments.of("4.4.1"))
                 }
-                addAll(
-                    listOf(
-                        Arguments.of("5.6.2"),
-                        Arguments.of("5.4.1"),
-                        Arguments.of("4.10.2")
+                if (JavaVersion.current() <= JavaVersion.VERSION_12) {
+                    addAll(
+                        listOf(
+                            Arguments.of("5.6.2"),
+                            Arguments.of("5.4.1"),
+                            Arguments.of("4.10.2")
+                        )
                     )
-                )
+                }
+                add(Arguments.of("6.0"))
             }
         }
     }
