@@ -20,6 +20,7 @@ import com.github.vlsi.gradle.release.jgit.dsl.push
 import com.github.vlsi.gradle.release.jgit.dsl.setCredentials
 import com.github.vlsi.gradle.release.jgit.dsl.updateRemoteParams
 import org.eclipse.jgit.lib.Constants
+import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.transport.RefSpec
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
@@ -56,9 +57,25 @@ open class GitPushTask : DefaultGitTask() {
                 refSpecs = this@GitPushTask.refSpecs.get()
             }
             for (result in pushResults) {
-                result.messages?.let { logger.lifecycle("Message from {}: {}", remoteName, it) }
-                for (ref in result.advertisedRefs) {
-                    logger.lifecycle("Updated remote ref $ref: ${result.getRemoteUpdate(ref.name)}")
+                logger.lifecycle("Message from {}: {}", remoteName, result.messages)
+                val sb = StringBuilder()
+                for (ref in result.remoteUpdates.sortedBy { it.remoteName }) {
+                    sb.clear()
+                    sb.append("  ").append(ref.remoteName).append(": ").append(ref.status).append(", ")
+                    if (ref.expectedOldObjectId != ObjectId.zeroId()) {
+                        sb.append(ref.expectedOldObjectId.name()).append(" -> ")
+                    }
+                    sb.append(ref.newObjectId.name())
+                    if (ref.isFastForward) {
+                        sb.append(" (fastForward)")
+                    }
+                    if (ref.isForceUpdate) {
+                        sb.append(" (force)")
+                    }
+                    if (!ref.message.isNullOrBlank()) {
+                        sb.append(", ").append(ref.message)
+                    }
+                    logger.lifecycle(sb.toString())
                 }
             }
         }
