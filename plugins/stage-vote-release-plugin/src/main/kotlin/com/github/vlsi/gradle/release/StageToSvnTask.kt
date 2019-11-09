@@ -33,6 +33,8 @@ abstract class StageToSvnTask() : SvnmuccTask() {
 
     init {
         dependsOn(files)
+        // The task produces no outputs => we specify it as "always stale"
+        outputs.upToDateWhen { false }
     }
 
     override fun message() =
