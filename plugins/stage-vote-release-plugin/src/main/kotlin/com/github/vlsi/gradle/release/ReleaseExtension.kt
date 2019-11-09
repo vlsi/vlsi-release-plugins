@@ -366,6 +366,7 @@ class ReleaseParams(
     val committerId: String,
     val artifacts: List<ReleaseArtifact>,
     val svnStagingUri: URI,
+    val svnStagingRevision: Int,
     val nexusRepositoryUri: URI,
     val previewSiteUri: URI,
     val sourceCodeTagUrl: URI
