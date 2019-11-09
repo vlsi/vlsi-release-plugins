@@ -17,6 +17,7 @@
 
 package com.github.vlsi.gradle.license
 
+import org.gradle.api.JavaVersion
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions
@@ -30,9 +31,12 @@ class GatherLicenseTaskTest {
     companion object {
         @JvmStatic
         private fun gradleVersionAndSettings(): Iterable<Arguments> {
-            return listOf(
-                Arguments.of("5.4.1", "// no extra settings")
-            )
+            return mutableListOf<Arguments>().apply {
+                if (JavaVersion.current() <= JavaVersion.VERSION_12) {
+                    add(Arguments.of("5.4.1", "// no extra settings"))
+                }
+                add(Arguments.of("6.0", "// no extra settings"))
+            }
         }
     }
 
@@ -58,7 +62,7 @@ class GatherLicenseTaskTest {
             import com.github.vlsi.gradle.license.api.License
             import com.github.vlsi.gradle.license.api.SpdxLicense
             import org.gradle.api.GradleException
-            
+
             plugins {
                 id('java')
                 id('com.github.vlsi.license-gather')
@@ -76,7 +80,7 @@ class GatherLicenseTaskTest {
                 runtime("org.junit.jupiter:junit-jupiter:5.4.2")
                 runtime("org.jodd:jodd-core:5.0.6")
             }
-            
+
             tasks.register("generateLicense", GatherLicenseTask.class) {
                 configurations.add(project.configurations.runtime)
                 ignoreMissingLicenseFor(SpdxLicense.BSD_2_Clause)
