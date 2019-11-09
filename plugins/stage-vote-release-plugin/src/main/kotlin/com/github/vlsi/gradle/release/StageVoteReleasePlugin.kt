@@ -21,6 +21,9 @@ import de.marcphilipp.gradle.nexus.InitializeNexusStagingRepository
 import de.marcphilipp.gradle.nexus.NexusPublishExtension
 import io.codearte.gradle.nexus.NexusStagingExtension
 import io.codearte.gradle.nexus.NexusStagingPlugin
+import java.io.File
+import java.net.URI
+import javax.inject.Inject
 import org.ajoberstar.grgit.Grgit
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.ObjectId
@@ -41,9 +44,6 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.kotlin.dsl.*
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-import java.io.File
-import java.net.URI
-import javax.inject.Inject
 
 class StageVoteReleasePlugin @Inject constructor(private val instantiator: Instantiator) :
     Plugin<Project> {
@@ -552,7 +552,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                     .let { it.replacePath(it.path + "/" + svnDist.stageFolder.get()) }
 
                 val svnStagingRevision = try {
-                    Svn(project,  svnStagingUri).ls {
+                    Svn(project, svnStagingUri).ls {
                         username = svnDist.credentials.username(project)
                         password = svnDist.credentials.password(project)
                         folders.add("")
@@ -560,7 +560,6 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 } catch (e: Exception) {
                     0
                 }
-
 
                 val releaseParams = ReleaseParams(
                     tlp = releaseExt.tlp.get(),
