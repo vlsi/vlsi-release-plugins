@@ -153,6 +153,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.42.0
+* stage-vote-release-plugin: fix logging in RemoveStaleArtifactsTask
+
 v1.41.0
 * stage-vote-release-plugin: implement removeStaleArtifacts task to cleanup dist.apache.org
 * stage-vote-release-plugin: hide technical tasks
