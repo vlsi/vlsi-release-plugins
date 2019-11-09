@@ -153,6 +153,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.44.0
+* stage-vote-release-plugin: disable automatic execution of removeStaleArtifacts when publishing the release
+
 v1.43.0
 * stage-vote-release-plugin: support Gradle 6.0
 

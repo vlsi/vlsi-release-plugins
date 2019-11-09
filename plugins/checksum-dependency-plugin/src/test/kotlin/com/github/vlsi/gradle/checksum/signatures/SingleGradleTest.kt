@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 class SingleGradleTest : BaseGradleTest() {
     @Test
     internal fun run() {
-        val gradleVersion = "5.5.1"
+        val gradleVersion = "6.0"
 
         createSettings("include('child')")
         projectDir.resolve("build.gradle").write("""

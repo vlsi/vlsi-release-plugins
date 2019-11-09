@@ -188,8 +188,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             dependsOn(closeRepository)
         }
 
-        val removeStaleArtifacts = tasks.register(REMOVE_STALE_ARTIFACTS_TASK_NAME, RemoveStaleArtifactsTask::class) {
-            description = "Removes stale artifacts from dist.apache.org (dry run with -PasfDryRun, keeps the current version in releases)"
+        tasks.register(REMOVE_STALE_ARTIFACTS_TASK_NAME, RemoveStaleArtifactsTask::class) {
+            description = "Removes stale artifacts from dist.apache.org (dry run with -PasfDryRun)"
             group = RELEASE_GROUP
             mustRunAfter(publishSvnDist)
         }
@@ -198,7 +198,6 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             description = "Publish release artifacts to SVN and Nexus"
             group = RELEASE_GROUP
             dependsOn(publishSvnDist)
-            dependsOn(removeStaleArtifacts)
             dependsOn(releaseRepository)
         }
 
