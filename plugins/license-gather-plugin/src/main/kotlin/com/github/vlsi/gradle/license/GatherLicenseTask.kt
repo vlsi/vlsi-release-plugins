@@ -45,6 +45,7 @@ import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.setProperty
 import org.gradle.kotlin.dsl.submit
+import org.gradle.util.GradleVersion
 import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkerExecutor
 import java.io.File
@@ -299,10 +300,20 @@ open class GatherLicenseTask @Inject constructor(
                 )
 
                 haveFilesToAnalyze = true
-                workerExecutor.submit(FindLicense::class) {
-                    displayName = "Extract licenses for ${compId.displayName}"
-                    isolationMode = IsolationMode.NONE
-                    params(compId.displayName, art.file, artLicenseTexts)
+                if (GradleVersion.current() < GradleVersion.version("5.6")) {
+                    @Suppress("DEPRECATION")
+                    workerExecutor.submit(FindLicense::class) {
+                        displayName = "Extract licenses for ${compId.displayName}"
+                        isolationMode = IsolationMode.NONE
+                        params(compId.displayName, art.file, artLicenseTexts)
+                    }
+                } else {
+                    @Suppress("UnstableApiUsage")
+                    workerExecutor.noIsolation().submit(FindLicenseWorkAction::class) {
+                        id.set(compId.displayName)
+                        file.set(art.file)
+                        outputDir.set(artLicenseTexts)
+                    }
                 }
             }
         }

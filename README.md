@@ -157,6 +157,8 @@ v1.45.0
 * stage-vote-release-plugin: preserve **/.git/** in syncPreviewSiteRepo
 * stage-vote-release-plugin: avoid NPE in GitPushTask when pushing new tag
 * stage-vote-release-plugin: avoid rebuilding artifacts for generateVoteText/publishDist (fetch files from SVN dist)
+* ide-plugin: support generatedJavaSources for different sourceSets (main, test)
+* license-gather-plugin: use Gradle 7-compatible API workerExecutor.noIsolation instead of .submit
 
 v1.44.0
 * stage-vote-release-plugin: disable automatic execution of removeStaleArtifacts when publishing the release

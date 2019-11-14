@@ -21,9 +21,10 @@ import com.github.vlsi.gradle.ide.dsl.settings
 import com.github.vlsi.gradle.ide.dsl.taskTriggers
 import java.io.File
 import java.net.URI
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
@@ -92,12 +93,21 @@ open class IdeExtension(private val project: Project) {
 
     fun generatedJavaSources(task: Task, generationOutput: File) {
         val sourceSets = project.property("sourceSets") as SourceSetContainer
+        generatedJavaSources(task, generationOutput, sourceSets.named("main"))
+    }
 
-        project.tasks.named(JavaPlugin.COMPILE_JAVA_TASK_NAME) {
-            dependsOn(task)
+    fun generatedJavaSources(
+        task: Task,
+        generationOutput: File,
+        sourceSet: NamedDomainObjectProvider<SourceSet>
+    ) {
+
+        sourceSet.configure {
+            java.srcDir(generationOutput)
+            project.tasks.named(compileJavaTaskName) {
+                dependsOn(task)
+            }
         }
-
-        sourceSets["main"].java.srcDir(generationOutput)
 
         project.configure<IdeaModel> {
             module.generatedSourceDirs.add(generationOutput)
