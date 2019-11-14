@@ -16,6 +16,7 @@
  */
 package com.github.vlsi.gradle.release
 
+import com.github.vlsi.gradle.release.svn.LsDepth
 import com.github.vlsi.gradle.release.svn.Svn
 import de.marcphilipp.gradle.nexus.InitializeNexusStagingRepository
 import de.marcphilipp.gradle.nexus.NexusPublishExtension
@@ -23,6 +24,7 @@ import io.codearte.gradle.nexus.NexusStagingExtension
 import io.codearte.gradle.nexus.NexusStagingPlugin
 import java.io.File
 import java.net.URI
+import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 import org.ajoberstar.grgit.Grgit
 import org.eclipse.jgit.lib.Constants
@@ -146,8 +148,6 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             mustRunAfter(stageSvnDist)
             // pushReleaseTag is easier to rollback, so we push it first
             dependsOn(pushReleaseTag)
-            files.from(releaseExt.archives)
-            files.from(releaseExt.checksums)
         }
 
         // Tasks from NexusStagingPlugin
@@ -203,7 +203,14 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
         // prepareVote depends on all the publish tasks
         // prepareVote depends on publish SVN
-        val generateVote = generateVoteText(pushPreviewSite, stageDist)
+        val generateVote = generateVoteText()
+        generateVote {
+            mustRunAfter(pushPreviewSite, stageDist)
+            // TODO: allow uncommitted
+            dependsOn(validateReleaseParams)
+            // SVN credentials are optional as the operation is read-only
+            // dependsOn(validateSvnParams)
+        }
 
         val prepareVote = tasks.register(PREPARE_VOTE_TASK_NAME) {
             description = "Stage artifacts and prepare text for vote mail"
@@ -523,19 +530,13 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         }
     }
 
-    private fun Project.generateVoteText(
-        pushPreviewSite: TaskProvider<*>,
-        stageDist: TaskProvider<*>
-    ) =
+    private fun Project.generateVoteText() =
         tasks.register(GENERATE_VOTE_TEXT_TASK_NAME) {
-            mustRunAfter(pushPreviewSite, stageDist)
             // Note: task is not incremental, and we enforce Gradle to re-execute it
             // Otherwise we would have to duplicate ReleaseParams logic as "inputs"
             outputs.upToDateWhen { false }
 
             val releaseExt = project.the<ReleaseExtension>()
-            dependsOn(releaseExt.archives)
-            dependsOn(releaseExt.checksums)
 
             val voteMailFile = "$buildDir/$PREPARE_VOTE_TASK_NAME/mail.txt"
             outputs.file(file(voteMailFile))
@@ -554,15 +555,26 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 val svnStagingUri = svnDist.url.get()
                     .let { it.replacePath(it.path + "/" + svnDist.stageFolder.get()) }
 
-                val svnStagingRevision = try {
-                    Svn(project, svnStagingUri).ls {
-                        username = svnDist.credentials.username(project)
-                        password = svnDist.credentials.password(project)
-                        folders.add("")
-                    }.firstOrNull()?.commit?.revision ?: 0
-                } catch (e: Exception) {
-                    0
+                val svn = Svn(project, svnStagingUri)
+                val stagedFiles = svn.ls {
+                    username = svnDist.credentials.username(project)
+                    password = svnDist.credentials.password(project)
+                    depth = LsDepth.INFINITY
+                    folders.add("")
                 }
+
+                val checksums = stagedFiles
+                    .asSequence()
+                    .filter { it.name.endsWith(".sha512") }
+                    .sortedBy { it.name }
+                    .associate {
+                        it.name to svn.cat {
+                            file = it.name
+                            revision = it.commit.revision
+                        }.toString(StandardCharsets.UTF_8)
+                    }
+
+                val svnStagingRevision = stagedFiles.map { it.commit.revision }.max() ?: 0
 
                 val releaseParams = ReleaseParams(
                     tlp = releaseExt.tlp.get(),
@@ -572,14 +584,12 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                     tag = releaseExt.rcTag.get(),
                     rc = releaseExt.rc.get(),
                     committerId = releaseExt.committerId.get(),
-                    artifacts = files(releaseExt.archives.get())
-                        .sortedBy { it.name }
-                        .map {
-                            ReleaseArtifact(
-                                it.name,
-                                file(it.absolutePath + ".sha512").readText().trim().substringBefore(" ")
-                            )
-                        },
+                    artifacts = checksums.map { (name, checksum) ->
+                        ReleaseArtifact(
+                            name = name.removeSuffix(".sha512"),
+                            sha512 = checksum.trim().substringBefore(" ")
+                        )
+                    },
                     svnStagingUri = svnStagingUri,
                     svnStagingRevision = svnStagingRevision,
                     nexusRepositoryUri = repoUri,
@@ -588,6 +598,9 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 )
                 val voteText = releaseExt.voteText.get().invoke(releaseParams)
                 file(voteMailFile).writeText(voteText)
+                if (gradle.startParameter.taskNames.any { it.removePrefix(":") == GENERATE_VOTE_TEXT_TASK_NAME }) {
+                    logger.lifecycle(voteText + "\n")
+                }
                 logger.lifecycle("Please find draft vote text in {}", voteMailFile)
             }
         }

@@ -17,6 +17,7 @@
 package com.github.vlsi.gradle.release
 
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
@@ -29,7 +30,8 @@ abstract class StageToSvnTask() : SvnmuccTask() {
     val files = project.files()
 
     @Input
-    val folder = project.the<ReleaseExtension>().svnDist.stageFolder
+    val folder = project.objects.property<String>()
+        .convention(project.the<ReleaseExtension>().svnDist.stageFolder)
 
     init {
         dependsOn(files)

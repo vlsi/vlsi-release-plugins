@@ -27,7 +27,10 @@ import java.time.OffsetDateTime
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 
-class Svn(val project: Project, val uri: URI) {
+class Svn(val project: Project, val uri: URI) : SvnCredentials {
+    override var username: String? = null
+    override var password: String? = null
+
     // <?xml version="1.0" encoding="UTF-8"?>
     // <lists>
     //   <list path="https://dist.apache.org/repos/dist/dev/jmeter">
@@ -43,6 +46,7 @@ class Svn(val project: Project, val uri: URI) {
         kind = attr("kind").let { EntryKind.valueOf(it.toUpperCase()) },
         path = path,
         name = get("name").text(),
+        size = get("size").text().ifBlank { null }?.toLong(),
         commit = get("commit").toCommit()
     )
 
@@ -52,10 +56,48 @@ class Svn(val project: Project, val uri: URI) {
         date = OffsetDateTime.parse(get("date").text())
     )
 
-    fun ls(options: LsOptions.() -> Unit): List<SvnEntry> {
-        val opts = LsOptions().also(options)
+    fun cat(options: CatOptions.() -> Unit): ByteArray {
+        val opts = CatOptions().also {
+            it.credentialsFrom(this)
+        }.also(options)
 
-        project.logger.debug("About to execute svn ls(root: {}, folders: {})", uri, opts.folders)
+        val file = opts.file
+
+        val revisionSuffix = opts.revision?.let { "@$it" } ?: ""
+        project.logger.lifecycle("Fetching {}/{}{}", uri, file, revisionSuffix)
+
+        val stdout = ByteArrayOutputStream()
+        val stderr = ByteArrayOutputStream()
+        val result = project.exec {
+            workingDir = project.projectDir
+            commandLine("svn", "cat")
+            opts.username?.let { args("--username", it) }
+            opts.password?.let { args("--password", it) }
+            opts.revision?.let { args("--revision", it) }
+            args("$uri/$file")
+            isIgnoreExitValue = true
+            standardOutput = stdout
+            errorOutput = stderr
+        }
+
+        if (result.exitValue != 0) {
+            throw GradleException("Unable to fetch $uri/$file, revision ${opts.revision}: $stderr")
+        }
+        return stdout.toByteArray()
+    }
+
+    fun ls(options: LsOptions.() -> Unit): List<SvnEntry> {
+        val opts = LsOptions().also {
+            it.credentialsFrom(this)
+        }.also(options)
+
+        val revisionSuffix = opts.revision?.let { "@$it" } ?: ""
+        val contents = if (opts.folders.isNotEmpty()) {
+            "folders ${opts.folders}"
+        } else {
+            "contents"
+        }
+        project.logger.lifecycle("Listing SVN {} at {}{}", contents, uri, revisionSuffix)
 
         val stdout = ByteArrayOutputStream()
         val stderr = ByteArrayOutputStream()
@@ -92,11 +134,23 @@ class LsOptions : SvnCredentials {
     override var password: String? = null
     val folders = mutableListOf<String>()
     var depth = LsDepth.IMMEDIATES
+    val revision: Int? = null
+}
+
+class CatOptions : SvnCredentials {
+    override var username: String? = null
+    override var password: String? = null
+    lateinit var file: String
+    var revision: Int? = null
 }
 
 interface SvnCredentials {
     var username: String?
     var password: String?
+    fun credentialsFrom(other: SvnCredentials) {
+        username = other.username
+        password = other.password
+    }
 }
 
 data class SvnList(
@@ -108,6 +162,7 @@ data class SvnEntry(
     val kind: EntryKind,
     val path: String,
     val name: String,
+    val size: Long?,
     val commit: SvnCommit
 )
 

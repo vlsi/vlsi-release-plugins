@@ -16,17 +16,12 @@
  */
 package com.github.vlsi.gradle.release
 
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
+import com.github.vlsi.gradle.release.svn.LsDepth
+import com.github.vlsi.gradle.release.svn.Svn
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.InputChanges
 
 abstract class PromoteSvnRelease : SvnmuccTask() {
-    @InputFiles
-    @PathSensitive(PathSensitivity.NAME_ONLY)
-    val files = project.files()
-
     init {
         outputs.upToDateWhen { false }
     }
@@ -44,7 +39,14 @@ abstract class PromoteSvnRelease : SvnmuccTask() {
             val releaseFolder = svnDist.releaseFolder.get()
 
             val subfolders = svnDist.releaseSubfolder.get()
-            for (f in files) {
+
+            val entries = Svn(project, repository.get()).ls {
+                withCredentials()
+                folders.add(stageFolder)
+                depth = LsDepth.INFINITY
+            }
+
+            for (f in entries) {
                 val stagedFile = "$stageFolder/${f.name}"
                 val subfolder = subfolders.entries.firstOrNull { f.name.contains(it.key) }?.value
                 val releasedFile =
