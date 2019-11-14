@@ -117,18 +117,18 @@ class ChecksumDependency(
             }.toString()
 
         if (!path.startsWith(":")) {
-            logger.info { "Will resolve checksums from $path via settings.buildscript (${settings.buildscript.repositories.toStr()})" }
+            logger.debug { "Will resolve checksums from $path via settings.buildscript (${settings.buildscript.repositories.toStr()})" }
             return settings.buildscript.configurations
         }
         val rootProject = settings.gradle.rootProject
         val prj = rootProject.project(path.removeSuffix(":$name").ifBlank { ":" })
 
         return if (prj.buildscript.configurations.hasConfiguration(name)) {
-            logger.info { "Will resolve checksums from $path via $prj.buildscript.repositories = ${prj.buildscript.repositories.toStr()}" }
+            logger.debug { "Will resolve checksums from $path via $prj.buildscript.repositories = ${prj.buildscript.repositories.toStr()}" }
             prj.buildscript.configurations
         } else {
             // detachedConfigurationXX goes here. We assume that no-one would ever use prj.buildscript.configurations.detachedConfiguration()
-            logger.info { "Will resolve checksums from $path via $prj.repositories = ${prj.repositories.toStr()}" }
+            logger.debug { "Will resolve checksums from $path via $prj.repositories = ${prj.repositories.toStr()}" }
             prj.configurations
         }
     }
@@ -188,7 +188,7 @@ class ChecksumDependency(
                         sha512Tasks += executors.cpu.submit {
                             val checksum =
                                 checksumComputationTimer(fileLength) { artifact.file.sha512() }
-                            logger.info { "Computed SHA-512(${dependencyId.dependencyNotation}) = $checksum" }
+                            logger.debug { "Computed SHA-512(${dependencyId.dependencyNotation}) = $checksum" }
                             sha512.add(checksum)
                         }
                     }
@@ -216,7 +216,7 @@ class ChecksumDependency(
             keysToVerify[art] = signatures
             for (sign in signatures) {
                 if (verificationDb.isIgnored(sign.keyID)) {
-                    logger.info("Public key ${sign.keyID.hexKey} is ignored via <ignored-keys>, so ${art.id.artifactDependency} is assumed to be not signed with that key")
+                    logger.debug("Public key ${sign.keyID.hexKey} is ignored via <ignored-keys>, so ${art.id.artifactDependency} is assumed to be not signed with that key")
                     continue
                 }
             }
@@ -232,7 +232,7 @@ class ChecksumDependency(
                 receivedSignatures.add(signatureDependency)
                 for (sign in art.file.toSignatureList()) {
                     if (verificationDb.isIgnored(sign.keyID)) {
-                        logger.info("Public key ${sign.keyID.hexKey} is ignored via <ignored-keys>, so ${art.id.artifactDependency} is assumed to be not signed with that key")
+                        logger.debug("Public key ${sign.keyID.hexKey} is ignored via <ignored-keys>, so ${art.id.artifactDependency} is assumed to be not signed with that key")
                         continue
                     }
                     val verifySignature = keyStore
@@ -254,7 +254,9 @@ class ChecksumDependency(
                                     dependencyChecksum.pgpKeys += sign.keyID
                                 }
                             }
-                            logger.info { "${if (validSignature) "OK" else "KO"}: verification of ${art.id.artifactDependency} via ${publicKey.keyID.hexKey}" }
+                            logger.log(if (validSignature) LogLevel.DEBUG else LogLevel.LIFECYCLE) {
+                                "${if (validSignature) "OK" else "KO"}: verification of ${art.id.artifactDependency} via ${publicKey.keyID.hexKey}"
+                            }
                         }, executors.cpu)
                     verifyPgpTasks.add(verifySignature)
                 }
@@ -286,7 +288,7 @@ class ChecksumDependency(
                 val file = originalFiles[it.id]!!
                 val checksum =
                     checksumComputationTimer(file.length()) { file.sha512() }
-                logger.info { "Computed SHA-512(${it.id.dependencyNotation}) = $checksum" }
+                logger.debug { "Computed SHA-512(${it.id.dependencyNotation}) = $checksum" }
                 it.sha512.add(checksum)
             }
         }

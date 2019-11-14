@@ -16,6 +16,7 @@
  */
 package com.github.vlsi.gradle.checksum
 
+import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logger
 
 internal inline fun Logger.debug(message: () -> String) {
@@ -33,5 +34,11 @@ internal inline fun Logger.info(message: () -> String) {
 internal inline fun Logger.lifecycle(message: () -> String) {
     if (isLifecycleEnabled) {
         lifecycle(message())
+    }
+}
+
+internal inline fun Logger.log(level: LogLevel, message: () -> String) {
+    if (isEnabled(level)) {
+        log(level, message())
     }
 }
