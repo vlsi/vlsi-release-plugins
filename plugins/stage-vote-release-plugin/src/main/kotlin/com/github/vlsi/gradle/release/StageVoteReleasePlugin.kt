@@ -402,6 +402,10 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             dependsOn(preparePreviewSiteRepo)
             dependsOn(configurations[PREVIEW_SITE_CONFIGURATION_NAME])
 
+            preserve {
+                include("**/.git/**")
+            }
+
             into(File(buildDir, releaseExt.sitePreview.name))
             // Just reuse .gitattributes for text/binary and crlf/lf attributes
             from("${rootProject.rootDir}/.gitattributes")
