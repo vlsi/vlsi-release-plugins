@@ -155,6 +155,7 @@ Change log
 ----------
 v1.45.0
 * stage-vote-release-plugin: preserve **/.git/** in syncPreviewSiteRepo
+* stage-vote-release-plugin: avoid NPE in GitPushTask when pushing new tag
 
 v1.44.0
 * stage-vote-release-plugin: disable automatic execution of removeStaleArtifacts when publishing the release

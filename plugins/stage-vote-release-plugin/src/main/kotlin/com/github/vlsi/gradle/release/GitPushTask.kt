@@ -62,8 +62,9 @@ open class GitPushTask : DefaultGitTask() {
                 for (ref in result.remoteUpdates.sortedBy { it.remoteName }) {
                     sb.clear()
                     sb.append("  ").append(ref.remoteName).append(": ").append(ref.status).append(", ")
-                    if (ref.expectedOldObjectId != ObjectId.zeroId()) {
-                        sb.append(ref.expectedOldObjectId.name()).append(" -> ")
+
+                    ref.expectedOldObjectId?.takeIf { it != ObjectId.zeroId() }?.let {
+                        sb.append(it.name()).append(" -> ")
                     }
                     sb.append(ref.newObjectId.name())
                     if (ref.isFastForward) {
