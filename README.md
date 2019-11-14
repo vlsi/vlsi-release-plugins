@@ -154,7 +154,7 @@ This library is distributed under terms of Apache License 2.0
 Change log
 ----------
 v1.45.0
-* stage-vote-release-plugin: preserve **/.git/** in syncPreviewSiteRepo
+* stage-vote-release-plugin: preserve `**/.git/**` in syncPreviewSiteRepo
 * stage-vote-release-plugin: avoid NPE in GitPushTask when pushing new tag
 * stage-vote-release-plugin: avoid rebuilding artifacts for generateVoteText/publishDist (fetch files from SVN dist)
 * ide-plugin: support generatedJavaSources for different sourceSets (main, test)
