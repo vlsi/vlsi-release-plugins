@@ -44,58 +44,29 @@ open class ReleaseExtension @Inject constructor(
 ) {
     internal val repositoryIdStore = NexusRepositoryIdStore(project)
 
-    val validateSvnParams = mutableListOf<Runnable>().apply {
-        add(Runnable {
-            svnDist {
-                credentials.username(project, required = true)
-            }
-        })
-        add(Runnable {
-            svnDist {
-                credentials.password(project, required = true)
-            }
-        })
-    }
+    val validateSvnCredentials =
+        project.validate { svnDist.credentials }.toMutableList()
 
-    val validateNexusParams = mutableListOf<Runnable>().apply {
-        add(Runnable {
-            nexus {
-                credentials.username(project, required = true)
-            }
-        })
-        add(Runnable {
-            nexus {
-                credentials.password(project, required = true)
-            }
-        })
-    }
+    val validateNexusCredentials =
+        project.validate { nexus.credentials }.toMutableList()
 
-    val validateReleaseParams =
-        mutableListOf<Runnable>().apply {
-            add(Runnable {
-                if (!rc.isPresent || rc.get() < 0) {
-                    throw GradleException(
-                        "Please specify release candidate index via -Prc=<int>"
-                    )
-                }
-            })
-            add(Runnable {
-                if (!allowUncommittedChanges.get()) {
-                    val grgit = project.property("grgit") as Grgit
-                    val jgit = grgit.repository.jgit
-                    jgit.status().call().apply {
-                        if (!hasUncommittedChanges()) {
-                            return@Runnable
-                        }
-                        throw GradleException(
-                            "Please commit (or revert) the changes (or add -PallowUncommittedChanges): ${uncommittedChanges.joinToString(
-                                ", "
-                            )}"
-                        )
-                    }
-                }
-            })
+    val validateBeforeBuildingReleaseArtifacts = mutableListOf(Runnable {
+        if (allowUncommittedChanges.get()) {
+            return@Runnable
         }
+        val grgit = project.property("grgit") as Grgit
+        val jgit = grgit.repository.jgit
+        jgit.status().call().apply {
+            if (!hasUncommittedChanges()) {
+                return@Runnable
+            }
+            throw GradleException(
+                "Please commit (or revert) the changes (or add -PallowUncommittedChanges): ${uncommittedChanges.joinToString(
+                    ", "
+                )}"
+            )
+        }
+    })
 
     val allowUncommittedChanges = objects.property<Boolean>()
         .value(
@@ -206,10 +177,6 @@ open class ReleaseExtension @Inject constructor(
     val site by git.creating {
         branch.convention("asf-site")
         gitUrlConvention("-site")
-    }
-
-    fun validateReleaseParams(action: Runnable) {
-        validateReleaseParams.add(action)
     }
 }
 
@@ -377,3 +344,12 @@ class ReleaseParams(
     val tlpUrl
         get() = tlp.toLowerCase()
 }
+
+internal fun Project.validate(credentials: () -> Credentials) = listOf(
+    Runnable {
+        credentials().username(project, required = true)
+    },
+    Runnable {
+        credentials().password(project, required = true)
+    }
+)

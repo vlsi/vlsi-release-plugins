@@ -74,9 +74,10 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         const val PUSH_PREVIEW_SITE_TASK_NAME = "pushPreviewSite"
 
         // Marker tasks
-        const val VALIDATE_SVN_PARAMS_TASK_NAME = "validateSvnParams"
-        const val VALIDATE_NEXUS_PARAMS_TASK_NAME = "validateNexusParams"
-        const val VALIDATE_RELEASE_PARAMS_TASK_NAME = "validateReleaseParams"
+        const val VALIDATE_RC_INDEX_SPECIFIED_TASK_NAME = "validateRcIndexSpecified"
+        const val VALIDATE_SVN_CREDENTIALS_TASK_NAME = "validateSvnCredentials"
+        const val VALIDATE_NEXUS_CREDENTIALS_TASK_NAME = "validateNexusCredentials"
+        const val VALIDATE_BEFORE_ARTIFACT_BUILD_TASK_NAME = "validateBeforeBuildingReleaseArtifacts"
 
         // Configurations
         const val RELEASE_FILES_CONFIGURATION_NAME = "releaseFiles"
@@ -112,29 +113,31 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         releaseExt.archives.add(releaseFilesConfiguration)
         releaseExt.checksums.add(releaseSignaturesConfiguration)
 
-        val validateNexusParams = tasks.register(VALIDATE_NEXUS_PARAMS_TASK_NAME)
-        val validateSvnParams = tasks.register(VALIDATE_SVN_PARAMS_TASK_NAME)
-        val validateReleaseParams = tasks.register(VALIDATE_RELEASE_PARAMS_TASK_NAME)
+        val validateNexusCredentials = tasks.register(VALIDATE_NEXUS_CREDENTIALS_TASK_NAME)
+        val validateSvnCredentials = tasks.register(VALIDATE_SVN_CREDENTIALS_TASK_NAME)
+        val validateRcIndexSpecified = tasks.register(VALIDATE_RC_INDEX_SPECIFIED_TASK_NAME)
+        val validateBeforeBuildingReleaseArtifacts = tasks.register(VALIDATE_BEFORE_ARTIFACT_BUILD_TASK_NAME)
 
-        configureNexusPublish(validateNexusParams)
+        configureNexusPublish(validateNexusCredentials, validateBeforeBuildingReleaseArtifacts)
 
         configureNexusStaging(releaseExt)
 
         tasks.named("init").hide()
         hideMavenPublishTasks()
 
-        val pushRcTag = createPushRcTag(releaseExt, validateReleaseParams)
-        val pushReleaseTag = createPushReleaseTag(releaseExt, validateReleaseParams)
+        val pushRcTag = createPushRcTag(releaseExt, validateBeforeBuildingReleaseArtifacts)
+        val pushReleaseTag = createPushReleaseTag(releaseExt, validateRcIndexSpecified)
 
-        val pushPreviewSite = addPreviewSiteTasks()
+        val pushPreviewSite = addPreviewSiteTasks(validateBeforeBuildingReleaseArtifacts)
 
         val stageSvnDist = tasks.register<StageToSvnTask>(STAGE_SVN_DIST_TASK_NAME) {
             description = "Stage release artifacts to SVN dist repository"
             group = RELEASE_GROUP
             hide()
             mustRunAfter(pushRcTag)
-            dependsOn(validateSvnParams)
-            dependsOn(validateReleaseParams)
+            dependsOn(validateRcIndexSpecified)
+            dependsOn(validateBeforeBuildingReleaseArtifacts)
+            dependsOn(validateSvnCredentials)
             files.from(releaseExt.archives)
             files.from(releaseExt.checksums)
         }
@@ -143,8 +146,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             description = "Publish release artifacts to SVN dist repository"
             group = RELEASE_GROUP
             hide()
-            dependsOn(validateSvnParams)
-            dependsOn(validateReleaseParams)
+            dependsOn(validateRcIndexSpecified)
+            dependsOn(validateSvnCredentials)
             mustRunAfter(stageSvnDist)
             // pushReleaseTag is easier to rollback, so we push it first
             dependsOn(pushReleaseTag)
@@ -155,7 +158,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val releaseRepository = tasks.named("releaseRepository")
 
         closeRepository {
-            dependsOn(validateReleaseParams)
+            dependsOn(validateNexusCredentials)
+            // TODO: find repository id from rc, and depend on validateRcIndexSpecified
         }
         closeRepository.hide()
         releaseRepository.hide()
@@ -166,8 +170,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             // Note: publishSvnDist might fail, and it is easier to rollback than "rollback Nexus"
             // So we publish to SVN first, and release Nexus later
             mustRunAfter(publishSvnDist)
-            dependsOn(validateNexusParams)
-            dependsOn(validateReleaseParams)
+            dependsOn(validateNexusCredentials)
         }
 
         // closeRepository does not wait all publications by default, so we add that dependency
@@ -206,8 +209,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val generateVote = generateVoteText()
         generateVote {
             mustRunAfter(pushPreviewSite, stageDist)
-            // TODO: allow uncommitted
-            dependsOn(validateReleaseParams)
+            dependsOn(validateRcIndexSpecified)
             // SVN credentials are optional as the operation is read-only
             // dependsOn(validateSvnParams)
         }
@@ -234,39 +236,14 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         // Validations should be performed before tasks start execution
         project.gradle.taskGraph.whenReady {
             var validations = emptySequence<Runnable>()
-            if (hasTask(validateSvnParams.get())) {
-                validations += releaseExt.validateSvnParams
-            }
-            if (hasTask(pushRcTag.get()) || hasTask(pushReleaseTag.get())) {
+            if (hasTask(validateRcIndexSpecified.get())) {
                 validations += Runnable {
-                    releaseExt.source.credentials {
-                        username(project, required = true)
+                    if (!releaseExt.rc.isPresent || releaseExt.rc.get() < 0) {
+                        throw GradleException(
+                            "Please specify release candidate index via -Prc=<int>"
+                        )
                     }
                 }
-                validations += Runnable {
-                    releaseExt.source.credentials {
-                        password(project, required = true)
-                    }
-                }
-            }
-            if (releaseExt.sitePreviewEnabled.get() &&
-                hasTask(pushPreviewSite.get())) {
-                validations += Runnable {
-                    releaseExt.sitePreview.credentials {
-                        username(project, required = true)
-                    }
-                }
-                validations += Runnable {
-                    releaseExt.sitePreview.credentials {
-                        password(project, required = true)
-                    }
-                }
-            }
-            if (hasTask(validateNexusParams.get())) {
-                validations += releaseExt.validateNexusParams
-            }
-            if (hasTask(validateReleaseParams.get())) {
-                validations += releaseExt.validateReleaseParams
                 if (!hasTask(pushRcTag.get())) {
                     // Tag won't be created as a part of the release
                     validations += Runnable {
@@ -283,6 +260,22 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                         }
                     }
                 }
+            }
+            if (hasTask(validateBeforeBuildingReleaseArtifacts.get())) {
+                validations += releaseExt.validateBeforeBuildingReleaseArtifacts
+            }
+            if (hasTask(validateSvnCredentials.get())) {
+                validations += releaseExt.validateSvnCredentials
+            }
+            if (hasTask(pushRcTag.get()) || hasTask(pushReleaseTag.get())) {
+                validations += project.validate { releaseExt.source.credentials }
+            }
+            if (hasTask(validateNexusCredentials.get())) {
+                validations += releaseExt.validateNexusCredentials
+            }
+            if (releaseExt.sitePreviewEnabled.get() &&
+                hasTask(pushPreviewSite.get())) {
+                validations += project.validate { releaseExt.sitePreview.credentials }
             }
             runValidations(validations)
         }
@@ -351,13 +344,13 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
     private fun Project.createPushRcTag(
         releaseExt: ReleaseExtension,
-        validateReleaseParams: TaskProvider<*>
+        validateBeforeBuildingReleaseArtifacts: TaskProvider<*>
     ): TaskProvider<*> {
         val createTag = tasks.register(CREATE_RC_TAG_TASK_NAME, GitCreateTagTask::class) {
             description = "Create release candidate tag if missing"
             group = RELEASE_GROUP
             hide()
-            dependsOn(validateReleaseParams)
+            dependsOn(validateBeforeBuildingReleaseArtifacts)
             rootGitRepository(releaseExt.source)
             tag.set(releaseExt.rcTag)
         }
@@ -374,13 +367,13 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
     private fun Project.createPushReleaseTag(
         releaseExt: ReleaseExtension,
-        validateReleaseParams: TaskProvider<*>
+        validateRcIndexSpecified: TaskProvider<*>
     ): TaskProvider<*> {
         val createTag = tasks.register(CREATE_RELEASE_TAG_TASK_NAME, GitCreateTagTask::class) {
             description = "Create release tag if missing"
             group = RELEASE_GROUP
             hide()
-            dependsOn(validateReleaseParams)
+            dependsOn(validateRcIndexSpecified)
             rootGitRepository(releaseExt.source)
             tag.set(releaseExt.releaseTag)
             taggedRef.set(releaseExt.rcTag)
@@ -396,12 +389,15 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         }
     }
 
-    private fun Project.addPreviewSiteTasks(): TaskProvider<GitCommitAndPush> {
+    private fun Project.addPreviewSiteTasks(
+        validateBeforeBuildingReleaseArtifacts: TaskProvider<*>
+    ): TaskProvider<GitCommitAndPush> {
         val releaseExt = project.the<ReleaseExtension>()
         val preparePreviewSiteRepo =
             tasks.register("preparePreviewSiteRepo", GitPrepareRepo::class) {
                 onlyIf { releaseExt.sitePreviewEnabled.get() }
                 repository.set(releaseExt.sitePreview)
+                dependsOn(validateBeforeBuildingReleaseArtifacts)
             }
 
         val syncPreviewSiteRepo = tasks.register("syncPreviewSiteRepo", Sync::class) {
@@ -478,7 +474,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
     )
 
     private fun Project.configureNexusPublish(
-        validateNexusParams: TaskProvider<*>
+        validateNexusCredentials: TaskProvider<*>,
+        validateBeforeBuildingReleaseArtifacts: TaskProvider<*>
     ) {
         val releaseExt = project.the<ReleaseExtension>()
         configure<NexusPublishExtension> {
@@ -517,7 +514,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                     group = null
                 }
                 tasks.withType<InitializeNexusStagingRepository>().configureEach {
-                    dependsOn(validateNexusParams)
+                    dependsOn(validateBeforeBuildingReleaseArtifacts)
+                    dependsOn(validateNexusCredentials)
                     doLast {
                         // nexus-publish puts stagingRepositoryId to NexusStagingExtension so we get it from there
                         val repoName = this@configureEach.repositoryName.get()
