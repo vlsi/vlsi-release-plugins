@@ -555,10 +555,12 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 val svnStagingUri = svnDist.url.get()
                     .let { it.replacePath(it.path + "/" + svnDist.stageFolder.get()) }
 
-                val svn = Svn(project, svnStagingUri)
-                val stagedFiles = svn.ls {
+                val svn = Svn(project, svnStagingUri).apply {
                     username = svnDist.credentials.username(project)
                     password = svnDist.credentials.password(project)
+                }
+
+                val stagedFiles = svn.ls {
                     depth = LsDepth.INFINITY
                     folders.add("")
                 }
