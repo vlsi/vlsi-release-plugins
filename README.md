@@ -155,6 +155,7 @@ Change log
 ----------
 v1.46.0
 * stage-vote-release-plugin: avoid failures in pushPreviewSite on Gradle version upgrade
+* crlf-plugin: fix handling of `.gitignore` files in subfolders
 
 v1.45.0
 * stage-vote-release-plugin: preserve `**/.git/**` in syncPreviewSiteRepo

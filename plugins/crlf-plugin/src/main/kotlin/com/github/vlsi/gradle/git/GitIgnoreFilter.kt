@@ -152,7 +152,9 @@ class GitIgnoreFilter(rootPath: Path) : GitHolder<GitIgnoreNode, Boolean>(rootPa
     override fun compute(entryPath: String?, isFile: Boolean): Boolean =
         when (entryPath) {
             null -> false
-            else -> findNode(entryPath)?.isIgnored(entryPath, isFile) ?: false
+            else -> findNode(entryPath)?.run {
+                isIgnored(entryPath.substring(totalPrefixLength), isFile)
+            } ?: false
         }
 }
 

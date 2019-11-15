@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test
 
 class GitignoreTest {
     @Test
-    internal fun gitignore() {
+    fun gitignore() {
         val props = findGitproperties(Paths.get(".", "ignoretest"))
         val ignores = props.ignores
         val attrs = props.attrs
@@ -36,6 +36,7 @@ class GitignoreTest {
                 # /
                 /**/ignored
                 !/**/non_ignored
+                /*/target
 
                 # /non_ignored/
                 /non_ignored/**/in_non_ignored
@@ -64,6 +65,7 @@ class GitignoreTest {
         ignores.assertSatisfy(true, "subdir", "ignored")
         ignores.assertSatisfy(true, "subdir", "ignored", "abcd")
         ignores.assertNotSatisfy(true, "subdir", "signored", "abcd")
+        ignores.assertSatisfy(true, "non_ignored", "target", "should_be_ignored.txt")
         attrs.assertType("Attributes[ text ]", true, "subsdir", "test.txt")
         attrs.assertType("Attributes[ eol=lf text ]", true, "non_ignored", "test.txt")
         attrs.assertType("Attributes[ eol=crlf text ]", true, "non_ignored", "crlf.txt")
