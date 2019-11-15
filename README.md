@@ -153,6 +153,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.46.0
+* stage-vote-release-plugin: avoid failures in pushPreviewSite on Gradle version upgrade
+
 v1.45.0
 * stage-vote-release-plugin: preserve `**/.git/**` in syncPreviewSiteRepo
 * stage-vote-release-plugin: avoid NPE in GitPushTask when pushing new tag

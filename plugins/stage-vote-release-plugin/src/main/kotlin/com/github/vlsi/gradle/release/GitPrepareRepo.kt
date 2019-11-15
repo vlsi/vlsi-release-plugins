@@ -20,9 +20,14 @@ import com.github.vlsi.gradle.release.jgit.dsl.*
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.ResetCommand
 import org.eclipse.jgit.util.FileUtils
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
 open class GitPrepareRepo : DefaultGitTask() {
+    // Tell Gradle the directory is output, so it does not clean it on Gradle upgrades
+    @OutputDirectory
+    val outputDir = repositoryLocation
+
     @TaskAction
     fun execute() {
         val repo = repository.get()

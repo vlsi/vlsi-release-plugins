@@ -20,17 +20,21 @@ import com.github.vlsi.gradle.release.jgit.dsl.useRun
 import org.ajoberstar.grgit.Grgit
 import org.eclipse.jgit.api.Git
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.property
 
 abstract class DefaultGitTask : DefaultTask() {
-    @Input
+    @Internal
     val repository = project.objects.property<GitConfig>()
 
     @Internal
     val repositoryLocation = project.objects.directoryProperty()
         .convention(project.layout.buildDirectory.dir(repository.map { it.name }))
+
+    init {
+        // Never up to date
+        outputs.upToDateWhen { false }
+    }
 
     protected fun <R> jgit(action: Git.() -> R): R {
         val location = repositoryLocation.get().asFile
