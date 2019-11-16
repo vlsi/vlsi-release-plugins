@@ -15,6 +15,25 @@ to declare the expected checksums.
 
 See [detailed description](plugins/checksum-dependency-plugin/README.md) for installation and configuration options.
 
+Stage Vote Release Plugin
+=========================
+
+Enables to stage and vote on release artifacts before they are released.
+
+See [detailed description](plugins/stage-vote-release-plugin/README.md) for configuration options.
+
+Gradle Extensions Plugin
+========================
+
+Enables to access `Project` properties in a type-safe way:
+
+```kotlin
+val skipJavadoc by props()     // defaults to false
+val enableTests by props(true) // defaults to true
+val hello by props("world")    // defaults to "world"
+if (project.props.bool("isOk", default=true)) { ... }
+```
+
 CRLF Plugin
 ===========
 
@@ -140,19 +159,15 @@ tasks.register("generateLicense", GatherLicenseTask::class) {
 }
 ```
 
-Stage Vote Release Plugin
-=========================
-
-Enables to stage and vote on release artifacts before they are released.
-
-See [detailed description](plugins/stage-vote-release-plugin/README.md) for configuration options.
-
 License
 -------
 This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.47.0
+* gradle-extensions-plugin: plugin for type-safe `Project` property access in `build.gradle.kts`
+
 v1.46.0
 * stage-vote-release-plugin: avoid failures in pushPreviewSite on Gradle version upgrade
 * stage-vote-release-plugin: allow uncommitted changes for generateVoteText / publishDist

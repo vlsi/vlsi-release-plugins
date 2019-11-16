@@ -14,14 +14,12 @@
  * limitations under the License.
  *
  */
+package com.github.vlsi.gradle.properties
 
-dependencies {
-    implementation(project(":plugins:crlf-plugin"))
-    implementation(project(":plugins:license-gather-plugin"))
-    implementation(project(":plugins:gradle-extensions-plugin"))
-    implementation("org.eclipse.jgit:org.eclipse.jgit:5.4.0.201906121030-r")
-    implementation("org.ajoberstar.grgit:grgit-gradle:3.1.1")
-    implementation("org.ajoberstar.grgit:grgit-core:3.1.1")
-    implementation("de.marcphilipp.gradle:nexus-publish-plugin:0.2.0")
-    implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.20.0")
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+
+class ProjectExtensionsPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+    }
 }
