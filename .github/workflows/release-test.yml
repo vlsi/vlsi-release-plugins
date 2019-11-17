@@ -1,0 +1,109 @@
+name: Release test
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners
+
+jobs:
+  release-avatica:
+    name: 'Release Calcite Avatica'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 50
+        submodules: true
+    - name: 'Set up JDK 11'
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: 'Start release environment'
+      run: |
+        gpg --import .github/workflows/test-key.asc
+        git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
+        cd ../asflike-release-environment
+        cp .env_calcite .env
+        docker-compose build vcs
+        docker-compose up -d
+    - name: 'Clone Calcite Avatica'
+      run: |
+        git clone --depth 100 https://github.com/apache/calcite-avatica.git ../calcite-avatica
+    - name: 'Prepare Candidate'
+      working-directory: ../calcite-avatica
+      run: |
+        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew -no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+    - name: 'Publish Release'
+      working-directory: ../calcite-avatica
+      run: |
+        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
+
+  release-calcite:
+    name: 'Release Calcite'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 50
+        submodules: true
+    - name: 'Set up JDK 11'
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: 'Start release environment'
+      run: |
+        gpg --import .github/workflows/test-key.asc
+        git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
+        cd ../asflike-release-environment
+        cp .env_calcite .env
+        docker-compose build vcs
+        docker-compose up -d
+    - name: 'Clone Calcite'
+      run: |
+        git clone --depth 100 --branch gradle https://github.com/vlsi/calcite.git ../calcite
+    - name: 'Prepare Candidate'
+      working-directory: ../calcite
+      run: |
+        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew -PskipSigning --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+    - name: 'Publish Release'
+      working-directory: ../calcite
+      run: |
+        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
+
+  release-jmeter:
+    name: 'Release JMeter'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 50
+        submodules: true
+    - name: 'Set up JDK 11'
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: 'Start release environment'
+      run: |
+        gpg --import .github/workflows/test-key.asc
+        git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
+        cd ../asflike-release-environment
+        cp .env_jmeter .env
+        docker-compose build vcs
+        docker-compose up -d
+    - name: 'Clone JMeter'
+      run: |
+        git clone --depth 100 https://github.com/apache/jmeter.git ../jmeter
+    - name: 'Prepare Candidate'
+      working-directory: ../jmeter
+      run: |
+        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -PasfTestGitSitePreviewUsername=test -PasfTestGitSitePreviewPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+    - name: 'Publish Release'
+      working-directory: ../jmeter
+      run: |
+        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
+
