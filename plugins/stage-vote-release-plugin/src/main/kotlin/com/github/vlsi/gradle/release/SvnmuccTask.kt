@@ -92,6 +92,7 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
         for (o in muccOps) {
             val fileName = when (o) {
                 is SvnPut -> o.destination
+                is SvnCp -> o.destination
                 is SvnMv -> o.destination
                 is SvnMkdir -> o.path + "/tmp"
                 else -> null
@@ -154,6 +155,10 @@ data class SvnMkdir(val path: String) : SvnOperation() {
 
 data class SvnPut(val file: File, val destination: String) : SvnOperation() {
     override fun toSvn() = "put\n$file\n$destination"
+}
+
+data class SvnCp(val revision: Int, val source: String, val destination: String) : SvnOperation() {
+    override fun toSvn() = "cp\n$revision\n$source\n$destination"
 }
 
 data class SvnMv(val source: String, val destination: String) : SvnOperation() {

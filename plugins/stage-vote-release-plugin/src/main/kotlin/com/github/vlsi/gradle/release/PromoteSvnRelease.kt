@@ -18,6 +18,8 @@ package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.release.svn.LsDepth
 import com.github.vlsi.gradle.release.svn.Svn
+import org.gradle.api.tasks.Input
+import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.InputChanges
 
@@ -25,6 +27,9 @@ abstract class PromoteSvnRelease : SvnmuccTask() {
     init {
         outputs.upToDateWhen { false }
     }
+
+    @Input
+    val useCpWorkaround = project.objects.property<Boolean>().convention(true)
 
     override fun message() =
         project.the<ReleaseExtension>().run {
@@ -51,7 +56,14 @@ abstract class PromoteSvnRelease : SvnmuccTask() {
                 val subfolder = subfolders.entries.firstOrNull { f.name.contains(it.key) }?.value
                 val releasedFile =
                     "$releaseFolder/${if (subfolder.isNullOrEmpty()) "" else "$subfolder/"}${f.name}"
-                add(SvnMv(stagedFile, releasedFile))
+                if (useCpWorkaround.get()) {
+                    // Workaround https://issues.apache.org/jira/browse/SVN-4666 for svn 1.9
+                    // It can't delete folder that contains "only deleted files"
+                    // So we don't mv the files
+                    add(SvnCp(f.commit.revision, stagedFile, releasedFile))
+                } else {
+                    add(SvnMv(stagedFile, releasedFile))
+                }
             }
             add(SvnRm(stageFolder))
         }

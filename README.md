@@ -165,6 +165,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.48.0
+* stage-vote-release-plugin: workaround publishDist issue when SVN 1.9 is used
+
 v1.47.0
 * gradle-extensions-plugin: plugin for type-safe `Project` property access in `build.gradle.kts`
 
