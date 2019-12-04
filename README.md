@@ -165,6 +165,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.49.0
+* gradle-extensions-plugin: expose Project.props(Int), props(Long), props.string(...), props.int(...), props.long(...)
+
 v1.48.0
 * stage-vote-release-plugin: workaround publishDist issue when SVN 1.9 is used
 

@@ -58,13 +58,31 @@ class PropertyMapper internal constructor(private val project: Project) {
 
     operator fun invoke(default: String) = object : ReadOnlyProperty<Any?, String> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): String =
-            project.stringProperty(property.name, false)
-                ?: default
+            string(property.name, default)
+    }
+
+    operator fun invoke(default: Int) = object : ReadOnlyProperty<Any?, Int> {
+        override fun getValue(thisRef: Any?, property: KProperty<*>): Int =
+            int(property.name, default)
+    }
+
+    operator fun invoke(default: Long) = object : ReadOnlyProperty<Any?, Long> {
+        override fun getValue(thisRef: Any?, property: KProperty<*>): Long =
+            long(property.name, default)
     }
 
     fun bool(name: String, default: Boolean = false, nullAs: Boolean = default, blankAs: Boolean = true) =
         project.stringProperty(name, false)
             .toBool(nullAs = nullAs, blankAs = blankAs, default = default)
+
+    fun string(name: String, default: String = "") =
+        project.stringProperty(name, false) ?: default
+
+    fun int(name: String, default: Int = 0) =
+        project.stringProperty(name, false)?.toInt() ?: default
+
+    fun long(name: String, default: Long = 0) =
+        project.stringProperty(name, false)?.toLong() ?: default
 }
 
 fun Project.lastEditYear(path: String = "$rootDir/NOTICE"): Int =
