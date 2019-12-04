@@ -159,12 +159,28 @@ tasks.register("generateLicense", GatherLicenseTask::class) {
 }
 ```
 
+Gettext Plugin
+==============
+
+The plugin adds the following task classes to execute `GNU gettext` binaries:
+
+* `GettextTask` collects messages from the source files into `.pot`
+* `MsgAttribTask` processes `.po` files (e.g. for removal of obsolete messages)
+* `MsgMergeTask` updates `.po` files with missing messages from `.pot`
+* `MsgFmtTask` generates the resource bundle (e.g. Java source files for the resources)
+
 License
 -------
 This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.56
+* Add gettext-plugin
+
+v1.55
+* Build with Gradle 6.1.1
+
 v1.54
 * Replace Spotless -> [Autostyle](https://github.com/autostyle/autostyle) for simpler code style management
 * Update org.eclipse.jgit: 5.4 -> 5.6

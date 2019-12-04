@@ -35,6 +35,7 @@ include(
     "plugins:gradle-extensions-plugin",
     "plugins:checksum-dependency-plugin",
     "plugins:crlf-plugin",
+    "plugins:gettext-plugin",
     "plugins:ide-plugin",
     "plugins:license-gather-plugin",
     "plugins:stage-vote-release-plugin"

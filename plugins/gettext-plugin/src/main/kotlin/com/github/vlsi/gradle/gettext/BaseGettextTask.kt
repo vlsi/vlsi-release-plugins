@@ -14,33 +14,17 @@
  * limitations under the License.
  *
  */
-package com.github.vlsi.gradle.git
+package com.github.vlsi.gradle.gettext
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 
-open class FindGitAttributes @Inject constructor(
-    objectFactory: ObjectFactory
+open class BaseGettextTask @Inject constructor(
+    objects: ObjectFactory
 ) : DefaultTask() {
-    @InputDirectory
-    val root = objectFactory.directoryProperty()
-
     @Input
-    val maxDepth = objectFactory.property<Int>().convention(Int.MAX_VALUE)
-
-    @Internal
-    lateinit var props: GitProperties
-
-    @TaskAction
-    fun run() {
-        props = findGitproperties(root.get().asFile.toPath(), maxDepth.get())
-        logger.debug("Overall .gitignore: {}", props.ignores)
-        logger.debug("Overall .gitattributes: {}", props.attrs)
-    }
+    val executable = objects.property<String>()
 }
