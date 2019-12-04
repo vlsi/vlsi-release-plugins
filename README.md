@@ -168,6 +168,7 @@ Change log
 v1.49.0
 * gradle-extensions-plugin: expose Project.props(Int), props(Long), props.string(...), props.int(...), props.long(...)
 * gradle-extensions-plugin: change Project.lastEditYear to find the maximum 4-digit integer
+* ide-plugin: expose ide.licenseHeader, ide.licenseHeaderJava, and ide.copyright(...). Fix default ASF copyright
 
 v1.48.0
 * stage-vote-release-plugin: workaround publishDist issue when SVN 1.9 is used
