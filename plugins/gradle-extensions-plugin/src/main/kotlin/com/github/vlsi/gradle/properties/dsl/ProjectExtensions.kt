@@ -85,12 +85,12 @@ class PropertyMapper internal constructor(private val project: Project) {
         project.stringProperty(name, false)?.toLong() ?: default
 }
 
+private val yearRegexp = Regex("\\d{4}")
+
 fun Project.lastEditYear(path: String = "$rootDir/NOTICE"): Int =
     file(path)
         .readLines()
-        .first { it.contains("Copyright") }
-        .let {
-            """Copyright \d{4}-(\d{4})""".toRegex()
-                .find(it)?.groupValues?.get(1)?.toInt()
-                ?: throw IllegalStateException("Unable to identify copyright year from $path")
-        }
+        .asSequence()
+        .flatMap { yearRegexp.findAll(it) }
+        .map { it.value.toInt() }
+        .max() ?: throw IllegalStateException("Unable to identify copyright year from $path")
