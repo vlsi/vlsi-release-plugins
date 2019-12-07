@@ -15,7 +15,7 @@ jobs:
     name: 'Release Calcite Avatica'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         fetch-depth: 50
         submodules: true
@@ -28,7 +28,7 @@ jobs:
         gpg --import .github/workflows/test-key.asc
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
         cd ../asflike-release-environment
-        cp .env_calcite .env
+        cp .env_calcite-avatica .env
         docker-compose build vcs
         docker-compose up -d
     - name: 'Clone Calcite Avatica'
@@ -47,7 +47,7 @@ jobs:
     name: 'Release Calcite'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         fetch-depth: 50
         submodules: true
@@ -79,7 +79,7 @@ jobs:
     name: 'Release JMeter'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         fetch-depth: 50
         submodules: true
