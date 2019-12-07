@@ -94,6 +94,7 @@ Release configuration
 releaseParams {
     tlp.set("Calcite Avatica") // Defines Apache TLP name (used for VCS path and dist.apache.org path)
     tlpUrl.set("calcite") // Defaults to kebab-case of $tlp, however can be overriden
+    gitRepoName.set("calcite-avatica") // defaults to tlpUrl, enables to customize Git repository name
     voteText.set(...) // (ReleaseParams) -> String function that generates "release candidate draft email"
     svnDist { // configures staging to dist.apache.org
         credentials {

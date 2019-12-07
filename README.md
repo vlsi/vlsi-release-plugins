@@ -165,6 +165,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.50
+* stage-vote-release-plugin: expose releaseParams.gitRepoName to customize Git repository name
+
 v1.49.0
 * gradle-extensions-plugin: expose Project.props(Int), props(Long), props.string(...), props.int(...), props.long(...)
 * gradle-extensions-plugin: change Project.lastEditYear to find the maximum 4-digit integer

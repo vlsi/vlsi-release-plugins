@@ -91,6 +91,7 @@ open class ReleaseExtension @Inject constructor(
 
     val tlp = objects.property<String>()
     val tlpUrl = objects.property<String>().convention(tlp.map { it.toKebabCase() })
+    val gitRepoName = objects.property<String>().convention(tlpUrl)
 
     val componentName = objects.property<String>()
         .convention(tlp.map { "Apache $it" })
@@ -150,7 +151,7 @@ open class ReleaseExtension @Inject constructor(
 
     private fun GitConfig.gitUrlConvention(suffix: String = "") {
         urls.convention(repositoryType.map {
-            val repo = "${tlpUrl.get()}$suffix"
+            val repo = gitRepoName.get() + suffix
             when (it) {
                 RepositoryType.PROD -> when (pushRepositoryProvider.get()) {
                     GitPushRepositoryProvider.GITHUB -> GitHub("apache", repo)
