@@ -18,6 +18,7 @@ package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.release.svn.LsDepth
 import com.github.vlsi.gradle.release.svn.Svn
+import com.github.vlsi.gradle.release.svn.SvnEntry
 import de.marcphilipp.gradle.nexus.InitializeNexusStagingRepository
 import de.marcphilipp.gradle.nexus.NexusPublishExtension
 import io.codearte.gradle.nexus.NexusStagingExtension
@@ -133,6 +134,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val stageSvnDist = tasks.register<StageToSvnTask>(STAGE_SVN_DIST_TASK_NAME) {
             description = "Stage release artifacts to SVN dist repository"
             group = RELEASE_GROUP
+            onlyIf { releaseExt.svnDistEnabled.get() }
             hide()
             mustRunAfter(pushRcTag)
             dependsOn(validateRcIndexSpecified)
@@ -145,6 +147,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val publishSvnDist = tasks.register<PromoteSvnRelease>(PUBLISH_SVN_DIST_TASK_NAME) {
             description = "Publish release artifacts to SVN dist repository"
             group = RELEASE_GROUP
+            onlyIf { releaseExt.svnDistEnabled.get() }
             hide()
             dependsOn(validateRcIndexSpecified)
             dependsOn(validateSvnCredentials)
@@ -194,6 +197,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         tasks.register(REMOVE_STALE_ARTIFACTS_TASK_NAME, RemoveStaleArtifactsTask::class) {
             description = "Removes stale artifacts from dist.apache.org (dry run with -PasfDryRun)"
             group = RELEASE_GROUP
+            onlyIf { releaseExt.svnDistEnabled.get() }
             mustRunAfter(publishSvnDist)
         }
 
@@ -264,7 +268,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             if (hasTask(validateBeforeBuildingReleaseArtifacts.get())) {
                 validations += releaseExt.validateBeforeBuildingReleaseArtifacts
             }
-            if (hasTask(validateSvnCredentials.get())) {
+            if (releaseExt.svnDistEnabled.get() && hasTask(validateSvnCredentials.get())) {
                 validations += releaseExt.validateSvnCredentials
             }
             if (hasTask(pushRcTag.get()) || hasTask(pushReleaseTag.get())) {
@@ -553,26 +557,11 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 val svnStagingUri = svnDist.url.get()
                     .let { it.replacePath(it.path + "/" + svnDist.stageFolder.get()) }
 
-                val svn = Svn(project, svnStagingUri).apply {
-                    username = svnDist.credentials.username(project)
-                    password = svnDist.credentials.password(project)
+                val (stagedFiles, checksums) = if (releaseExt.svnDistEnabled.get()) {
+                    fetchSvnArtifacts(project, svnStagingUri, svnDist)
+                } else {
+                    Pair(listOf(), mapOf())
                 }
-
-                val stagedFiles = svn.ls {
-                    depth = LsDepth.INFINITY
-                    folders.add("")
-                }
-
-                val checksums = stagedFiles
-                    .asSequence()
-                    .filter { it.name.endsWith(".sha512") }
-                    .sortedBy { it.name }
-                    .associate {
-                        it.name to svn.cat {
-                            file = it.name
-                            revision = it.commit.revision
-                        }.toString(StandardCharsets.UTF_8)
-                    }
 
                 val svnStagingRevision = stagedFiles.map { it.commit.revision }.max() ?: 0
 
@@ -604,4 +593,32 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 logger.lifecycle("Please find draft vote text in {}", voteMailFile)
             }
         }
+
+    private fun fetchSvnArtifacts(
+        project: Project,
+        svnStagingUri: URI,
+        svnDist: SvnDistConfig
+    ): Pair<List<SvnEntry>, Map<String, String>> {
+        val svn = Svn(project, svnStagingUri).apply {
+            username = svnDist.credentials.username(project)
+            password = svnDist.credentials.password(project)
+        }
+
+        val stagedFiles = svn.ls {
+            depth = LsDepth.INFINITY
+            folders.add("")
+        }
+
+        val checksums = stagedFiles
+            .asSequence()
+            .filter { it.name.endsWith(".sha512") }
+            .sortedBy { it.name }
+            .associate {
+                it.name to svn.cat {
+                    file = it.name
+                    revision = it.commit.revision
+                }.toString(StandardCharsets.UTF_8)
+            }
+        return Pair(stagedFiles, checksums)
+    }
 }

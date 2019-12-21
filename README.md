@@ -165,6 +165,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.51
+* stage-vote-release-plugin: expose releaseParams.svnDistEnabled to skip SVN publication
+
 v1.50
 * stage-vote-release-plugin: expose releaseParams.gitRepoName to customize Git repository name
 

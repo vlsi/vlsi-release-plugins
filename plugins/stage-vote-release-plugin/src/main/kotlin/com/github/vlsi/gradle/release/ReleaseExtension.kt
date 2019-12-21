@@ -73,14 +73,6 @@ open class ReleaseExtension @Inject constructor(
             project.stringProperty("allowUncommittedChanges").toBool()
         )
 
-    val repositoryType = objects.property<RepositoryType>()
-        .value(
-            when ((project.stringProperty("asf") ?: project.stringProperty("asfDryRun")).toBool()) {
-                true -> RepositoryType.PROD
-                else -> RepositoryType.TEST
-            }
-        )
-
     val prefixForProperties = objects.property<String>().convention("asf")
     val prefix = prefixForProperties.map {
         it + when (repositoryType.get()) {
@@ -88,6 +80,16 @@ open class ReleaseExtension @Inject constructor(
             RepositoryType.TEST -> "Test"
         }
     }
+
+    val repositoryType = objects.property<RepositoryType>()
+        .convention(
+            prefixForProperties.map {
+                when ((project.stringProperty(it) ?: project.stringProperty("${it}DryRun")).toBool()) {
+                    true -> RepositoryType.PROD
+                    else -> RepositoryType.TEST
+                }
+            }
+        )
 
     val tlp = objects.property<String>()
     val tlpUrl = objects.property<String>().convention(tlp.map { it.toKebabCase() })
@@ -97,6 +99,8 @@ open class ReleaseExtension @Inject constructor(
         .convention(tlp.map { "Apache $it" })
     val componentNameUrl = objects.property<String>()
         .convention(componentName.map { it.toKebabCase() })
+
+    val organizationName = objects.property<String>().convention("apache")
 
     val voteText = objects.property<(ReleaseParams) -> String>()
 
@@ -154,7 +158,7 @@ open class ReleaseExtension @Inject constructor(
             val repo = gitRepoName.get() + suffix
             when (it) {
                 RepositoryType.PROD -> when (pushRepositoryProvider.get()) {
-                    GitPushRepositoryProvider.GITHUB -> GitHub("apache", repo)
+                    GitPushRepositoryProvider.GITHUB -> GitHub(organizationName.get(), repo)
                     GitPushRepositoryProvider.GITBOX -> GitBox(repo)
                 }
                 RepositoryType.TEST -> GitDaemon("127.0.0.1", repo)
@@ -174,6 +178,9 @@ open class ReleaseExtension @Inject constructor(
 
     val sitePreviewEnabled = objects.property<Boolean>()
         .convention(project.stringProperty("sitePreviewEnabled").toBool(nullAs = true))
+
+    val svnDistEnabled = objects.property<Boolean>()
+        .convention(project.stringProperty("svnDistEnabled").toBool(nullAs = true))
 
     val site by git.creating {
         branch.convention("asf-site")
@@ -262,8 +269,8 @@ open class GitConfig @Inject constructor(
     objects: ObjectFactory
 ) {
     val pushRepositoryProvider = objects.property<GitPushRepositoryProvider>()
-        .convention(project.provider {
-            project.stringProperty("asf.git.pushRepositoryProvider")
+        .convention(ext.prefixForProperties.map { prefix ->
+            project.stringProperty("$prefix.git.pushRepositoryProvider")
                 ?.let { GitPushRepositoryProvider.valueOf(it.toUpperCase()) }
                 ?: GitPushRepositoryProvider.GITHUB
         })
