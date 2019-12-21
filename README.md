@@ -167,6 +167,7 @@ Change log
 ----------
 v1.51
 * stage-vote-release-plugin: expose releaseParams.svnDistEnabled to skip SVN publication
+* stage-vote-release-plugin: publish Git tag after publishing Nexus and SVN
 
 v1.50
 * stage-vote-release-plugin: expose releaseParams.gitRepoName to customize Git repository name

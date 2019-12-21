@@ -136,7 +136,6 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             group = RELEASE_GROUP
             onlyIf { releaseExt.svnDistEnabled.get() }
             hide()
-            mustRunAfter(pushRcTag)
             dependsOn(validateRcIndexSpecified)
             dependsOn(validateBeforeBuildingReleaseArtifacts)
             dependsOn(validateSvnCredentials)
@@ -152,8 +151,6 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             dependsOn(validateRcIndexSpecified)
             dependsOn(validateSvnCredentials)
             mustRunAfter(stageSvnDist)
-            // pushReleaseTag is easier to rollback, so we push it first
-            dependsOn(pushReleaseTag)
         }
 
         // Tasks from NexusStagingPlugin
@@ -185,6 +182,11 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             }
         }
 
+        pushRcTag {
+            mustRunAfter(stageSvnDist)
+            mustRunAfter(closeRepository)
+        }
+
         val stageDist = tasks.register(STAGE_DIST_TASK_NAME) {
             description = "Stage release artifacts to SVN and Nexus"
             group = RELEASE_GROUP
@@ -201,11 +203,17 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             mustRunAfter(publishSvnDist)
         }
 
+        pushReleaseTag {
+            mustRunAfter(publishSvnDist)
+            mustRunAfter(releaseRepository)
+        }
+
         tasks.register(PUBLISH_DIST_TASK_NAME) {
             description = "Publish release artifacts to SVN and Nexus"
             group = RELEASE_GROUP
             dependsOn(publishSvnDist)
             dependsOn(releaseRepository)
+            dependsOn(pushReleaseTag)
         }
 
         // prepareVote depends on all the publish tasks
