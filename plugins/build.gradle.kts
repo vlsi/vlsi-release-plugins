@@ -72,6 +72,7 @@ subprojects {
             create(pluginId) {
                 id = "com.github.vlsi.$pluginId"
                 displayName = pluginDisplayName
+                description = project.description
                 implementationClass = project.property("plugin.implementation.class") as String
             }
         }
@@ -143,23 +144,25 @@ subprojects {
                     named<MavenPublication>("pluginMaven") {
                         artifact(sourcesJar)
                         artifact(javadocJar)
-                        pom {
-                            name.set(pluginDisplayName)
-                            description.set(project.description)
-                            inceptionYear.set("2019")
-                            url.set(repoUrl)
-                            developers {
-                                developer {
-                                    name.set("Vladimir Sitnikov")
-                                    id.set("vlsi")
-                                    email.set("sitnikov.vladmir@gmail.com")
-                                }
+                    }
+                }
+                withType<MavenPublication> {
+                    pom {
+                        name.set(pluginDisplayName)
+                        description.set(project.description)
+                        inceptionYear.set("2019")
+                        url.set(repoUrl)
+                        developers {
+                            developer {
+                                name.set("Vladimir Sitnikov")
+                                id.set("vlsi")
+                                email.set("sitnikov.vladmir@gmail.com")
                             }
-                            licenses {
-                                license {
-                                    name.set("Apache-2.0")
-                                    url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                                }
+                        }
+                        licenses {
+                            license {
+                                name.set("Apache-2.0")
+                                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                             }
                         }
                     }
