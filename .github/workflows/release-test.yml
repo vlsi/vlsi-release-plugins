@@ -34,6 +34,7 @@ jobs:
     - name: 'Clone Calcite Avatica'
       run: |
         git clone --depth 100 https://github.com/apache/calcite-avatica.git ../calcite-avatica
+        git rev-parse HEAD
     - name: 'Prepare Candidate'
       working-directory: ../calcite-avatica
       run: |
@@ -65,7 +66,8 @@ jobs:
         docker-compose up -d
     - name: 'Clone Calcite'
       run: |
-        git clone --depth 100 --branch gradle https://github.com/vlsi/calcite.git ../calcite
+        git clone --depth 100 https://github.com/apache/calcite.git ../calcite
+        git rev-parse HEAD
     - name: 'Prepare Candidate'
       working-directory: ../calcite
       run: |
@@ -98,6 +100,7 @@ jobs:
     - name: 'Clone JMeter'
       run: |
         git clone --depth 100 https://github.com/apache/jmeter.git ../jmeter
+        git rev-parse HEAD
     - name: 'Prepare Candidate'
       working-directory: ../jmeter
       run: |
@@ -130,6 +133,7 @@ jobs:
     - name: 'Clone Autostyle'
       run: |
         git clone --depth 100 https://github.com/autostyle/autostyle.git ../autostyle
+        git rev-parse HEAD
     - name: 'Prepare Candidate'
       working-directory: ../autostyle
       run: |
