@@ -16,6 +16,7 @@
  */
 package com.github.vlsi.gradle.release
 
+import com.github.vlsi.gradle.properties.dsl.props
 import com.github.vlsi.gradle.release.svn.LsDepth
 import com.github.vlsi.gradle.release.svn.Svn
 import com.github.vlsi.gradle.release.svn.SvnEntry
@@ -23,10 +24,6 @@ import de.marcphilipp.gradle.nexus.InitializeNexusStagingRepository
 import de.marcphilipp.gradle.nexus.NexusPublishExtension
 import io.codearte.gradle.nexus.NexusStagingExtension
 import io.codearte.gradle.nexus.NexusStagingPlugin
-import java.io.File
-import java.net.URI
-import java.nio.charset.StandardCharsets
-import javax.inject.Inject
 import org.ajoberstar.grgit.Grgit
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.ObjectId
@@ -35,6 +32,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.publish.maven.tasks.GenerateMavenPom
 import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
@@ -45,8 +43,22 @@ import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.reflect.Instantiator
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.invoke
+import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.withType
 import org.gradle.language.base.plugins.LifecycleBasePlugin
+import org.gradle.plugins.signing.SigningExtension
+import org.gradle.plugins.signing.SigningPlugin
+import java.io.File
+import java.net.URI
+import java.nio.charset.StandardCharsets
+import javax.inject.Inject
 
 class StageVoteReleasePlugin @Inject constructor(private val instantiator: Instantiator) :
     Plugin<Project> {
@@ -86,10 +98,16 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         const val PREVIEW_SITE_CONFIGURATION_NAME = "previewSite"
     }
 
+    private val Project.skipSign: Boolean get() = props.bool("skipSign")
+
     override fun apply(project: Project) {
         project.configureAll()
         if (project.parent == null) {
             project.configureRoot()
+        }
+        if (!project.skipSign && project.rootProject.the<ReleaseExtension>().release.get()) {
+            // Signing is applied only for release versions
+            project.apply(plugin = "signing")
         }
     }
 
@@ -110,6 +128,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
         // Save stagingRepoId. We don't know which
         val releaseExt = extensions.create<ReleaseExtension>(RELEASE_PARAMS_EXTENSION_NAME, project)
+
+        configureSigning(releaseExt)
 
         releaseExt.archives.add(releaseFilesConfiguration)
         releaseExt.checksums.add(releaseSignaturesConfiguration)
@@ -290,6 +310,44 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 validations += project.validate { releaseExt.sitePreview.credentials }
             }
             runValidations(validations)
+        }
+    }
+
+    fun Project.configureSigning(releaseExt: ReleaseExtension) {
+        if (skipSign) {
+            return
+        }
+
+        if (releaseExt.release.get()) {
+            allprojects {
+                plugins.withId("publishing") {
+                    apply(plugin = "signing")
+                    configure<SigningExtension> {
+                        // Sign all the publications
+                        sign(the<PublishingExtension>().publications)
+                    }
+                }
+            }
+        }
+
+        val useGpgCmd by props()
+        if (!useGpgCmd) {
+            return
+        }
+
+        releaseExt.validateBeforeBuildingReleaseArtifacts += Runnable {
+            if (useGpgCmd && findProperty("signing.gnupg.keyName") == null) {
+                throw GradleException("Please specify signing key id via signing.gnupg.keyName " +
+                        "(see https://github.com/gradle/gradle/issues/8657)")
+            }
+        }
+
+        allprojects {
+            plugins.withType<SigningPlugin> {
+                configure<SigningExtension> {
+                    useGpgCmd()
+                }
+            }
         }
     }
 

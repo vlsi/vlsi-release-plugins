@@ -89,16 +89,21 @@ open class ReleaseArtifacts @Inject constructor(
                 builtBy(shaTask)
             }
         }
-        project.configure<SigningExtension> {
-            val prevSignConfiguration = configuration
-            configuration = project.configurations[RELEASE_SIGNATURES_CONFIGURATION_NAME]
-            val signTasks = sign(task)
-            for (signTask in signTasks) {
-                signTask.onlyIf { archiveFile.get().asFile.exists() }
-            }
-            configuration = prevSignConfiguration
-            project.tasks.named(BasePlugin.ASSEMBLE_TASK_NAME) {
-                dependsOn(shaTask, signTasks)
+        project.tasks.named(BasePlugin.ASSEMBLE_TASK_NAME) {
+            dependsOn(shaTask)
+        }
+        project.plugins.withId("signing") {
+            project.configure<SigningExtension> {
+                val prevSignConfiguration = configuration
+                configuration = project.configurations[RELEASE_SIGNATURES_CONFIGURATION_NAME]
+                val signTasks = sign(task)
+                for (signTask in signTasks) {
+                    signTask.onlyIf { archiveFile.get().asFile.exists() }
+                }
+                configuration = prevSignConfiguration
+                project.tasks.named(BasePlugin.ASSEMBLE_TASK_NAME) {
+                    dependsOn(signTasks)
+                }
             }
         }
     }

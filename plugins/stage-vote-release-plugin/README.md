@@ -67,6 +67,13 @@ You can preview the set of files to be removed asf follows:
 By default it removes everything in `/dev/$tlp/` folder, and it keeps the current artifacts
 in `/release/...`
 
+Signing
+-------
+
+By default, the plugin adds `signing` plugin when release version is used (e.g. `-Prelease` or `-Prc=...`).
+You can override that by adding `-PskipSign` property.
+By default Java implementation is used for PGP, and you can use native `gpg` executable by adding `-PuseGpgCmd`.
+
 Testing release procedure
 -------------------------
 

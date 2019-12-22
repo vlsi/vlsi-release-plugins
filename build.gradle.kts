@@ -67,7 +67,7 @@ allprojects {
             kotlin {
                 // Generated build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
                 // has wrong indentation, and it is not clear how to exclude it
-                ktlint().userData(mapOf("disabled_rules" to "no-wildcard-imports"))
+                ktlint().userData(mapOf("disabled_rules" to "no-wildcard-imports,import-ordering"))
                 // It prints errors regarding build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
                 // so comment it for now :(
                 licenseHeaderFile(licenseHeaderFile)

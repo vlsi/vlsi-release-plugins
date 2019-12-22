@@ -165,6 +165,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.52
+* stage-vote-release-plugin: integrate signing, and support skipSign and useGpgCmd properties
+
 v1.51
 * stage-vote-release-plugin: expose releaseParams.svnDistEnabled to skip SVN publication
 * stage-vote-release-plugin: publish Git tag after publishing Nexus and SVN
