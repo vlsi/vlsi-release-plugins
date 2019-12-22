@@ -201,10 +201,13 @@ open class SvnDistConfig @Inject constructor(
         .convention(
             ext.repositoryType.map {
                 when (it) {
-                    RepositoryType.PROD -> project.uri("https://dist.apache.org/repos/dist")
-                    RepositoryType.TEST -> project.uri("http://127.0.0.1/svn/dist")
-                }
+                    RepositoryType.PROD -> prodUrl
+                    RepositoryType.TEST -> testUrl
+                }.get()
             })
+
+    val prodUrl = objects.property<URI>().convention(project.uri("https://dist.apache.org/repos/dist"))
+    val testUrl = objects.property<URI>().convention(project.uri("http://127.0.0.1/svn/dist"))
 
     val stageFolder = objects.property<String>()
         .convention(project.provider {
@@ -248,10 +251,21 @@ open class NexusConfig @Inject constructor(
         .convention(
             ext.repositoryType.map {
                 when (it) {
-                    RepositoryType.PROD -> project.uri("https://repository.apache.org")
-                    RepositoryType.TEST -> project.uri("http://127.0.0.1:8080")
-                }
+                    RepositoryType.PROD -> prodUrl
+                    RepositoryType.TEST -> testUrl
+                }.get()
             })
+
+    val prodUrl = objects.property<URI>().convention(project.uri("https://repository.apache.org"))
+    val testUrl = objects.property<URI>().convention(project.uri("http://127.0.0.1:8080"))
+
+    fun mavenCentral() {
+        prodUrl.set(project.uri("https://oss.sonatype.org"))
+    }
+
+    fun apacheRepository() {
+        prodUrl.set(project.uri("https://repository.apache.org"))
+    }
 
     val credentials = objects.newInstance<Credentials>("Nexus", ext)
 

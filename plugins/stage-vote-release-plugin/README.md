@@ -104,6 +104,7 @@ releaseParams {
     gitRepoName.set("calcite-avatica") // defaults to tlpUrl, enables to customize Git repository name
     voteText.set(...) // (ReleaseParams) -> String function that generates "release candidate draft email"
     svnDist { // configures staging to dist.apache.org
+        prodUrl.set(uri("https://nexus.url")) // By default the plugin publishes to dist.apache.org, and it can be overridden
         credentials {
             username.set(String) // -PasfSvnUsername or -PasfTestSvnUsername
             password.set(String) // -PasfSvnPassword or -PasfTestSvnPassword
@@ -115,6 +116,8 @@ releaseParams {
         }
     }
     nexus { // Configures Nexus repository
+        mavenCentral() // By default the plugin publishes to repository.apache.org, and it can be overridden
+        prodUrl.set(uri("https://nexus.url")) // An alternative option to override Nexus URL
         credentials {
             username.set(String) // -PasfNexusUsername or -PasfTestNexusUsername
             password.set(String) // -PasfNexusPassword or -PasfTestNexusPassword
