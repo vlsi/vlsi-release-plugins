@@ -22,11 +22,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `kotlin-dsl`
     `maven-publish`
-    id("com.gradle.plugin-publish") version "0.10.1" apply false
-    id("com.github.autostyle") version "3.0"
-    id("org.jetbrains.gradle.plugin.idea-ext") version "0.5"
-    id("com.github.ben-manes.versions") version "0.21.0"
-    id("org.jetbrains.dokka") version "0.9.17"
+    id("com.gradle.plugin-publish") apply false
+    id("com.github.autostyle")
+    id("org.jetbrains.gradle.plugin.idea-ext")
+    id("com.github.ben-manes.versions")
+    id("org.jetbrains.dokka")
 }
 
 description = "A set of plugins to simplify Gradle release tasks"

@@ -15,6 +15,19 @@
  *
  */
 
+pluginManagement {
+    plugins {
+        fun String.v() = extra["$this.version"].toString()
+        fun PluginDependenciesSpec.idv(id: String, key: String = id) = id(id) version key.v()
+
+        idv("com.github.autostyle")
+        idv("com.gradle.plugin-publish")
+        idv("org.jetbrains.gradle.plugin.idea-ext")
+        idv("com.github.ben-manes.versions")
+        idv("org.jetbrains.dokka")
+    }
+}
+
 rootProject.name = "vlsi-release-plugins"
 
 include(
@@ -84,4 +97,16 @@ if (!extra.has("noverify")) {
         throw GradleException("Buildscript classpath has non-whitelisted files:\n  $violations")
     }
     apply(plugin = "com.github.vlsi.checksum-dependency")
+}
+
+fun property(name: String) =
+    when (extra.has(name)) {
+        true -> extra.get(name) as? String
+        else -> null
+    }
+
+// This enables to try local Autostyle
+property("localAutostyle")?.ifBlank { "../autostyle" }?.let {
+    println("Importing project '$it'")
+    includeBuild("../autostyle")
 }

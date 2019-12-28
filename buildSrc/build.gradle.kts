@@ -20,7 +20,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `java`
     `kotlin-dsl` apply false
-    id("com.github.autostyle") version "3.0"
+    id("com.github.autostyle")
 }
 
 repositories {

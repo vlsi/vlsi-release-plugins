@@ -15,6 +15,15 @@
  *
  */
 
+pluginManagement {
+    plugins {
+        fun String.v() = extra["$this.version"].toString()
+        fun PluginDependenciesSpec.idv(id: String, key: String = id) = id(id) version key.v()
+
+        idv("com.github.autostyle")
+    }
+}
+
 include("licenseTexts")
 
 val upperCaseLetters = "\\p{Upper}".toRegex()
