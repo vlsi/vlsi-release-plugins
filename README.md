@@ -165,6 +165,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+HEAD
+* Replace Spotless -> [Autostyle](https://github.com/autostyle/autostyle) for simpler code style management
+
 v1.53
 * stage-vote-release-plugin: expose NexusConfig#mavenCentral to enable publishing to Central
 

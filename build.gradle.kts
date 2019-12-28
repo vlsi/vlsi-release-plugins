@@ -23,7 +23,7 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     id("com.gradle.plugin-publish") version "0.10.1" apply false
-    id("com.diffplug.gradle.spotless") version "3.25.0"
+    id("com.github.autostyle") version "3.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "0.5"
     id("com.github.ben-manes.versions") version "0.21.0"
     id("org.jetbrains.dokka") version "0.9.17"
@@ -59,18 +59,22 @@ allprojects {
     }
 }
 
-val licenseHeaderFile = file("gradle/license-header.txt")
+val licenseHeader = file("gradle/license-header.txt").readText()
 allprojects {
     if (project.path != ":plugins:license-gather-plugin") {
-        apply(plugin = "com.diffplug.gradle.spotless")
-        spotless {
+        apply(plugin = "com.github.autostyle")
+        autostyle {
             kotlin {
+                licenseHeader(licenseHeader)
+                trimTrailingWhitespace()
                 // Generated build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
                 // has wrong indentation, and it is not clear how to exclude it
-                ktlint().userData(mapOf("disabled_rules" to "no-wildcard-imports,import-ordering"))
+                ktlint {
+                    userData(mapOf("disabled_rules" to "no-wildcard-imports,import-ordering"))
+                }
                 // It prints errors regarding build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
                 // so comment it for now :(
-                licenseHeaderFile(licenseHeaderFile)
+                endWithNewline()
             }
         }
     }
@@ -98,22 +102,7 @@ idea {
                 profiles {
                     create("Apache-2.0") {
                         keyword = "Copyright"
-                        notice = """
-        Copyright 2019 Vladimir Sitnikov <sitnikov.vladimir@gmail.com>
-
-        Licensed under the Apache License, Version 2.0 (the "License");
-        you may not use this file except in compliance with the License.
-        You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-        Unless required by applicable law or agreed to in writing, software
-        distributed under the License is distributed on an "AS IS" BASIS,
-        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        See the License for the specific language governing permissions and
-        limitations under the License.
-
-    """.trimIndent()
+                        notice = licenseHeader
                     }
                 }
             }

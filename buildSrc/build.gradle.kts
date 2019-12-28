@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `java`
     `kotlin-dsl` apply false
+    id("com.github.autostyle") version "3.0"
 }
 
 repositories {
@@ -27,12 +28,29 @@ repositories {
     gradlePluginPortal()
 }
 
+val licenseHeader = file("$rootDir/../gradle/license-header.txt").readText()
 allprojects {
     repositories {
         jcenter()
         gradlePluginPortal()
     }
     applyKotlinProjectConventions()
+
+    apply(plugin = "com.github.autostyle")
+    autostyle {
+        kotlin {
+            licenseHeader(licenseHeader)
+            trimTrailingWhitespace()
+            // Generated build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
+            // has wrong indentation, and it is not clear how to exclude it
+            ktlint {
+                userData(mapOf("disabled_rules" to "no-wildcard-imports,import-ordering"))
+            }
+            // It prints errors regarding build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
+            // so comment it for now :(
+            endWithNewline()
+        }
+    }
 }
 
 fun Project.applyKotlinProjectConventions() {

@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 package com.github.vlsi.gradle.buildtools
 
 import org.apache.tools.ant.filters.FixCrLfFilter

@@ -3,19 +3,35 @@
   <trust-requirement pgp='GROUP' checksum='NONE' />
   <ignored-keys />
   <trusted-keys>
+    <trusted-key id='379ce192d401ab61' group='com.diffplug.durian' />
     <trusted-key id='c9fbaa83a8753994' group='com.fasterxml.jackson.core' />
     <trusted-key id='c9fbaa83a8753994' group='com.fasterxml.jackson.module' />
+    <trusted-key id='105cb91cac2aee0e' group='com.github.autostyle' />
+    <trusted-key id='461a804f2609fd89' group='com.github.shyiko.klob' />
     <trusted-key id='7a01b0f236e5430f' group='com.google.code.gson' />
+    <trusted-key id='7eb97d110dfadd60' group='com.googlecode.concurrent-trees' />
+    <trusted-key id='72475fd306b9cab7' group='com.googlecode.javaewah' />
+    <trusted-key id='a50569c7ca7fa1f0' group='com.jcraft' />
+    <trusted-key id='aa49c633b4734832' group='com.pinterest' />
+    <trusted-key id='aa49c633b4734832' group='com.pinterest.ktlint' />
     <trusted-key id='685c46769dbb5e5d' group='com.squareup' />
     <trusted-key id='86fdc7e2a11262cb' group='commons-codec' />
     <trusted-key id='a41f13c999945293' group='commons-logging' />
     <trusted-key id='6449005f96bc97a3' group='de.undercouch' />
+    <trusted-key id='379ce192d401ab61' group='info.picocli' />
+    <trusted-key id='efe8086f9e93774e' group='junit' />
     <trusted-key id='7c25280eae63ebe5' group='org.apache.httpcomponents' />
+    <trusted-key id='e2b3d84202b812d9' group='org.assertj' />
+    <trusted-key id='41321490758aad6f' group='org.codehaus.groovy' />
+    <trusted-key id='0e91c2de43b72bb1' group='org.ec4j.core' />
+    <trusted-key id='5b05ccde140c2876' group='org.eclipse.jgit' />
+    <trusted-key id='a6adfc93ef34893e' group='org.hamcrest' />
     <trusted-key id='bcf4173966770193' group='org.jetbrains' />
     <trusted-key id='379ce192d401ab61' group='org.jetbrains.intellij.deps' />
     <trusted-key id='6a0975f8b1127b83' group='org.jetbrains.kotlin' />
     <trusted-key id='98fe03a974ce0a0b' group='org.jetbrains.kotlin' />
     <trusted-key id='379ce192d401ab61' group='org.jetbrains.kotlinx' />
+    <trusted-key id='2c7b12f2a511e325' group='org.slf4j' />
   </trusted-keys>
   <dependencies>
     <dependency group='org.gradle.kotlin' module='plugins' version='1.2.9'>

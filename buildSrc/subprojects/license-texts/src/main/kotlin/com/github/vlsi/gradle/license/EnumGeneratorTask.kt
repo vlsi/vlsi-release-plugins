@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 package com.github.vlsi.gradle.license
 
 import com.fasterxml.jackson.databind.DeserializationFeature

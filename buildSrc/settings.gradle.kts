@@ -35,7 +35,7 @@ for (project in rootProject.children) {
 
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.26.0") {
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.45.0") {
             exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         }
     }
@@ -54,8 +54,8 @@ val expectedSha512 = mapOf(
             to "okhttp-4.1.0.jar",
     "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
             to "okio-2.2.2.jar",
-    "2AB28DC6026A9CFC869C6287501D1002B8F2B61C7C3896B61A5616CE686DD41FD22EE9FD2D122111E4DABAA8359A4947C3F43B9DF29B1AFC8AA5D809A8188CAD"
-            to "checksum-dependency-plugin-1.26.0.jar"
+    "993FD75CCCE1618BBE64BB2ED55242836C2B01442AD0AE98DA03CD672EAFF935567921304B6E8705AAE87367FDF7B8FF684C992A45E8008DDB4EF7E73FEA4DAD"
+            to "checksum-dependency-plugin-1.45.0.jar"
 )
 
 fun File.sha512(): String {
