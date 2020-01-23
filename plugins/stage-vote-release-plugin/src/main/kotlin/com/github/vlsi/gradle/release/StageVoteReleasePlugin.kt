@@ -551,6 +551,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         configure<NexusPublishExtension> {
             serverUrl.set(releaseExt.nexus.url.map { it.replacePath("/service/local/") })
             snapshotRepositoryUrl.set(releaseExt.nexus.url.map { it.replacePath("/content/repositories/snapshots/") })
+            username.set(project.provider { releaseExt.nexus.credentials.username(project) })
+            password.set(project.provider { releaseExt.nexus.credentials.password(project) })
         }
         val rootInitStagingRepository = tasks.named("initializeNexusStagingRepository")
         // Use the same settings for all subprojects that apply MavenPublishPlugin
