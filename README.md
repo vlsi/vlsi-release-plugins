@@ -169,6 +169,7 @@ HEAD
 * Replace Spotless -> [Autostyle](https://github.com/autostyle/autostyle) for simpler code style management
 * Update org.eclipse.jgit: 5.4 -> 5.6
 * stage-vote-release-plugin: fix race condition in nexus-publish afterEvaluate: provide username/password always
+* stage-vote-release-plugin: generate description for nexus staging repository
 
 v1.53
 * stage-vote-release-plugin: expose NexusConfig#mavenCentral to enable publishing to Central
