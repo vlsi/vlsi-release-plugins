@@ -167,6 +167,7 @@ Change log
 ----------
 HEAD
 * Replace Spotless -> [Autostyle](https://github.com/autostyle/autostyle) for simpler code style management
+* Update org.eclipse.jgit: 5.4 -> 5.6
 
 v1.53
 * stage-vote-release-plugin: expose NexusConfig#mavenCentral to enable publishing to Central

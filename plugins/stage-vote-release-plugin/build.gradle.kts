@@ -19,7 +19,7 @@ dependencies {
     implementation(project(":plugins:crlf-plugin"))
     implementation(project(":plugins:license-gather-plugin"))
     implementation(project(":plugins:gradle-extensions-plugin"))
-    implementation("org.eclipse.jgit:org.eclipse.jgit:5.4.0.201906121030-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:5.6.0.201912101111-r")
     implementation("org.ajoberstar.grgit:grgit-gradle:3.1.1")
     implementation("org.ajoberstar.grgit:grgit-core:3.1.1")
     implementation("de.marcphilipp.gradle:nexus-publish-plugin:0.2.0")
