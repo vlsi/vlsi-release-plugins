@@ -165,7 +165,7 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
-HEAD
+v1.54
 * Replace Spotless -> [Autostyle](https://github.com/autostyle/autostyle) for simpler code style management
 * Update org.eclipse.jgit: 5.4 -> 5.6
 * stage-vote-release-plugin: fix race condition in nexus-publish afterEvaluate: provide username/password always
