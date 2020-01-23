@@ -170,6 +170,7 @@ HEAD
 * Update org.eclipse.jgit: 5.4 -> 5.6
 * stage-vote-release-plugin: fix race condition in nexus-publish afterEvaluate: provide username/password always
 * stage-vote-release-plugin: generate description for nexus staging repository
+* ide-plugin: update gradle-idea-ext: 0.5 -> 0.7
 
 v1.53
 * stage-vote-release-plugin: expose NexusConfig#mavenCentral to enable publishing to Central

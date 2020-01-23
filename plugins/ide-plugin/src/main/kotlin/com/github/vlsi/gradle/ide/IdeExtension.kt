@@ -24,7 +24,6 @@ import java.io.File
 import java.net.URI
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.apply
@@ -88,17 +87,16 @@ open class IdeExtension(private val project: Project) {
         }
     }
 
-    fun generatedJavaSources(task: Task, generationOutput: File) {
+    fun generatedJavaSources(task: Any, generationOutput: File) {
         val sourceSets = project.property("sourceSets") as SourceSetContainer
         generatedJavaSources(task, generationOutput, sourceSets.named("main"))
     }
 
     fun generatedJavaSources(
-        task: Task,
+        task: Any,
         generationOutput: File,
         sourceSet: NamedDomainObjectProvider<SourceSet>
     ) {
-
         sourceSet.configure {
             java.srcDir(generationOutput)
             project.tasks.named(compileJavaTaskName) {
@@ -108,6 +106,9 @@ open class IdeExtension(private val project: Project) {
 
         project.configure<IdeaModel> {
             module.generatedSourceDirs.add(generationOutput)
+            if (sourceSet.name.contains("test", ignoreCase = true)) {
+                module.testSourceDirs.add(generationOutput)
+            }
         }
 
         // Run the specified task on import in Eclipse

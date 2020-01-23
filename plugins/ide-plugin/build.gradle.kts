@@ -21,7 +21,5 @@ repositories {
 }
 
 dependencies {
-    val ideaExt = create("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:0.5")
-    compileOnly(ideaExt)
-    testImplementation(ideaExt)
+    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:0.7")
 }
