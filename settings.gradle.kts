@@ -43,12 +43,12 @@ include(
 buildscript {
     dependencies {
         if (true) {
-            classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.45.0") {
+            classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.55") {
                 exclude("org.jetbrains.kotlin", "kotlin-stdlib")
             }
         } else {
             // Below enables use of locally built file for testing purposes
-            classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.45.0.jar"))
+            classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.55.jar"))
             classpath("org.bouncycastle:bcpg-jdk15on:1.62")
             classpath("com.squareup.okhttp3:okhttp:4.1.0") {
                 exclude("org.jetbrains.kotlin", "kotlin-stdlib")
@@ -70,8 +70,8 @@ val expectedSha512 = mapOf(
             to "okhttp-4.1.0.jar",
     "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
             to "okio-2.2.2.jar",
-    "993FD75CCCE1618BBE64BB2ED55242836C2B01442AD0AE98DA03CD672EAFF935567921304B6E8705AAE87367FDF7B8FF684C992A45E8008DDB4EF7E73FEA4DAD"
-            to "checksum-dependency-plugin-1.45.0.jar"
+    "B9F1FAD15FEFA21686867449544783AD2CDFB7802A6C4F83C0AFB79A5392FEB22FA13D3EA72BC7F762ACE5FD30B603145FAA8466550221B3458E1CAE1ED60C34"
+            to "checksum-dependency-plugin-1.55.jar"
 )
 
 fun File.sha512(): String {
