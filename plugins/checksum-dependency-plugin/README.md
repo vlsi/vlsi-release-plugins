@@ -74,6 +74,7 @@ Expected checksums for `checksum-dependency-plugin.jar`
 
 SHA-512
 
+* v1.55: `B9F1FAD15FEFA21686867449544783AD2CDFB7802A6C4F83C0AFB79A5392FEB22FA13D3EA72BC7F762ACE5FD30B603145FAA8466550221B3458E1CAE1ED60C34`
 * v1.45.0: `993FD75CCCE1618BBE64BB2ED55242836C2B01442AD0AE98DA03CD672EAFF935567921304B6E8705AAE87367FDF7B8FF684C992A45E8008DDB4EF7E73FEA4DAD`
 * v1.44.0: `A86B9B2CBA7BA99860EF2F23555F1E1C1D5CB790B1C47536C32FE7A0FDA48A55694A5457B9F42C60B4725F095B90506324BDE0299F08E9E76B5944FB308375AC`
 * ...
@@ -123,7 +124,7 @@ Kotlin DSL:
 // Checksum plugin sources can be validated at https://github.com/vlsi/vlsi-release-plugins
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.45.0") {
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.55") {
             // Gradle ships kotlin-stdlib which is good enough
             exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         }
@@ -143,8 +144,8 @@ val expectedSha512 = mapOf(
             to "okhttp-4.1.0.jar",
     "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
             to "okio-2.2.2.jar",
-    "993FD75CCCE1618BBE64BB2ED55242836C2B01442AD0AE98DA03CD672EAFF935567921304B6E8705AAE87367FDF7B8FF684C992A45E8008DDB4EF7E73FEA4DAD"
-            to "checksum-dependency-plugin-1.45.0.jar"
+    "B9F1FAD15FEFA21686867449544783AD2CDFB7802A6C4F83C0AFB79A5392FEB22FA13D3EA72BC7F762ACE5FD30B603145FAA8466550221B3458E1CAE1ED60C34"
+            to "checksum-dependency-plugin-1.55.jar"
 )
 
 fun File.sha512(): String {
@@ -177,7 +178,7 @@ Groovy DSL:
 // See https://github.com/vlsi/vlsi-release-plugins
 buildscript {
   dependencies {
-    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.45.0') {
+    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.55') {
       // Gradle ships kotlin-stdlib which is good enough
       exclude(group: "org.jetbrains.kotlin", module:"kotlin-stdlib")
     }
@@ -197,8 +198,8 @@ def expectedSha512 = [
     'okhttp-4.1.0.jar',
   '93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7':
     'okio-2.2.2.jar',
-  '993FD75CCCE1618BBE64BB2ED55242836C2B01442AD0AE98DA03CD672EAFF935567921304B6E8705AAE87367FDF7B8FF684C992A45E8008DDB4EF7E73FEA4DAD':
-    'checksum-dependency-plugin-1.45.0.jar'
+  'B9F1FAD15FEFA21686867449544783AD2CDFB7802A6C4F83C0AFB79A5392FEB22FA13D3EA72BC7F762ACE5FD30B603145FAA8466550221B3458E1CAE1ED60C34':
+    'checksum-dependency-plugin-1.55.jar'
 ]
 
 static def sha512(File file) {
@@ -480,6 +481,9 @@ Verification options
 
 Changelog
 ---------
+v1.55:
+* Released with Gradle 6.1.1
+
 v1.45.0
 * Reduced verbosity for non-error messages from info to debug
 
