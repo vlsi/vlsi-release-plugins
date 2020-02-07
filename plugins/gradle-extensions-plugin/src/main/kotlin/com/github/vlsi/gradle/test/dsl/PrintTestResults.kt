@@ -22,7 +22,6 @@ import org.gradle.api.tasks.testing.TestDescriptor
 import org.gradle.api.tasks.testing.TestResult
 import org.gradle.kotlin.dsl.KotlinClosure2
 
-
 private const val ESC = "\u001B"
 
 fun Test.printTestResults(
@@ -68,22 +67,19 @@ fun Test.printTestResults(
             .styleIf(durationMillis >= slowTestLogThreshold, bold)
         val displayName = classDisplayName.withDisplayName(testDisplayName, " > ")
         // Hide SUCCESS from output log, so FAILURE/SKIPPED are easier to spot
-        val resultType = result.resultType
-            .takeUnless {
-                it == TestResult
-                    .ResultType.SUCCESS
-            }
-            ?.let {
-                toString().styleIf(
-                    true, if (it == TestResult.ResultType.SKIPPED
-                    ) warning else error
+        val resultType = when (val res = result.resultType) {
+            TestResult.ResultType.SUCCESS ->
+                if (result.skippedTestCount > 0 || result.testCount == 0L) {
+                    "WARNING".styleIf(true, warning)
+                } else {
+                    "       "
+                }
+            else ->
+                res.toString().styleIf(
+                    true,
+                    if (res == TestResult.ResultType.SKIPPED) warning else error
                 )
-            }
-            ?.toString()
-            ?: (if (result.skippedTestCount > 0 || result.testCount == 0L) "WARNING".styleIf(
-                true,
-                warning
-            ) else "       ")
+        }
         if (!descriptor.isComposite) {
             println("$resultType $duration, $displayName")
         } else {
@@ -95,13 +91,15 @@ fun Test.printTestResults(
                 .styleIf(result.skippedTestCount > 0, warning)
             println("$resultType $duration, $completed completed, $failed failed, $skipped skipped, $displayName")
         }
+        if (System.getenv("GITHUB_ACTIONS") == "true" && result.resultType == TestResult.ResultType.FAILURE) {
+            println("::error file=$displayName::${result.failedTestCount} failed, ${result.exception?.message?.substringBefore('\n')}")
+        }
     }
     afterTest(
         KotlinClosure2<TestDescriptor, TestResult, Any>({ descriptor, result ->
             // There are lots of skipped tests, so it is not clear how to log them
             // without making build logs too verbose
-            if (result.resultType == TestResult
-                    .ResultType.FAILURE ||
+            if (result.resultType == TestResult.ResultType.FAILURE ||
                 result.endTime - result.startTime >= slowTestLogThreshold
             ) {
                 printResult(descriptor, result)
@@ -113,8 +111,7 @@ fun Test.printTestResults(
             if (descriptor.name.startsWith("Gradle Test Executor")) {
                 return@KotlinClosure2
             }
-            if (result.resultType == TestResult
-                    .ResultType.FAILURE ||
+            if (result.resultType == TestResult.ResultType.FAILURE ||
                 result.endTime - result.startTime >= slowSuiteLogThreshold
             ) {
                 printResult(descriptor, result)

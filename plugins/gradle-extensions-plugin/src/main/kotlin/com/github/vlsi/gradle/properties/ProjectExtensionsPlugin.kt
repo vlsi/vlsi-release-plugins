@@ -18,8 +18,22 @@ package com.github.vlsi.gradle.properties
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.execution.TaskExecutionListener
+import org.gradle.api.tasks.TaskState
 
 class ProjectExtensionsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
+        if (System.getenv("GITHUB_ACTIONS") == "true" && target == target.rootProject) {
+            target.gradle.addListener(object: TaskExecutionListener {
+                override fun beforeExecute(task: Task) = Unit
+
+                override fun afterExecute(task: Task, state: TaskState) {
+                    state.failure?.let {
+                        println("::error file=$task::${it.message.substringBefore('\n')}")
+                    }
+                }
+            })
+        }
     }
 }
