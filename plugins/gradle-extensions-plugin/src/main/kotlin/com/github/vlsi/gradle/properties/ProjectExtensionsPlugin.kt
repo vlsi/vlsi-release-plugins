@@ -30,7 +30,7 @@ class ProjectExtensionsPlugin : Plugin<Project> {
 
                 override fun afterExecute(task: Task, state: TaskState) {
                     state.failure?.let {
-                        println("::error file=$task::${it.message.substringBefore('\n')}")
+                        println("::error file=$task::${it.message?.substringBefore('\n') ?: "no message"}")
                     }
                 }
             })

@@ -31,7 +31,6 @@ open class MsgAttribTask @Inject constructor(
 ) : BaseGettextEditTask(objects) {
     @InputFiles
     @Incremental
-    @SkipWhenEmpty
     @PathSensitive(PathSensitivity.NONE)
     val poFiles = objects.fileCollection()
 
@@ -40,7 +39,6 @@ open class MsgAttribTask @Inject constructor(
             .convention(project.layout.buildDirectory.dir("gettext/$name/po"))
 
     @Input
-    @SkipWhenEmpty
     val args = objects.listProperty<String>()
 
     init {

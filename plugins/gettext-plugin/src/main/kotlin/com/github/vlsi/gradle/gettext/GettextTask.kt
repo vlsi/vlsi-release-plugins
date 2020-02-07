@@ -45,7 +45,6 @@ open class GettextTask @Inject constructor(
     val sourceFiles = objects.fileCollection()
 
     @OutputFile
-    @PathSensitive(PathSensitivity.NONE)
     val outputPot = objects.fileProperty()
             .convention(project.layout.buildDirectory.file("gettext/$name/messages.pot"))
 

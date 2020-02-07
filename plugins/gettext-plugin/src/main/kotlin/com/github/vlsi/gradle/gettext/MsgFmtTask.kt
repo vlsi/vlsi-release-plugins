@@ -35,12 +35,10 @@ open class MsgFmtTask @Inject constructor(
 ) : BaseGettextTask(objects) {
     @InputFiles
     @Incremental
-    @SkipWhenEmpty
     @PathSensitive(PathSensitivity.NONE)
     val poFiles = objects.fileCollection()
 
     @Input
-    @SkipWhenEmpty
     val args = objects.listProperty<String>()
 
     @OutputDirectory

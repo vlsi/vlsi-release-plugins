@@ -175,8 +175,12 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
-v1.59
+v1.60
 * gradle-extensions-plugin: add GitHub Actions error markers to test output
+* gettext-plugin: cleanup Gradle annotations
+
+v1.59
+* Skipped
 
 v1.58
 * gradle-extensions-plugin: enable coloring in test results by default (`-Pnocolor`, `-Pnocolor=true|false`)

@@ -31,12 +31,10 @@ open class MsgMergeTask @Inject constructor(
 ) : BaseGettextEditTask(objects) {
     @InputFiles
     @Incremental
-    @SkipWhenEmpty
     @PathSensitive(PathSensitivity.NONE)
     val poFiles = objects.fileCollection()
 
     @Input
-    @SkipWhenEmpty
     val args = objects.listProperty<String>()
 
     @InputFile
