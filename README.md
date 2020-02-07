@@ -175,8 +175,12 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
-v1.56
+v1.57
 * Add gettext-plugin
+* Add `Test.printTestResults` (print test results, color output) function to gradle-extensions-plugin
+
+v1.56
+* Skipped
 
 v1.55
 * Build with Gradle 6.1.1
