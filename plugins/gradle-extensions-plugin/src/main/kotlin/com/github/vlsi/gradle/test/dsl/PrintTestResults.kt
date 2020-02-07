@@ -20,26 +20,16 @@ import com.github.vlsi.gradle.properties.dsl.props
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.TestDescriptor
 import org.gradle.api.tasks.testing.TestResult
-import org.gradle.internal.nativeintegration.console.ConsoleDetector
-import org.gradle.internal.nativeintegration.services.NativeServices
 import org.gradle.kotlin.dsl.KotlinClosure2
 
 
 private const val ESC = "\u001B"
 
-private fun stdOutIsAttachedToTerminal(): Boolean = try {
-    val consoleDetector =
-        NativeServices.getInstance().get(ConsoleDetector::class.java)
-    val consoleMetaData = consoleDetector.console
-    consoleMetaData?.isStdOut ?: false
-} catch (e: RuntimeException) {
-    false
-}
-
 fun Test.printTestResults(
     slowTestLogThreshold: Long = project.props.long("slowTestLogThreshold", 2000L),
     slowSuiteLogThreshold: Long = project.props.long("slowSuiteLogThreshold", 0L),
-    enableColor: Boolean = !project.props.bool("nocolor", default = !stdOutIsAttachedToTerminal())
+    enableColor: Boolean = !project.props.bool("nocolor",
+        default = System.getProperty("os.name").contains("windows", ignoreCase = true))
 ) {
     // https://github.com/junit-team/junit5/issues/2041
     // Gradle does not print parameterized test names yet :(

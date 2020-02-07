@@ -175,6 +175,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.58
+* gradle-extensions-plugin: enable coloring in test results by default (`-Pnocolor`, `-Pnocolor=true|false`)
+
 v1.57
 * Add gettext-plugin
 * Add `Test.printTestResults` (print test results, color output) function to gradle-extensions-plugin
