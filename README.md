@@ -25,6 +25,8 @@ See [detailed description](plugins/stage-vote-release-plugin/README.md) for conf
 Gradle Extensions Plugin
 ========================
 
+See [detailed description](plugins/gradle-extensions-plugin/README.md) for configuration options.
+
 Enables to access `Project` properties in a type-safe way:
 
 ```kotlin
@@ -33,6 +35,9 @@ val enableTests by props(true) // defaults to true
 val hello by props("world")    // defaults to "world"
 if (project.props.bool("isOk", default=true)) { ... }
 ```
+
+It improves test output and build failures as well:
+<img width="809" height="455" src="plugins/gradle-extensions-plugin/github_actions_tests.png" alt="Sample GitHub Actions log that shows test results highlighting">
 
 CRLF Plugin
 ===========
@@ -175,6 +180,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.61
+* gradle-extensions-plugin: significantly improve stacktrace formatting, add task failure summary
+
 v1.60
 * gradle-extensions-plugin: add GitHub Actions error markers to test output
 * gettext-plugin: cleanup Gradle annotations

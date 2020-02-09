@@ -43,6 +43,7 @@ class ChecksumVerificationTest : BaseGradleTest() {
                     )
                 }
                 add(Arguments.of("6.0"))
+                add(Arguments.of("6.1.1"))
             }
         }
     }

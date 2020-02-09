@@ -19,8 +19,11 @@ package com.github.vlsi.gradle.license
 
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.text
-import java.io.*
-import java.lang.IllegalStateException
+import java.io.ByteArrayOutputStream
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.File
+import java.io.InputStream
 
 val spdxPredictor by lazy {
     SpdxLicense::class.java

@@ -17,11 +17,11 @@
 package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.git.GitAttributesMerger
-import java.nio.file.Paths
 import org.eclipse.jgit.attributes.AttributesNode
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
+import java.nio.file.Paths
 
 class GitAttributesTest {
     private fun String.toAttributes() =

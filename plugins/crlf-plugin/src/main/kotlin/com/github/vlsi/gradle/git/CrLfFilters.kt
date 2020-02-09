@@ -16,16 +16,16 @@
  */
 package com.github.vlsi.gradle.git
 
+import org.apache.tools.ant.util.ReaderInputStream
+import org.eclipse.jgit.util.io.AutoCRLFInputStream
+import org.eclipse.jgit.util.io.AutoLFInputStream
+import org.gradle.api.GradleException
 import java.io.FilterReader
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
-import org.apache.tools.ant.util.ReaderInputStream
-import org.eclipse.jgit.util.io.AutoCRLFInputStream
-import org.eclipse.jgit.util.io.AutoLFInputStream
-import org.gradle.api.GradleException
 
 private val BYTE_SAFE_ENCODING = StandardCharsets.ISO_8859_1
 

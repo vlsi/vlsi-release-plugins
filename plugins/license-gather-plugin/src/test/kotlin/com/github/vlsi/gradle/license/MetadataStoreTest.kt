@@ -29,7 +29,6 @@ import com.github.vlsi.gradle.license.api.with
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.File
-import java.io.StringReader
 import java.io.StringWriter
 
 class MetadataStoreTest {

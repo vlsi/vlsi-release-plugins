@@ -84,6 +84,7 @@ subprojects {
                 useJUnitPlatform()
                 testLogging {
                     exceptionFormat = TestExceptionFormat.FULL
+                    showStandardStreams = true
                 }
                 maxParallelForks = 8
             }

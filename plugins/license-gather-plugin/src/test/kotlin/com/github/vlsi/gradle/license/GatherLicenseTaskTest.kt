@@ -36,6 +36,7 @@ class GatherLicenseTaskTest {
                     add(Arguments.of("5.4.1", "// no extra settings"))
                 }
                 add(Arguments.of("6.0", "// no extra settings"))
+                add(Arguments.of("6.1.1", "// no extra settings"))
             }
         }
     }

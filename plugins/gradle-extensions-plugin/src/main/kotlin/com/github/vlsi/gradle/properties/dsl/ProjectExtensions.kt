@@ -16,10 +16,10 @@
  */
 package com.github.vlsi.gradle.properties.dsl
 
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 
 fun Project.stringProperty(property: String, required: Boolean = false): String? {
     val value = project.findProperty(property)

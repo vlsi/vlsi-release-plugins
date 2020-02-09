@@ -19,11 +19,11 @@ package com.github.vlsi.gradle.release
 import com.github.vlsi.gradle.git.GitAttributesMerger
 import com.github.vlsi.gradle.git.GitIgnoreFilter
 import com.github.vlsi.gradle.git.findGitproperties
-import java.io.File
-import java.nio.file.Paths
 import org.gradle.api.file.RelativePath
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.io.File
+import java.nio.file.Paths
 
 class GitignoreTest {
     @Test
