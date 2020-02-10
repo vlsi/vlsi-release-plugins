@@ -182,6 +182,7 @@ Change log
 ----------
 v1.61
 * gradle-extensions-plugin: significantly improve stacktrace formatting, add task failure summary
+* checksum-dependency-plugin: removed http://keys.fedoraproject.org/ from keyserver list as it no longer works
 
 v1.60
 * gradle-extensions-plugin: add GitHub Actions error markers to test output

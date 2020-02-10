@@ -103,7 +103,7 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
             }
 
         val pgpKeyserver = settings.property("pgpKeyserver",
-            "hkp://pool.sks-keyservers.net,https://keys.fedoraproject.org,https://keyserver.ubuntu.com,hkp://keys.openpgp.org")
+            "hkp://pool.sks-keyservers.net,https://keyserver.ubuntu.com,hkp://keys.openpgp.org")
 
         val pgpConnectTimeout = settings.property("pgpConnectTimeout", "5").toLong()
         val pgpReadTimeout = settings.property("pgpReadTimeout", "20").toLong()
