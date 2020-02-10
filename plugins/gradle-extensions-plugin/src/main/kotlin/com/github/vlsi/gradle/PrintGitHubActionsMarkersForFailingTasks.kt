@@ -30,7 +30,9 @@ object PrintGitHubActionsMarkersForFailingTasks : TaskExecutionListener {
                 // GitHub "annotations" do not support coloring
                 enableStyle = false
             }
-            val printer = task.project.createThrowablePrinter()
+            val printer = task.project.createThrowablePrinter().apply {
+                indent = ""
+            }
             printer.print(throwable, sb)
             println(
                 """
