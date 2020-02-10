@@ -22,6 +22,8 @@ Sample output:
 Features:
 * Failing tests are red
 * Skipped tests are blue
+* `Suppressed` exceptions are printed as well (Gradle 6.1.1 does not print them)
+* `SQLException#iterator()` exceptions are printed as well (Gradle 6.1.1 does not print them)
 * Individual test names are printed when a single test takes more than 2 seconds
 * Stacktraces are truncated to avoid clutter
 * Framework frames in the stacks are grayed out
@@ -29,6 +31,10 @@ Features:
 * Build result summary includes short stacktraces (better than Gradle's `--stacktrace`)
 
 Note: it is recommended you do **not** use `--stacktrace` when `Gradle Extensions Plugin` is applied.
+
+Several Gradle properties can override the output:
+* `-Pnocolor` disables coloring
+* `-Pfulltrace` shows full stack traces (by default the plugin skips certain stacks, ans)
 
 How to activate coloring
 ========================
