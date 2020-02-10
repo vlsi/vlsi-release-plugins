@@ -261,7 +261,7 @@ class ThrowablePrinter {
     private inline fun <R> Appendable.ifStyled(action: StyledTextBuilder.() -> R) =
         (this as? StyledTextBuilder)?.run(action)
 
-    private fun<T> T.nullIf(v: T) = if (this == v) null else this
+    private fun <T> T.nullIf(v: T) = if (this == v) null else this
 
     private val Throwable.compactStacktrace: List<StackTraceElement>
         get() {
