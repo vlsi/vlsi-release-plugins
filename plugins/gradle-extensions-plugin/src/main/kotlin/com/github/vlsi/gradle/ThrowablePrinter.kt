@@ -21,6 +21,7 @@ import com.github.vlsi.gradle.styledtext.Style
 import com.github.vlsi.gradle.styledtext.StyledTextBuilder
 import org.gradle.api.GradleException
 import org.gradle.api.UncheckedIOException
+import org.gradle.api.internal.tasks.TaskDependencyResolveException
 import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.internal.UncheckedException
 import org.gradle.internal.exceptions.LocationAwareException
@@ -85,6 +86,7 @@ class ThrowablePrinter {
         private val defaultHideStacktrace =
             listOf<Predicate<Throwable>>(
                 { it is TaskExecutionException },
+                { it is TaskDependencyResolveException },
                 { it is LocationAwareException },
                 {
                     it is GradleException &&
@@ -269,6 +271,9 @@ class ThrowablePrinter {
                 .filterNot { it.lineNumber < 0 } // ignore generated methods
                 .filterNot { st -> classExcludes.any { it(st) } }
                 .toList()
+            if (list.isEmpty()) {
+                return list
+            }
             val rootFrame = rootFrames.fold(list.lastIndex) { currentBest, filter ->
                 list.subList(0, currentBest).indexOfLast(filter).nullIf(-1) ?: currentBest
             }
