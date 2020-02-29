@@ -83,6 +83,13 @@ class ThrowablePrinter {
                 }
             )
 
+        private val defaultInterestingThrowables =
+            listOf<Predicate<Throwable>>(
+                { it is NullPointerException || it is KotlinNullPointerException },
+                { it is IllegalStateException || it is IllegalArgumentException },
+                { it is AssertionError }
+            )
+
         private val defaultHideStacktrace =
             listOf<Predicate<Throwable>>(
                 { it is TaskExecutionException },
@@ -128,7 +135,9 @@ class ThrowablePrinter {
     val frameStyles = defaultFrameStyles.toMutableList()
     val hideThrowables = defaultHideThrowables.toMutableList()
     val hideStacktraces = defaultHideStacktrace.toMutableList()
+    val interestingThrowables = defaultInterestingThrowables.toMutableList()
     var indent = ""
+    var interestingCases = 0
 
     private data class Work(
         val throwable: Throwable,
@@ -230,19 +239,26 @@ class ThrowablePrinter {
                 ourStack.lastIndex
             }
 
+            if (interestingThrowables.any { it(throwable) }) {
+                interestingCases += 1
+            }
+
             val prevStyle = out.ifStyled { currentStyle } ?: Style.NORMAL
             val faintStyle = prevStyle + StandardColor.BLACK.bright.foreground
             for (i in 0..lastFrame) {
                 val element = ourStack[i]
                 out.append(nextIndent)
+                val style = frameStyles
+                    .foldRight(null as Style?) { f, value -> value ?: f(element) }
+                    ?: if (faintPackages.any { element.className.startsWith(it) }) {
+                        faintStyle
+                    } else {
+                        prevStyle
+                    }
+                if (style != faintStyle) {
+                    interestingCases += 1
+                }
                 out.ifStyled {
-                    val style = frameStyles
-                        .foldRight(null as Style?) { f, value -> value ?: f(element) }
-                        ?: if (faintPackages.any { element.className.startsWith(it) }) {
-                            faintStyle
-                        } else {
-                            prevStyle
-                        }
                     switchTo(style)
                 }
                 out.append("at ").appendln(element.toString())

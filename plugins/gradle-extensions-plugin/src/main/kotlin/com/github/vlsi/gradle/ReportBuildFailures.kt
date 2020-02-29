@@ -47,6 +47,8 @@ object ReportBuildFailures : BuildAdapter() {
         // So we print extra spaces so the garbage after "reason" is wiped out.
         sb.appendln(" reason:                                ")
         throwablePrinter.print(failure, sb)
-        println(sb.toString())
+        if (throwablePrinter.interestingCases > 0 && throwablePrinter.classExcludes.isEmpty()) {
+            println(sb.toString())
+        }
     }
 }
