@@ -30,6 +30,7 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -71,6 +72,14 @@ open class Apache2LicenseRenderer @Inject constructor(
     val licenseCategory =
         objectFactory.mapProperty<LicenseExpression, AsfLicenseCategory>()
 
+    @Optional
+    @InputFile
+    val mainLicenseFile = objectFactory.fileProperty()
+
+    @Input
+    @Optional
+    val mainLicenseText = objectFactory.property<String>()
+
     private val dependencyLicenses = objectFactory.property<CopySpec>()
         .convention(project.copySpec())
 
@@ -94,7 +103,10 @@ open class Apache2LicenseRenderer @Inject constructor(
         }
 
         output.bufferedWriter().use { out ->
-            out.appendln(SpdxLicense.Apache_2_0.text)
+            val license = mainLicenseFile.orNull?.asFile?.readText()
+                ?: mainLicenseText.orNull
+                ?: SpdxLicense.Apache_2_0.text
+            out.appendln(license)
 
             if (dependencies.isNotEmpty() && dependencySubfoder.get().isNotEmpty()) {
                 out.appendln(

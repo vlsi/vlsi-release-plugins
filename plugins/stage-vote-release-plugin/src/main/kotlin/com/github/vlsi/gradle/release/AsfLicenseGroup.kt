@@ -33,10 +33,10 @@ internal val LicenseGroup.title: String
     get() =
         when (this) {
             LicenseGroup.UNCLEAR -> "- Software with unclear license. Please analyze the license and specify manually"
-            LicenseGroup.ASF_AL2 -> "- Software produced at the ASF which is available under AL 2.0 (as above)"
-            LicenseGroup.ASF_OTHER -> "- Software produced at the ASF which is available under other licenses (not AL 2.0)"
-            LicenseGroup.AL2 -> "- Software produced outside the ASF which is available under AL 2.0 (as above)"
-            LicenseGroup.OTHER -> "- Software produced outside the ASF which is available under other licenses (not AL 2.0)"
+            LicenseGroup.ASF_AL2 -> "- Software produced at the ASF which is available under Apache-2.0"
+            LicenseGroup.ASF_OTHER -> "- Software produced at the ASF which is available under other licenses (not Apache-2.0)"
+            LicenseGroup.AL2 -> "- Software produced outside the ASF which is available under Apache-2.0"
+            LicenseGroup.OTHER -> "- Software produced outside the ASF which is available under other licenses (not Apache-2.0)"
         }
 
 private val asfGroups = setOf(
