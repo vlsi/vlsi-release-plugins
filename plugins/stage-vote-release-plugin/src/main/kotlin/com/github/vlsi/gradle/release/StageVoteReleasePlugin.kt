@@ -146,7 +146,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         tasks.named("init").hide()
         hideMavenPublishTasks()
 
-        val pushRcTag = createPushRcTag(releaseExt, validateBeforeBuildingReleaseArtifacts)
+        val pushRcTag = createPushRcTag(releaseExt, validateRcIndexSpecified, validateBeforeBuildingReleaseArtifacts)
         val pushReleaseTag = createPushReleaseTag(releaseExt, validateRcIndexSpecified)
 
         val pushPreviewSite = addPreviewSiteTasks(validateBeforeBuildingReleaseArtifacts)
@@ -390,7 +390,6 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 it.run()
                 null
             } catch (e: GradleException) {
-                println(e.message)
                 e
             }
         }.toList()
@@ -414,12 +413,14 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
     private fun Project.createPushRcTag(
         releaseExt: ReleaseExtension,
+        validateRcIndexSpecified: TaskProvider<*>,
         validateBeforeBuildingReleaseArtifacts: TaskProvider<*>
     ): TaskProvider<*> {
         val createTag = tasks.register(CREATE_RC_TAG_TASK_NAME, GitCreateTagTask::class) {
             description = "Create release candidate tag if missing"
             group = RELEASE_GROUP
             hide()
+            dependsOn(validateRcIndexSpecified)
             dependsOn(validateBeforeBuildingReleaseArtifacts)
             rootGitRepository(releaseExt.source)
             tag.set(releaseExt.rcTag)
@@ -429,6 +430,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             description = "Push release candidate tag to a remote repository"
             group = RELEASE_GROUP
             hide()
+            dependsOn(validateRcIndexSpecified)
             dependsOn(createTag)
             rootGitRepository(releaseExt.source)
             tag(releaseExt.rcTag)
@@ -522,7 +524,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 stagingProfileId = nexus.stagingProfileId.orNull
                 if (releaseExt.release.get()) {
                     repositoryDescription =
-                        "Release ${releaseExt.componentName.get()} ${releaseExt.releaseTag.get()} (${releaseExt.rcTag.get()})"
+                        "Release ${releaseExt.componentName.get()} ${releaseExt.releaseTag.get()} (${releaseExt.rcTag.orNull ?: ""})"
                 }
                 val nexusPublish = project.the<NexusPublishExtension>()
                 serverUrl =

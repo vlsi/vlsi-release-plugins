@@ -104,15 +104,13 @@ open class ReleaseExtension @Inject constructor(
 
     val voteText = objects.property<(ReleaseParams) -> String>()
 
+    val rc = objects.property<Int>()
+        .value(project.stringProperty("rc")?.toInt())
+
     val releaseTag = objects.property<String>()
         .convention(project.provider { "v${project.version}" })
     val rcTag = objects.property<String>()
-        .convention(releaseTag.map { "$it-rc" + rc.get() })
-
-    val rc = objects.property<Int>()
-        .value(
-            project.stringProperty("rc")?.toInt()
-        )
+        .convention(rc.map { releaseTag.get() + "-rc$it" })
 
     val release = objects.property<Boolean>()
         .value(

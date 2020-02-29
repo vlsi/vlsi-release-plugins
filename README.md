@@ -183,6 +183,7 @@ Change log
 v1.62
 * gradle-extensions-plugin: add `DomainObjectCollection.configureEach<T>` extension
 * gradle-extensions-plugin: reduce verbosity of the default exception printer (print only well-known exceptions and stacktraces by default like NPE)
+* stage-vote-release-plugin: refine -Prc input parameter validation
 
 v1.61
 * gradle-extensions-plugin: significantly improve stacktrace formatting, add task failure summary
