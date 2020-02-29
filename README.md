@@ -180,6 +180,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.62
+* gradle-extensions-plugin: add `DomainObjectCollection.configureEach<T>` extension
+
 v1.61
 * gradle-extensions-plugin: significantly improve stacktrace formatting, add task failure summary
 * checksum-dependency-plugin: removed http://keys.fedoraproject.org/ from keyserver list as it no longer works

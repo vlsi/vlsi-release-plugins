@@ -136,3 +136,16 @@ fun int(name: String, default: Int = 0)
 
 fun long(name: String, default: Long = 0)
 ```
+
+Miscellaneous extensions
+========================
+
+Gradle best practices suggest to use `tasks.withType<Jar>().configureEach {` to leverage
+configuration avoidance, however, it is a common case, so the plugin adds a shortcut:
+
+```kotlin
+import com.github.vlsi.gradle.dsl.configureEach
+
+tasks.configureEach<Jar> {
+}
+```
