@@ -31,7 +31,7 @@ fun File.sha512(): String {
 tasks {
     jar {
         doLast {
-            for(f in outputs.files) {
+            for (f in outputs.files) {
                 println("SHA-512(${f.name}) = ${f.sha512()}")
             }
         }

@@ -93,17 +93,28 @@ allprojects {
     if (project.path != ":plugins:license-gather-plugin") {
         apply(plugin = "com.github.autostyle")
         autostyle {
-            kotlin {
-                licenseHeader(licenseHeader)
-                trimTrailingWhitespace()
-                // Generated build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
-                // has wrong indentation, and it is not clear how to exclude it
+            kotlinGradle {
                 ktlint {
                     userData(mapOf("disabled_rules" to "no-wildcard-imports,import-ordering"))
                 }
-                // It prints errors regarding build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
-                // so comment it for now :(
+                trimTrailingWhitespace()
                 endWithNewline()
+            }
+        }
+        plugins.withId("org.jetbrains.kotlin.jvm") {
+            autostyle {
+                kotlin {
+                    licenseHeader(licenseHeader)
+                    trimTrailingWhitespace()
+                    // Generated build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
+                    // has wrong indentation, and it is not clear how to exclude it
+                    ktlint {
+                        userData(mapOf("disabled_rules" to "no-wildcard-imports,import-ordering"))
+                    }
+                    // It prints errors regarding build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
+                    // so comment it for now :(
+                    endWithNewline()
+                }
             }
         }
     }
