@@ -25,6 +25,7 @@ pluginManagement {
         idv("org.jetbrains.gradle.plugin.idea-ext")
         idv("com.github.ben-manes.versions")
         idv("org.jetbrains.dokka")
+        idv("com.github.vlsi.stage-vote-release", "released")
     }
 }
 
@@ -42,16 +43,26 @@ include(
 )
 
 buildscript {
+    fun property(name: String) =
+        when (extra.has(name)) {
+            true -> extra.get(name) as? String
+            else -> null
+        }
+
+    fun String.v(): String = extra["$this.version"] as String
+
     dependencies {
-        if (true) {
-            classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.55") {
+        if (extra.has("noverify")) {
+            // skip
+        } else if (extra.has("localCdp")) {
+            // Below enables use of locally built file for testing purposes
+            classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-${"project".v()}.jar"))
+            classpath("org.bouncycastle:bcpg-jdk15on:1.62")
+            classpath("com.squareup.okhttp3:okhttp:4.1.0") {
                 exclude("org.jetbrains.kotlin", "kotlin-stdlib")
             }
         } else {
-            // Below enables use of locally built file for testing purposes
-            classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-1.55.jar"))
-            classpath("org.bouncycastle:bcpg-jdk15on:1.62")
-            classpath("com.squareup.okhttp3:okhttp:4.1.0") {
+            classpath("com.github.vlsi.gradle:checksum-dependency-plugin:${"com.github.vlsi.checksum-dependency".v()}") {
                 exclude("org.jetbrains.kotlin", "kotlin-stdlib")
             }
         }
@@ -71,8 +82,8 @@ val expectedSha512 = mapOf(
             to "okhttp-4.1.0.jar",
     "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
             to "okio-2.2.2.jar",
-    "B9F1FAD15FEFA21686867449544783AD2CDFB7802A6C4F83C0AFB79A5392FEB22FA13D3EA72BC7F762ACE5FD30B603145FAA8466550221B3458E1CAE1ED60C34"
-            to "checksum-dependency-plugin-1.55.jar"
+    settings.extra["com.github.vlsi.checksum-dependency.sha512"].toString()
+            to "checksum-dependency-plugin.jar"
 )
 
 fun File.sha512(): String {
@@ -95,7 +106,12 @@ val violations =
 // This enables to skip checksum-dependency which is helpful for checksum-dependency development
 if (!extra.has("noverify")) {
     if (violations.isNotBlank()) {
-        throw GradleException("Buildscript classpath has non-whitelisted files:\n  $violations")
+        val msg = "Buildscript classpath has non-whitelisted files:\n  $violations"
+        if (extra.has("localCdp")) {
+            println(msg)
+        } else {
+            throw GradleException(msg)
+        }
     }
     apply(plugin = "com.github.vlsi.checksum-dependency")
 }
