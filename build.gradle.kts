@@ -38,7 +38,8 @@ buildscript {
     }
     dependencies {
         if (publishToCentral) {
-            classpath("com.github.vlsi.stage-vote-release:com.github.vlsi.stage-vote-release.gradle.plugin:1.61")
+            val version = findProperty("released.version")
+            classpath("com.github.vlsi.stage-vote-release:com.github.vlsi.stage-vote-release.gradle.plugin:$version")
         }
     }
 }

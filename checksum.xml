@@ -6,6 +6,7 @@
     <trusted-key id='379ce192d401ab61' group='com.diffplug.durian' />
     <trusted-key id='105cb91cac2aee0e' group='com.github.autostyle' />
     <trusted-key id='461a804f2609fd89' group='com.github.shyiko.klob' />
+    <trusted-key id='105cb91cac2aee0e' group='com.github.vlsi.gradle' />
     <trusted-key id='59a252fb1199d873' group='com.google.code.findbugs' />
     <trusted-key id='7a01b0f236e5430f' group='com.google.code.gson' />
     <trusted-key id='bf935c771a8474f8' group='com.google.errorprone' />
@@ -57,32 +58,14 @@
     <trusted-key id='2c7b12f2a511e325' group='org.slf4j' />
   </trusted-keys>
   <dependencies>
-    <dependency group='com.diffplug.spotless' module='spotless-plugin-gradle' version='3.23.0'>
-      <sha512>3156088983703A4AF551155174A82735942BC86142C8EA50C2609B37803A56BEF8FB26B5E7F8120D07776DE857B2070AFF1F62FC90C23198045669D6A22037C2</sha512>
-    </dependency>
     <dependency group='com.github.ben-manes' module='gradle-versions-plugin' version='0.21.0'>
       <sha512>88F475A29F4775BB825AD10BE07AA8DBC6E554561CE01193F75ED2EE5532F615C89192AE4ECB31B3B127C1832E4D7121A3823118B03E05E90295F8B42303618D</sha512>
-    </dependency>
-    <dependency group='com.github.vlsi.gradle' module='crlf-plugin' version='1.61'>
-      <sha512>613DEC993998651505A523DBA80C262D0C570083EA9FB2ED17C8A82032AC989EE3F506198D9C45657133785D29C2678880E4F32CAA086E83D58121051C0DE9C2</sha512>
-    </dependency>
-    <dependency group='com.github.vlsi.gradle' module='gradle-extensions-plugin' version='1.61'>
-      <sha512>21061CE66CFE4A699DEE7483FEB9681DF2319530F2A9ABAA86E3EA6FA336F64040E8E405F7F2A5EB8CBE7DF9E5EBA1B597B7039CA279A00E0BECBC2BB5D69348</sha512>
-    </dependency>
-    <dependency group='com.github.vlsi.gradle' module='license-gather-plugin' version='1.61'>
-      <sha512>47F5142EB067DFFCD8B16DAEC000063747C5409A494FAB328DF429DE0D3AAF584A2AB68D335E53EA8A2C11FC5ABD32C77A9D996F7FFFCB3B748A12931A1A028F</sha512>
-    </dependency>
-    <dependency group='com.github.vlsi.gradle' module='stage-vote-release-plugin' version='1.61'>
-      <sha512>4ABAEFA329E49CA8F80E5616DD4A3F32AAD6D88E602CB8DB22C3DDE55CC055C32F4DCF3DE60178D1F74B1DB0F1CD8B39CC172430F9DAAFC46A54C7DC70DD96DF</sha512>
     </dependency>
     <dependency group='com.gradle.publish' module='plugin-publish-plugin' version='0.10.1'>
       <sha512>AAC08A8AD1CEFBA3323CDCF3011E98D10B3E8B092DAC7180712BC21422D7C394F9456F82DB6B12E091871C813FD86F133B5D5AF1A719DFA30DD1AAB7E7338A1E</sha512>
     </dependency>
     <dependency group='de.marcphilipp.gradle' module='nexus-publish-plugin' version='0.2.0'>
       <sha512>36DFDADA6745D7AF5CF2807E197AFD111073C30536CB29C531522F73D4086C2A7AB70756975FEC290657012B8C9090414F76811731A920D8BC4EEC1DEC0AB2DF</sha512>
-    </dependency>
-    <dependency group='gradle.plugin.org.jetbrains.gradle.plugin.idea-ext' module='gradle-idea-ext' version='0.5'>
-      <sha512>4A6B7FA6CD8C6FA82A517C396510E408F1C6FAB5FF6D4C68008F80718F05E5943755AA240F329C95661CCB0231114DD0F6D7C38EFBF73EE6B1ECC70850F40F7E</sha512>
     </dependency>
     <dependency group='gradle.plugin.org.jetbrains.gradle.plugin.idea-ext' module='gradle-idea-ext' version='0.7'>
       <sha512>A85249BA2BB5713B3779B88F3593CA60EA8739860327DAACE205057F811BAA330E772E4DD4B7BC42BBBFA589ACE38210AAFB0CF2919F5691794E6D9C5C505DAD</sha512>

@@ -22,14 +22,16 @@ releaseParams {
     prefixForProperties.set("gh")
     svnDistEnabled.set(false)
     sitePreviewEnabled.set(false)
-    nexus.mavenCentral()
-    nexus.packageGroup.set("com.github.vlsi")
-    voteText.set({
+    nexus {
+        mavenCentral()
+        packageGroup.set("com.github.vlsi")
+    }
+    voteText {
         """
         ${it.componentName} v${it.version}-rc${it.rc} is ready for preview.
 
         Git SHA: ${it.gitSha}
         Staging repository: ${it.nexusRepositoryUri}
         """.stripIndent()
-    } as kotlin.jvm.functions.Function1)
+    }
 }
