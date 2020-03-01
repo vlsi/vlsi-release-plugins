@@ -180,6 +180,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.63
+* gradle-extensions-plugin: refine condition for stacktrace printing
+
 v1.62
 * gradle-extensions-plugin: add `DomainObjectCollection.configureEach<T>` extension
 * gradle-extensions-plugin: reduce verbosity of the default exception printer (print only well-known exceptions and stacktraces by default like NPE)
