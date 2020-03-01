@@ -67,6 +67,9 @@
     <dependency group='de.marcphilipp.gradle' module='nexus-publish-plugin' version='0.2.0'>
       <sha512>36DFDADA6745D7AF5CF2807E197AFD111073C30536CB29C531522F73D4086C2A7AB70756975FEC290657012B8C9090414F76811731A920D8BC4EEC1DEC0AB2DF</sha512>
     </dependency>
+    <dependency group='de.marcphilipp.gradle' module='nexus-publish-plugin' version='0.4.0'>
+      <sha512>37EC6DFBDDD0458A2A341E371D038B3B0A25AB2F9006B295EBCF3BDE873A8D02C8CDAA6C69D875500F67593C618E8EF62C0269FB2F7F527A1367A7D6B8EA3CBE</sha512>
+    </dependency>
     <dependency group='gradle.plugin.org.jetbrains.gradle.plugin.idea-ext' module='gradle-idea-ext' version='0.7'>
       <sha512>A85249BA2BB5713B3779B88F3593CA60EA8739860327DAACE205057F811BAA330E772E4DD4B7BC42BBBFA589ACE38210AAFB0CF2919F5691794E6D9C5C505DAD</sha512>
     </dependency>

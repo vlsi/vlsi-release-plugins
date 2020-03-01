@@ -86,6 +86,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
         const val PUSH_PREVIEW_SITE_TASK_NAME = "pushPreviewSite"
 
+        const val REPOSITORY_NAME = "nexus"
+
         // Marker tasks
         const val VALIDATE_RC_INDEX_SPECIFIED_TASK_NAME = "validateRcIndexSpecified"
         const val VALIDATE_SVN_CREDENTIALS_TASK_NAME = "validateSvnCredentials"
@@ -527,13 +529,13 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                         "Release ${releaseExt.componentName.get()} ${releaseExt.releaseTag.get()} (${releaseExt.rcTag.orNull ?: ""})"
                 }
                 val nexusPublish = project.the<NexusPublishExtension>()
+                val repo = nexusPublish.repositories[REPOSITORY_NAME]
                 serverUrl =
-                    nexusPublish.run { if (useStaging.get()) serverUrl else snapshotRepositoryUrl }
+                    repo.run { if (nexusPublish.useStaging.get()) nexusUrl else snapshotRepositoryUrl }
                         .get().toString()
 
                 stagingRepositoryId.set(
-                    nexusPublish.repositoryName
-                        .map { releaseExt.repositoryIdStore.getOrLoad(it) }
+                    project.provider { releaseExt.repositoryIdStore.getOrLoad(REPOSITORY_NAME) }
                 )
             }
         }
@@ -554,30 +556,33 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         validateBeforeBuildingReleaseArtifacts: TaskProvider<*>
     ) {
         val releaseExt = project.the<ReleaseExtension>()
-        configure<NexusPublishExtension> {
-            serverUrl.set(releaseExt.nexus.url.map { it.replacePath("/service/local/") })
+        val nexusPublish = the<NexusPublishExtension>()
+        val repo = nexusPublish.repositories.create(REPOSITORY_NAME) {
+            nexusUrl.set(releaseExt.nexus.url.map { it.replacePath("/service/local/") })
             snapshotRepositoryUrl.set(releaseExt.nexus.url.map { it.replacePath("/content/repositories/snapshots/") })
             username.set(project.provider { releaseExt.nexus.credentials.username(project) })
             password.set(project.provider { releaseExt.nexus.credentials.password(project) })
         }
-        val rootInitStagingRepository = tasks.named("initializeNexusStagingRepository")
+        val rootInitStagingRepository = tasks.named("initialize${repo.name.capitalize()}StagingRepository")
         // Use the same settings for all subprojects that apply MavenPublishPlugin
         subprojects {
             plugins.withType<MavenPublishPlugin> {
                 apply(plugin = "de.marcphilipp.nexus-publish")
 
                 configure<NexusPublishExtension> {
-                    rootProject.the<NexusPublishExtension>().let {
-                        serverUrl.set(it.serverUrl)
-                        snapshotRepositoryUrl.set(it.snapshotRepositoryUrl)
-                        useStaging.set(it.useStaging)
+                    repositories.create(repo.name) {
+                        nexusUrl.set(repo.nexusUrl)
+                        snapshotRepositoryUrl.set(repo.snapshotRepositoryUrl)
+                        username.set(repo.username)
+                        password.set(repo.password)
                     }
+                    useStaging.set(nexusPublish.useStaging)
                 }
             }
             plugins.withId("de.marcphilipp.nexus-publish") {
                 tasks.withType<InitializeNexusStagingRepository>().configureEach {
                     // Allow for some parallelism, so the staging repository is created by the root task
-                    mustRunAfter(rootInitStagingRepository)
+                    dependsOn(rootInitStagingRepository)
                 }
             }
         }
@@ -618,11 +623,11 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             outputs.file(file(voteMailFile))
             doLast {
                 val nexusPublish = project.the<NexusPublishExtension>()
-                val nexusRepoName = nexusPublish.repositoryName.get()
+                val nexusRepoName = REPOSITORY_NAME
                 val repositoryId = releaseExt.repositoryIdStore[nexusRepoName]
 
-                val repoUri =
-                    nexusPublish.serverUrl.get().replacePath("/content/repositories/$repositoryId")
+                val repoUri = nexusPublish.repositories[nexusRepoName].nexusUrl.get()
+                    .replacePath("/content/repositories/$repositoryId")
 
                 val grgit = project.property("grgit") as Grgit
 
