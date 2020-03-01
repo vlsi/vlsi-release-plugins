@@ -104,6 +104,8 @@ open class ReleaseExtension @Inject constructor(
 
     val voteText = objects.property<(ReleaseParams) -> String>()
 
+    fun voteText(generator: (ReleaseParams) -> String) = voteText.set(generator)
+
     val rc = objects.property<Int>()
         .value(project.stringProperty("rc")?.toInt())
 
@@ -145,7 +147,7 @@ open class ReleaseExtension @Inject constructor(
     fun svnDist(action: Action<in SvnDistConfig>) = action(svnDist)
 
     val nexus = objects.newInstance<NexusConfig>(this, project)
-    fun nexus(action: NexusConfig.() -> Unit) = nexus.action()
+    fun nexus(action: Action<in NexusConfig>) = action(nexus)
 
     private val git = project.container<GitConfig> {
         objects.newInstance(it, this, project)

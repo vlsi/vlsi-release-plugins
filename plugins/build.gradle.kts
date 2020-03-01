@@ -17,6 +17,7 @@
 
 import com.github.vlsi.gradle.buildtools.filterEolSimple
 import com.gradle.publish.PluginBundleExtension
+import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.dokka.gradle.DokkaTask
@@ -24,20 +25,11 @@ import org.jetbrains.dokka.gradle.PackageOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    java
-    `maven-publish`
-    id("org.jetbrains.dokka")
-    id("org.gradle.kotlin.kotlin-dsl")
+    id("org.jetbrains.dokka") apply false
     id("com.gradle.plugin-publish") apply false
 }
 
 val repoUrl = "https://github.com/vlsi/vlsi-release-plugins"
-
-tasks {
-    jar {
-        enabled = false
-    }
-}
 
 subprojects {
     repositories {
@@ -53,7 +45,7 @@ subprojects {
     apply(plugin = "org.gradle.maven-publish")
 
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter:5.4.2")
+        "testImplementation"("org.junit.jupiter:junit-jupiter:5.4.2")
     }
 
     val pluginDisplayName = project.property("plugin.display.name") as String
@@ -80,7 +72,7 @@ subprojects {
 
     plugins.withType<JavaPlugin> {
         tasks {
-            test {
+            withType<Test>().configureEach {
                 useJUnitPlatform()
                 testLogging {
                     exceptionFormat = TestExceptionFormat.FULL
@@ -101,6 +93,7 @@ subprojects {
                     from("$rootDir/NOTICE")
                 }
                 manifest {
+                    attributes["Bundle-License"] = "Apache-2.0"
                     attributes["Specification-Title"] = project.name + " " + project.description
                     attributes["Specification-Vendor"] = "Vladimir Sitnikov"
                     attributes["Implementation-Vendor"] = "Vladimir Sitnikov"
@@ -121,11 +114,6 @@ subprojects {
             }
         }
 
-        val sourcesJar by tasks.creating(org.gradle.api.tasks.bundling.Jar::class) {
-            archiveClassifier.set("sources")
-            from(sourceSets.main.map { it.allSource })
-        }
-
         val javadocJar by tasks.creating(org.gradle.api.tasks.bundling.Jar::class) {
             archiveClassifier.set("javadoc")
             from(tasks.named("dokka"))
@@ -133,22 +121,48 @@ subprojects {
 
         // used by plugin-publish plugin
         val archives by configurations.getting
-        //archives.artifacts.clear()
         artifacts {
-            add(archives.name, sourcesJar)
             add(archives.name, javadocJar)
         }
 
-        publishing {
+        configure<PublishingExtension> { // publishing
             publications {
                 afterEvaluate {
                     named<MavenPublication>("pluginMaven") {
-                        artifact(sourcesJar)
                         artifact(javadocJar)
                     }
                 }
                 withType<MavenPublication> {
+                    // Use the resolved versions in pom.xml
+                    // Gradle might have different resolution rules, so we set the versions
+                    // that were used in Gradle build/test.
+                    versionMapping {
+                        usage(Usage.JAVA_RUNTIME) {
+                            fromResolutionResult()
+                        }
+                        usage(Usage.JAVA_API) {
+                            fromResolutionOf("runtimeClasspath")
+                        }
+                    }
                     pom {
+                        withXml {
+                            val sb = asString()
+                            var s = sb.toString()
+                            // <scope>compile</scope> is Maven default, so delete it
+                            s = s.replace("<scope>compile</scope>", "")
+                            // Cut <dependencyManagement> because all dependencies have the resolved versions
+                            s = s.replace(
+                                Regex(
+                                    "<dependencyManagement>.*?</dependencyManagement>",
+                                    RegexOption.DOT_MATCHES_ALL
+                                ),
+                                ""
+                            )
+                            sb.setLength(0)
+                            sb.append(s)
+                            // Re-format the XML
+                            asNode()
+                        }
                         name.set(pluginDisplayName)
                         description.set(project.description)
                         inceptionYear.set("2019")
@@ -160,11 +174,21 @@ subprojects {
                                 email.set("sitnikov.vladmir@gmail.com")
                             }
                         }
+                        issueManagement {
+                            system.set("GitHub")
+                            url.set("$repoUrl/issues")
+                        }
                         licenses {
                             license {
                                 name.set("Apache-2.0")
                                 url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                             }
+                        }
+                        scm {
+                            connection.set("scm:git:$repoUrl.git")
+                            developerConnection.set("scm:git:$repoUrl.git")
+                            url.set(repoUrl)
+                            tag.set("HEAD")
                         }
                     }
                 }

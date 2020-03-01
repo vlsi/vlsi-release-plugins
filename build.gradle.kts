@@ -20,20 +20,38 @@ import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    `kotlin-dsl`
-    `maven-publish`
     id("com.gradle.plugin-publish") apply false
     id("com.github.autostyle")
     id("org.jetbrains.gradle.plugin.idea-ext")
     id("com.github.ben-manes.versions")
     id("org.jetbrains.dokka")
+    `embedded-kotlin`
+}
+
+buildscript {
+    val publishToCentral = (findProperty("publishToCentral") as? String)
+        ?.ifBlank { "true" }?.toBoolean() ?: true
+    repositories {
+        if (publishToCentral) {
+            gradlePluginPortal()
+        }
+    }
+    dependencies {
+        if (publishToCentral) {
+            classpath("com.github.vlsi.stage-vote-release:com.github.vlsi.stage-vote-release.gradle.plugin:1.61")
+        }
+    }
 }
 
 description = "A set of plugins to simplify Gradle release tasks"
 val repoUrl = "https://github.com/vlsi/vlsi-release-plugins"
 
-tasks.jar {
-    enabled = false
+val publishToCentral = (findProperty("publishToCentral") as? String)
+    ?.ifBlank { "true" }?.toBoolean() ?: true
+
+if (publishToCentral) {
+    apply(plugin = "com.github.vlsi.stage-vote-release")
+    apply(from = "publish-central.gradle")
 }
 
 allprojects {
@@ -44,6 +62,17 @@ allprojects {
         mavenCentral()
     }
 
+    tasks.withType<GenerateModuleMetadata> {
+        enabled = false
+    }
+
+    plugins.withId("java") {
+        configure<JavaPluginExtension> {
+            withSourcesJar()
+            sourceCompatibility = JavaVersion.VERSION_1_8
+            targetCompatibility = JavaVersion.VERSION_1_8
+        }
+    }
     tasks.withType<KotlinCompile> {
         sourceCompatibility = "unused"
         targetCompatibility = "unused"
