@@ -182,6 +182,7 @@ Change log
 ----------
 v1.65
 * stage-vote-release-plugin: add `nexus.connectTimeout` and `nexus.operationTimeout` with default of 15 minutes (Maven Central is slow at times)
+* gradle-extensions-plugin: skip stacktrace for TaskSelectionException [issue#35](https://github.com/vlsi/vlsi-release-plugins/issues/35)
 
 v1.64
 * stage-vote-release-plugin: upate nexus-staging 0.2.0 -> 0.4.0; gradle-nexus-staging-plugin 0.20.0 -> 0.21.2

@@ -23,6 +23,8 @@ import org.gradle.api.GradleException
 import org.gradle.api.UncheckedIOException
 import org.gradle.api.internal.tasks.TaskDependencyResolveException
 import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.execution.TaskSelectionException
+import org.gradle.execution.commandline.TaskConfigurationException
 import org.gradle.internal.UncheckedException
 import org.gradle.internal.exceptions.LocationAwareException
 import org.gradle.internal.exceptions.MultiCauseException
@@ -94,6 +96,7 @@ class ThrowablePrinter {
             listOf<Predicate<Throwable>>(
                 { it is TaskExecutionException },
                 { it is TaskDependencyResolveException },
+                { it is TaskSelectionException || it is TaskConfigurationException },
                 { it is LocationAwareException },
                 {
                     it is GradleException &&
