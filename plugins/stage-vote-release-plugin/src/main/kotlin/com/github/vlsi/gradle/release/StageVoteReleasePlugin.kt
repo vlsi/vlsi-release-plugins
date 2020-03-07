@@ -148,8 +148,12 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         tasks.named("init").hide()
         hideMavenPublishTasks()
 
-        val pushRcTag = createPushRcTag(releaseExt, validateRcIndexSpecified, validateBeforeBuildingReleaseArtifacts)
-        val pushReleaseTag = createPushReleaseTag(releaseExt, validateRcIndexSpecified)
+        // Tasks from NexusStagingPlugin
+        val closeRepository = tasks.named("closeRepository")
+        val releaseRepository = tasks.named("releaseRepository")
+
+        val pushRcTag = createPushRcTag(releaseExt, validateRcIndexSpecified, validateBeforeBuildingReleaseArtifacts, closeRepository)
+        val pushReleaseTag = createPushReleaseTag(releaseExt, validateRcIndexSpecified, releaseRepository)
 
         val pushPreviewSite = addPreviewSiteTasks(validateBeforeBuildingReleaseArtifacts)
 
@@ -174,10 +178,6 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             dependsOn(validateSvnCredentials)
             mustRunAfter(stageSvnDist)
         }
-
-        // Tasks from NexusStagingPlugin
-        val closeRepository = tasks.named("closeRepository")
-        val releaseRepository = tasks.named("releaseRepository")
 
         closeRepository {
             dependsOn(validateNexusCredentials)
@@ -416,12 +416,15 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
     private fun Project.createPushRcTag(
         releaseExt: ReleaseExtension,
         validateRcIndexSpecified: TaskProvider<*>,
-        validateBeforeBuildingReleaseArtifacts: TaskProvider<*>
+        validateBeforeBuildingReleaseArtifacts: TaskProvider<*>,
+        closeRepository: TaskProvider<*>
     ): TaskProvider<*> {
         val createTag = tasks.register(CREATE_RC_TAG_TASK_NAME, GitCreateTagTask::class) {
             description = "Create release candidate tag if missing"
             group = RELEASE_GROUP
             hide()
+            // Avoid creating tag before the repository is pushed to nexus
+            mustRunAfter(closeRepository)
             dependsOn(validateRcIndexSpecified)
             dependsOn(validateBeforeBuildingReleaseArtifacts)
             rootGitRepository(releaseExt.source)
@@ -441,12 +444,15 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
     private fun Project.createPushReleaseTag(
         releaseExt: ReleaseExtension,
-        validateRcIndexSpecified: TaskProvider<*>
+        validateRcIndexSpecified: TaskProvider<*>,
+        releaseRepository: TaskProvider<*>
     ): TaskProvider<*> {
         val createTag = tasks.register(CREATE_RELEASE_TAG_TASK_NAME, GitCreateTagTask::class) {
             description = "Create release tag if missing"
             group = RELEASE_GROUP
             hide()
+            // Avoid creating tag before the repository is pushed to nexus
+            mustRunAfter(releaseRepository)
             dependsOn(validateRcIndexSpecified)
             rootGitRepository(releaseExt.source)
             tag.set(releaseExt.releaseTag)
@@ -524,6 +530,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 username = nexus.credentials.username(project)
                 password = nexus.credentials.password(project)
                 stagingProfileId = nexus.stagingProfileId.orNull
+                delayBetweenRetriesInMillis = 2000
+                numberOfRetries = (releaseExt.nexus.operationTimeout.get().toMillis() / 2000).toInt()
                 if (releaseExt.release.get()) {
                     repositoryDescription =
                         "Release ${releaseExt.componentName.get()} ${releaseExt.releaseTag.get()} (${releaseExt.rcTag.orNull ?: ""})"
@@ -563,6 +571,10 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             username.set(project.provider { releaseExt.nexus.credentials.username(project) })
             password.set(project.provider { releaseExt.nexus.credentials.password(project) })
         }
+
+        nexusPublish.connectTimeout.set(releaseExt.nexus.connectTimeout)
+        nexusPublish.clientTimeout.set(releaseExt.nexus.operationTimeout)
+
         val rootInitStagingRepository = tasks.named("initialize${repo.name.capitalize()}StagingRepository")
         // Use the same settings for all subprojects that apply MavenPublishPlugin
         subprojects {
@@ -570,6 +582,8 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                 apply(plugin = "de.marcphilipp.nexus-publish")
 
                 configure<NexusPublishExtension> {
+                    connectTimeout.set(nexusPublish.connectTimeout)
+                    clientTimeout.set(nexusPublish.clientTimeout)
                     repositories.create(repo.name) {
                         nexusUrl.set(repo.nexusUrl)
                         snapshotRepositoryUrl.set(repo.snapshotRepositoryUrl)

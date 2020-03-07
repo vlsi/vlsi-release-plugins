@@ -29,6 +29,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.kotlin.dsl.*
+import java.time.Duration
 
 /**
  * Setting up local release environment:
@@ -247,6 +248,12 @@ open class NexusConfig @Inject constructor(
     private val project: Project,
     objects: ObjectFactory
 ) {
+    val connectTimeout = objects.property<Duration>()
+        .convention(Duration.ofMinutes(15))
+
+    val operationTimeout = objects.property<Duration>()
+        .convention(Duration.ofMinutes(20))
+
     val url = objects.property<URI>()
         .convention(
             ext.repositoryType.map {

@@ -180,6 +180,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.65
+* stage-vote-release-plugin: add `nexus.connectTimeout` and `nexus.operationTimeout` with default of 15 minutes (Maven Central is slow at times)
+
 v1.64
 * stage-vote-release-plugin: upate nexus-staging 0.2.0 -> 0.4.0; gradle-nexus-staging-plugin 0.20.0 -> 0.21.2
 * update jgit: 5.6.0.201912101111-r -> 5.6.1.202002131546-r

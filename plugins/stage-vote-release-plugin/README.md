@@ -163,6 +163,8 @@ releaseParams { // ReleaseExtension
         releaseFolder.set(String) // Defaults to "release/${ext.tlpUrl.get()}/${ext.componentNameUrl.get()}-${project.version}"
     }
     nexus {
+        connectTimeout.set(Duration.ofMinutes(10))
+        operationTimeout.set(Duration.ofMinutes(10))
         url.set(URI) // Defaults to https://repository.apache.org (prod) or http://127.0.0.1:8080 (test)
         packageGroup.set(String) // Defaults to ${project.group}
     }
