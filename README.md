@@ -180,6 +180,11 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.66
+* gradle-extensions-plugin: MavenPom.simplifyXml() to trim scope=compile and dependencyManagement from pom.xml
+* gradle-extensions-plugin: MavenPublication.versionFromResolution() to map versions in pom.xml to Gradle resolution results
+* gradle-extensions-plugin: Project.extraMavenPublications() to add extra Maven publications (e.g. publish shadow jar)
+
 v1.65
 * stage-vote-release-plugin: add `nexus.connectTimeout` and `nexus.operationTimeout` with default of 15 minutes (Maven Central is slow at times)
 * stage-vote-release-plugin: create rc and release tags only after artifacts are pushed to Nexus (e.g. if javadoc build fails, the tag is not required)
