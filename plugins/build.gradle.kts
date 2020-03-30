@@ -21,7 +21,6 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.dokka.gradle.PackageOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -105,12 +104,14 @@ subprojects {
             withType<DokkaTask>().configureEach {
                 outputFormat = "javadoc"
                 outputDirectory = "$buildDir/javadoc"
-                reportUndocumented = false
-                jdkVersion = 8
-                packageOptions(delegateClosureOf<PackageOptions> {
-                    prefix = "com.github.vlsi.gradle"
-                    suppress = true
-                })
+                configuration {
+                    reportUndocumented = false
+                    jdkVersion = 8
+                    perPackageOption {
+                        prefix = "com.github.vlsi.gradle"
+                        suppress = true
+                    }
+                }
             }
         }
 
