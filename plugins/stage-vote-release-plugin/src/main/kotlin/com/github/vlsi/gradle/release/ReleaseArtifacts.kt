@@ -61,11 +61,10 @@ open class ReleaseArtifacts @Inject constructor(
     }
 
     fun artifact(taskProvider: TaskProvider<out AbstractArchiveTask>) {
-        val task = taskProvider.get()
         project.artifacts {
-            add(RELEASE_FILES_CONFIGURATION_NAME, task)
+            add(RELEASE_FILES_CONFIGURATION_NAME, taskProvider)
         }
-        val archiveFile = task.archiveFile
+        val archiveFile = taskProvider.flatMap { it.archiveFile }
         val sha512File = archiveFile.map { File(it.asFile.absolutePath + ".sha512") }
         val shaTask = project.tasks.register(taskProvider.name + "Sha512") {
             onlyIf { archiveFile.get().asFile.exists() }
@@ -86,6 +85,7 @@ open class ReleaseArtifacts @Inject constructor(
         project.artifacts {
             // https://github.com/gradle/gradle/issues/10960
             add(RELEASE_SIGNATURES_CONFIGURATION_NAME, sha512File) {
+                type = "sha512"
                 builtBy(shaTask)
             }
         }
@@ -96,7 +96,7 @@ open class ReleaseArtifacts @Inject constructor(
             project.configure<SigningExtension> {
                 val prevSignConfiguration = configuration
                 configuration = project.configurations[RELEASE_SIGNATURES_CONFIGURATION_NAME]
-                val signTasks = sign(task)
+                val signTasks = sign(taskProvider.get())
                 for (signTask in signTasks) {
                     signTask.onlyIf { archiveFile.get().asFile.exists() }
                 }
