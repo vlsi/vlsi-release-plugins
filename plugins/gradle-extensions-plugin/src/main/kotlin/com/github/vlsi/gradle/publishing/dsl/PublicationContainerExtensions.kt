@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 package com.github.vlsi.gradle.publishing.dsl
 
 import org.gradle.api.Project
