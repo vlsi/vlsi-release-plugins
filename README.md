@@ -181,7 +181,7 @@ This library is distributed under terms of Apache License 2.0
 Change log
 ----------
 v1.69
-Same as 1.68
+* license-gather-plugin: fix ignoreMissingLicenseFor annotations
 
 v1.68
 * license-gather-plugin: remove @Internal annotation from ignoreMissingLicenseFor
