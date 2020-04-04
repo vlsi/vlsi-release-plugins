@@ -180,6 +180,12 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.68
+* license-gather-plugin: remove @Internal annotation from ignoreMissingLicenseFor
+
+v1.67
+Same as 1.66 (re-published because 1.66 artifacts were corrupted by Gradle Plugin Portal issue)
+
 v1.66
 * gradle-extensions-plugin: MavenPom.simplifyXml() to trim scope=compile and dependencyManagement from pom.xml
 * gradle-extensions-plugin: MavenPublication.versionFromResolution() to map versions in pom.xml to Gradle resolution results

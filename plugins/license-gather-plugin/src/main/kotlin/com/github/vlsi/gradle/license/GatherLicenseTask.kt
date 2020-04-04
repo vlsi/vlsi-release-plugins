@@ -141,7 +141,6 @@ open class GatherLicenseTask @Inject constructor(
     protected fun getIgnoreMissingLicenseFor(): Set<String> =
         ignoreMissingLicenseFor.get().mapTo(mutableSetOf()) { it.toString() }
 
-    @Internal
     val ignoreMissingLicenseFor =
         objectFactory.setProperty<LicenseExpression>()
 
