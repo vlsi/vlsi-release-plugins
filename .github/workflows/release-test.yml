@@ -7,15 +7,20 @@ on:
   pull_request:
     branches:
       - '*'
+  schedule:
+    - cron: 27 18 * * 4 # weekly, 18:27 on Thursday
 
 # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners
 
 jobs:
   release-avatica:
-    name: 'Release Calcite Avatica'
+    strategy:
+      matrix:
+        gradle-version: [wrapper, rc, nightly]
+    name: 'Calcite Avatica ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
         fetch-depth: 50
         submodules: true
@@ -36,19 +41,30 @@ jobs:
         git clone --depth 100 https://github.com/apache/calcite-avatica.git ../calcite-avatica
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      working-directory: ../calcite-avatica
-      run: |
-        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew -no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../calcite-avatica
+        arguments: --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
     - name: 'Publish Release'
-      working-directory: ../calcite-avatica
-      run: |
-        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../calcite-avatica
+        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
 
   release-calcite:
-    name: 'Release Calcite'
+    strategy:
+      matrix:
+        gradle-version: [wrapper, rc, nightly]
+    name: 'Calcite ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
         fetch-depth: 50
         submodules: true
@@ -69,19 +85,30 @@ jobs:
         git clone --depth 100 https://github.com/apache/calcite.git ../calcite
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      working-directory: ../calcite
-      run: |
-        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew -PskipSigning --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../calcite
+        arguments: -PskipSigning --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
     - name: 'Publish Release'
-      working-directory: ../calcite
-      run: |
-        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../calcite
+        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
 
   release-jmeter:
-    name: 'Release JMeter'
+    strategy:
+      matrix:
+        gradle-version: [wrapper, rc, nightly]
+    name: 'JMeter ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
         fetch-depth: 50
         submodules: true
@@ -102,19 +129,30 @@ jobs:
         git clone --depth 100 https://github.com/apache/jmeter.git ../jmeter
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      working-directory: ../jmeter
-      run: |
-        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -PasfTestGitSitePreviewUsername=test -PasfTestGitSitePreviewPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../jmeter
+        arguments: --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -PasfTestGitSitePreviewUsername=test -PasfTestGitSitePreviewPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
     - name: 'Publish Release'
-      working-directory: ../jmeter
-      run: |
-        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../jmeter
+        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
 
   release-autostyle:
-    name: 'Release Autostyle'
+    strategy:
+      matrix:
+        gradle-version: [wrapper, rc, nightly]
+    name: 'Autostyle ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
         fetch-depth: 50
         submodules: true
@@ -135,10 +173,18 @@ jobs:
         git clone --depth 100 https://github.com/autostyle/autostyle.git ../autostyle
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      working-directory: ../autostyle
-      run: |
-        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../autostyle
+        arguments: --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
     - name: 'Publish Release'
-      working-directory: ../autostyle
-      run: |
-        ORG_GRADLE_PROJECT_checksumIgnore=true ./gradlew --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../autostyle
+        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true

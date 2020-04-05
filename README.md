@@ -180,6 +180,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.71
+* Add CI jobs with nightly and RC Gradle versions
+
 v1.70
 * stage-vote-release: fix Gradle 6.0 warnings
 
