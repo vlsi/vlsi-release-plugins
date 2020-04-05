@@ -17,6 +17,7 @@ jobs:
     strategy:
       matrix:
         gradle-version: [wrapper, rc, nightly]
+    if: matrix.gradle-version == 'wrapper' || github.ref == 'refs/heads/master'
     name: 'Calcite Avatica ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
@@ -61,6 +62,7 @@ jobs:
     strategy:
       matrix:
         gradle-version: [wrapper, rc, nightly]
+    if: matrix.gradle-version == 'wrapper' || github.ref == 'refs/heads/master'
     name: 'Calcite ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
@@ -105,6 +107,7 @@ jobs:
     strategy:
       matrix:
         gradle-version: [wrapper, rc, nightly]
+    if: matrix.gradle-version == 'wrapper' || github.ref == 'refs/heads/master'
     name: 'JMeter ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
@@ -149,6 +152,7 @@ jobs:
     strategy:
       matrix:
         gradle-version: [wrapper, rc, nightly]
+    if: matrix.gradle-version == 'wrapper' || github.ref == 'refs/heads/master'
     name: 'Autostyle ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
