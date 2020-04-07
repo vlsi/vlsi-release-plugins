@@ -58,6 +58,51 @@ jobs:
       env:
         ORG_GRADLE_PROJECT_checksumIgnore: true
 
+  release-darklaf:
+    strategy:
+      matrix:
+        gradle-version: [wrapper, rc, nightly]
+    if: matrix.gradle-version == 'wrapper' || github.ref == 'refs/heads/master'
+    name: 'Darklaf ${{ matrix.gradle-version }}'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 50
+        submodules: true
+    - name: 'Set up JDK 11'
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: 'Start release environment'
+      run: |
+        gpg --import .github/workflows/test-key.asc
+        git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
+        cd ../asflike-release-environment
+        cp .env_darklaf .env
+        docker-compose build vcs
+        docker-compose up -d
+    - name: 'Clone Darklaf'
+      run: |
+        git clone --depth 100 --branch gradle_63 https://github.com/vlsi/darklaf.git ../darklaf
+        git rev-parse HEAD
+    - name: 'Prepare Candidate'
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../darklaf
+        arguments: --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test -PghTestSvnUsername=test -PghTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
+    - name: 'Publish Release'
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../darklaf
+        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test -PghTestSvnUsername=test -PghTestSvnPassword=test
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
+
   release-calcite:
     strategy:
       matrix:
