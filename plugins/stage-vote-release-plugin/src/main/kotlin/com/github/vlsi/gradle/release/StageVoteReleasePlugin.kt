@@ -269,7 +269,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
         // Validations should be performed before tasks start execution
         project.gradle.taskGraph.whenReady {
-            var validations = emptySequence<Runnable>()
+            val validations = mutableListOf<Runnable>()
             if (hasTask(validateRcIndexSpecified.get())) {
                 validations += Runnable {
                     if (!releaseExt.rc.isPresent || releaseExt.rc.get() < 0) {
@@ -386,7 +386,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         }
     }
 
-    private fun runValidations(validations: Sequence<Runnable>) {
+    private fun runValidations(validations: List<Runnable>) {
         val errors = validations.mapNotNull {
             try {
                 it.run()
