@@ -188,3 +188,47 @@ jobs:
         arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test
       env:
         ORG_GRADLE_PROJECT_checksumIgnore: true
+
+  release-pgjdbc:
+    strategy:
+      matrix:
+        gradle-version: [wrapper, rc, nightly]
+    name: 'pgjdbc ${{ matrix.gradle-version }}'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 50
+        submodules: true
+    - name: 'Set up JDK 8'
+      uses: actions/setup-java@v1
+      with:
+        java-version: 8
+    - name: 'Start release environment'
+      run: |
+        gpg --import .github/workflows/test-key.asc
+        git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
+        cd ../asflike-release-environment
+        cp .env_pgjdbc .env
+        docker-compose build vcs
+        docker-compose up -d
+    - name: 'Clone pgjdbc'
+      run: |
+        git clone --depth 100 https://github.com/pgjdbc/pgjdbc.git ../pgjdbc
+        git rev-parse HEAD
+    - name: 'Prepare Candidate'
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../pgjdbc
+        arguments: --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
+    - name: 'Publish Release'
+      uses: eskatos/gradle-command-action@v1
+      with:
+        gradle-version: ${{ matrix.gradle-version }}
+        build-root-directory: ../pgjdbc
+        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test
+      env:
+        ORG_GRADLE_PROJECT_checksumIgnore: true
