@@ -12,9 +12,13 @@ on:
 
 # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners
 
+env:
+  ORG_GRADLE_PROJECT_checksumIgnore: true
+
 jobs:
   release-avatica:
     strategy:
+      fail-fast: false
       matrix:
         gradle-version: [wrapper, rc, nightly]
     name: 'Calcite Avatica ${{ matrix.gradle-version }}'
@@ -41,24 +45,23 @@ jobs:
         git clone --depth 100 https://github.com/apache/calcite-avatica.git ../calcite-avatica
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      uses: eskatos/gradle-command-action@v1
+      uses: burrunan/gradle-cache-action@v1
       with:
+        job-id: avatica
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../calcite-avatica
-        arguments: --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
-      env:
-        ORG_GRADLE_PROJECT_checksumIgnore: true
+        arguments: -Pnoverify --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
     - name: 'Publish Release'
-      uses: eskatos/gradle-command-action@v1
+      uses: burrunan/gradle-cache-action@v1
       with:
+        job-id: avatica
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../calcite-avatica
-        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
-      env:
-        ORG_GRADLE_PROJECT_checksumIgnore: true
+        arguments: -Pnoverify --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
 
   release-calcite:
     strategy:
+      fail-fast: false
       matrix:
         gradle-version: [wrapper, rc, nightly]
     name: 'Calcite ${{ matrix.gradle-version }}'
@@ -85,24 +88,24 @@ jobs:
         git clone --depth 100 https://github.com/apache/calcite.git ../calcite
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      uses: eskatos/gradle-command-action@v1
+      uses: burrunan/gradle-cache-action@v1
       with:
+        job-id: calcite
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../calcite
-        arguments: -PskipSigning --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
-      env:
-        ORG_GRADLE_PROJECT_checksumIgnore: true
+        arguments: -Pnoverify -PskipSigning --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
     - name: 'Publish Release'
-      uses: eskatos/gradle-command-action@v1
+      uses: burrunan/gradle-cache-action@v1
       with:
+        job-id: calcite
+        execution-only-caches: true
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../calcite
-        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
-      env:
-        ORG_GRADLE_PROJECT_checksumIgnore: true
+        arguments: -Pnoverify --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
 
   release-jmeter:
     strategy:
+      fail-fast: false
       matrix:
         gradle-version: [wrapper, rc, nightly]
     name: 'JMeter ${{ matrix.gradle-version }}'
@@ -129,24 +132,26 @@ jobs:
         git clone --depth 100 https://github.com/apache/jmeter.git ../jmeter
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      uses: eskatos/gradle-command-action@v1
+      uses: burrunan/gradle-cache-action@v1
       with:
+        job-id: jmeter
+        multi-cache-enabled: false
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../jmeter
-        arguments: --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -PasfTestGitSitePreviewUsername=test -PasfTestGitSitePreviewPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
-      env:
-        ORG_GRADLE_PROJECT_checksumIgnore: true
+        arguments: -Pnoverify --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -PasfTestGitSitePreviewUsername=test -PasfTestGitSitePreviewPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
     - name: 'Publish Release'
-      uses: eskatos/gradle-command-action@v1
+      uses: burrunan/gradle-cache-action@v1
       with:
+        job-id: jmeter
+        multi-cache-enabled: false
+        execution-only-caches: true
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../jmeter
-        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
-      env:
-        ORG_GRADLE_PROJECT_checksumIgnore: true
+        arguments: -Pnoverify --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
 
   release-autostyle:
     strategy:
+      fail-fast: false
       matrix:
         gradle-version: [wrapper, rc, nightly]
     name: 'Autostyle ${{ matrix.gradle-version }}'
@@ -173,24 +178,24 @@ jobs:
         git clone --depth 100 https://github.com/autostyle/autostyle.git ../autostyle
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      uses: eskatos/gradle-command-action@v1
+      uses: burrunan/gradle-cache-action@v1
       with:
+        job-id: autostyle
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../autostyle
-        arguments: --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
-      env:
-        ORG_GRADLE_PROJECT_checksumIgnore: true
+        arguments: -Pnoverify --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
     - name: 'Publish Release'
-      uses: eskatos/gradle-command-action@v1
+      uses: burrunan/gradle-cache-action@v1
       with:
+        job-id: autostyle
+        execution-only-caches: true
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../autostyle
-        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test
-      env:
-        ORG_GRADLE_PROJECT_checksumIgnore: true
+        arguments: -Pnoverify --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test
 
   release-pgjdbc:
     strategy:
+      fail-fast: false
       matrix:
         gradle-version: [wrapper, rc, nightly]
     name: 'pgjdbc ${{ matrix.gradle-version }}'
@@ -217,18 +222,17 @@ jobs:
         git clone --depth 100 https://github.com/pgjdbc/pgjdbc.git ../pgjdbc
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      uses: eskatos/gradle-command-action@v1
+      uses: burrunan/gradle-cache-action@v1
       with:
+        job-id: pgjdbc
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../pgjdbc
-        arguments: --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
-      env:
-        ORG_GRADLE_PROJECT_checksumIgnore: true
+        arguments: -Pnoverify --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
     - name: 'Publish Release'
-      uses: eskatos/gradle-command-action@v1
+      uses: burrunan/gradle-cache-action@v1
       with:
+        job-id: pgjdbc
+        execution-only-caches: true
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../pgjdbc
-        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test
-      env:
-        ORG_GRADLE_PROJECT_checksumIgnore: true
+        arguments: -Pnoverify --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PghTestNexusUsername=test -PghTestNexusPassword=test -PghTestGitSourceUsername=test -PghTestGitSourcePassword=test
