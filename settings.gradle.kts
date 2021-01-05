@@ -37,6 +37,7 @@ include(
     "plugins:checksum-dependency-plugin",
     "plugins:crlf-plugin",
     "plugins:gettext-plugin",
+    "plugins:jandex-plugin",
     "plugins:ide-plugin",
     "plugins:license-gather-plugin",
     "plugins:stage-vote-release-plugin"
