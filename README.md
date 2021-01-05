@@ -13,19 +13,28 @@ Note: this plugin has nothing to do with generating checksums.
 What it does it prevents man-in-the middle attack by enabling developers
 to declare the expected checksums.
 
-See [detailed description](plugins/checksum-dependency-plugin/README.md) for installation and configuration options.
+See [checksum-dependency-plugin description](plugins/checksum-dependency-plugin/README.md) for installation and configuration options.
+
+Jandex Gradle Plugin
+====================
+
+Allows building [Jandex](https://github.com/wildfly/jandex) class index.
+An alternative use case is verification of the class files: if `jandex` fails to parse the file,
+then the bytecode might be invalid.
+
+See [jandex-plugin description](plugins/jandex-plugin/README.md) for configuration options.
 
 Stage Vote Release Plugin
 =========================
 
 Enables to stage and vote on release artifacts before they are released.
 
-See [detailed description](plugins/stage-vote-release-plugin/README.md) for configuration options.
+See [stage-vote-release-plugin description](plugins/stage-vote-release-plugin/README.md) for configuration options.
 
 Gradle Extensions Plugin
 ========================
 
-See [detailed description](plugins/gradle-extensions-plugin/README.md) for configuration options.
+See [gradle-extensions-plugin description](plugins/gradle-extensions-plugin/README.md) for configuration options.
 
 Enables to access `Project` properties in a type-safe way:
 
@@ -182,6 +191,7 @@ Change log
 ----------
 v1.71
 * Add CI jobs with nightly and RC Gradle versions
+* jandex-plugin: build class file index via [Jandex](https://github.com/wildfly/jandex) or verify the bytecode
 
 v1.70
 * stage-vote-release: fix Gradle 6.0 warnings
