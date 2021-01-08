@@ -9,6 +9,7 @@ on:
       - '*'
   schedule:
     - cron: 27 18 * * 4 # weekly, 18:27 on Thursday
+  workflow_dispatch:
 
 # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners
 
