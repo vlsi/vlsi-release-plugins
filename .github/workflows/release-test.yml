@@ -15,6 +15,7 @@ on:
 jobs:
   release-avatica:
     strategy:
+      fail-fast: false
       matrix:
         gradle-version: [wrapper, rc, nightly]
     name: 'Calcite Avatica ${{ matrix.gradle-version }}'
@@ -59,6 +60,7 @@ jobs:
 
   release-calcite:
     strategy:
+      fail-fast: false
       matrix:
         gradle-version: [wrapper, rc, nightly]
     name: 'Calcite ${{ matrix.gradle-version }}'
@@ -103,6 +105,7 @@ jobs:
 
   release-jmeter:
     strategy:
+      fail-fast: false
       matrix:
         gradle-version: [wrapper, rc, nightly]
     name: 'JMeter ${{ matrix.gradle-version }}'
@@ -147,6 +150,7 @@ jobs:
 
   release-autostyle:
     strategy:
+      fail-fast: false
       matrix:
         gradle-version: [wrapper, rc, nightly]
     name: 'Autostyle ${{ matrix.gradle-version }}'
@@ -191,6 +195,7 @@ jobs:
 
   release-pgjdbc:
     strategy:
+      fail-fast: false
       matrix:
         gradle-version: [wrapper, rc, nightly]
     name: 'pgjdbc ${{ matrix.gradle-version }}'
