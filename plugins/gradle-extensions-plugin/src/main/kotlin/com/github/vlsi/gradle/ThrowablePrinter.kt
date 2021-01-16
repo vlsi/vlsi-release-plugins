@@ -215,7 +215,7 @@ class ThrowablePrinter {
                     val causeIndex = if (skipMessage) "" else "$prefix ${i + 1}: "
                     errors += Work(cause, nextIndent, causeIndex, ourStack)
                 }
-                for(work in errors.asReversed()) {
+                for (work in errors.asReversed()) {
                     queue.addFirst(work)
                 }
             }
