@@ -21,6 +21,7 @@ import org.gradle.api.file.FileType
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Classpath
+import org.gradle.api.tasks.Console
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
@@ -58,6 +59,9 @@ abstract class JandexTask @Inject constructor(
     @Classpath
     val classpath = objects.fileCollection()
 
+    @Console
+    val maxErrors = objects.property<Int>().convention(100)
+
     @InputFiles
     @SkipWhenEmpty
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -79,6 +83,7 @@ abstract class JandexTask @Inject constructor(
         queue.submit(JandexWork::class) {
             indexFile.set(this@JandexTask.indexFile)
             jandexBuildAction.set(this@JandexTask.jandexBuildAction)
+            maxErrors.set(this@JandexTask.maxErrors)
             if (jandexBuildAction.get() == JandexBuildAction.VERIFY_ONLY) {
                 logger.debug("Will process only changed class files via jandex")
                 // If the output index is not used, then we can use incremental processing

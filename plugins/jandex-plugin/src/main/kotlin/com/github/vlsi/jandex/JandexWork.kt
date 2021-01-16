@@ -26,9 +26,13 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.lang.reflect.InvocationTargetException
 
-class JandexException(message: String?, cause: Throwable?) : Exception(message, cause)
+open class JandexException(message: String?, cause: Throwable?) : Exception(message, cause)
+
+class JandexFileParseException(val file: java.io.File, message: String?, cause: Throwable?) :
+    JandexException(message, cause)
 
 interface JandexWorkParameters : WorkParameters {
+    val maxErrors: Property<Int>
     val inputFiles: ConfigurableFileCollection
     val indexFile: RegularFileProperty
     val jandexBuildAction: Property<JandexBuildAction>
@@ -45,6 +49,8 @@ abstract class JandexWork : WorkAction<JandexWorkParameters> {
         val indexer = indexerClass.getConstructor().newInstance()
         val indexMethod = indexerClass.getMethod("index", InputStream::class.java)
         var indexedFiles = 0
+        val maxErrors = parameters.maxErrors.get()
+        val errors = mutableListOf<JandexFileParseException>()
         for (file in parameters.inputFiles) {
             logger.debug("Jandex: processing {}", file)
             file.inputStream().use {
@@ -52,16 +58,35 @@ abstract class JandexWork : WorkAction<JandexWorkParameters> {
                     indexMethod.invoke(indexer, it)
                 } catch (e: InvocationTargetException) {
                     val cause = e.cause
-                    throw JandexException(
-                        "Unable to process ${file.name}" +
-                                ". It might be caused by invalid bytecode in the class file or a defect in org.jboss:jandex" +
-                                ". Jandex error: $cause" +
-                                "; You might analyze the bytecode with the following command: javap -verbose -p $file",
+                    logger.info("Error indexing file {}: {}", file, cause?.message)
+                    errors += JandexFileParseException(
+                        file,
+                        file.toString(),
                         cause
                     )
                 }
             }
             indexedFiles += 1
+            if (errors.size > maxErrors) {
+                break
+            }
+        }
+        if (errors.isNotEmpty()) {
+            val s = if (errors.size == 1) "" else "s"
+            throw JandexException(
+                "Unable to process ${errors.size} file$s" +
+                        ". It might be caused by invalid bytecode in the class file or a defect in org.jboss:jandex" +
+                        "; You might analyze the bytecode with the following command: javap -verbose -p <ClassName.class>" +
+                        "; Unable to parse the following file$s: " +
+                        errors.map { it.file }.sorted().joinToString(", "),
+                if (errors.size != 1) null else errors.first().cause
+            ).apply {
+                if (errors.size > 1) {
+                    for (e in errors) {
+                        addSuppressed(e)
+                    }
+                }
+            }
         }
         val parseFiles = System.currentTimeMillis()
         val index = try {

@@ -189,6 +189,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.72
+* jandex-plugin: add `maxErrors` option to show several errors rather than stop on the first one
+
 v1.71
 * Add CI jobs with nightly and RC Gradle versions
 * jandex-plugin: build class file index via [Jandex](https://github.com/wildfly/jandex) or verify the bytecode
