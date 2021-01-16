@@ -207,26 +207,30 @@ class ThrowablePrinter {
             }
 
             val nextIndent = if (hideThrowable) indent else "    $indent"
-            throwable.suppressed.forEach {
-                queue += Work(it, nextIndent, "Suppressed: ", ourStack)
-            }
 
             fun addNextExceptions(prefix: String, causes: Iterable<Throwable>) {
                 val skipMessage = causes is List<*> && causes.size == 1
+                val errors = mutableListOf<Work>()
                 for ((i, cause) in causes.withIndex()) {
                     val causeIndex = if (skipMessage) "" else "$prefix ${i + 1}: "
-                    queue += Work(cause, nextIndent, causeIndex, ourStack)
+                    errors += Work(cause, nextIndent, causeIndex, ourStack)
+                }
+                for(work in errors.asReversed()) {
+                    queue.addFirst(work)
                 }
             }
             if (throwable is MultiCauseException) {
                 addNextExceptions("Cause", throwable.causes)
             } else {
                 throwable.cause?.let {
-                    queue += Work(it, nextIndent, "Caused by: ", ourStack)
+                    queue.addFirst(Work(it, nextIndent, "Caused by: ", ourStack))
                 }
             }
             if (throwable is SQLException) {
                 addNextExceptions("Next exception", Iterable { throwable.iterator() })
+            }
+            throwable.suppressed.asList().asReversed().forEach {
+                queue.addFirst(Work(it, nextIndent, "Suppressed: ", ourStack))
             }
             val lastFrame = if (hideStacktrace || ourStack?.isEmpty() == null) {
                 continue
