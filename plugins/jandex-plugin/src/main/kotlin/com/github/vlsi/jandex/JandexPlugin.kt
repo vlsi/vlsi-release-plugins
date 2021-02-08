@@ -18,12 +18,12 @@ package com.github.vlsi.jandex
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 open class JandexPlugin : Plugin<Project> {
     companion object {
@@ -41,11 +41,13 @@ open class JandexPlugin : Plugin<Project> {
 
         val jandexTask = tasks.register(JANDEX_TASK_NAME) {
             description = "Builds org.jboss:jandex index"
-            group = JavaBasePlugin.VERIFICATION_GROUP
+            group = LifecycleBasePlugin.VERIFICATION_GROUP
             dependsOn(tasks.withType<JandexTask>())
         }
-        tasks.named(JavaBasePlugin.CHECK_TASK_NAME) {
-            dependsOn(jandexTask)
+        plugins.withType<LifecycleBasePlugin> {
+            tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
+                dependsOn(jandexTask)
+            }
         }
 
         plugins.withId("java") {

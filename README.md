@@ -189,6 +189,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.73
+* jandex-plugin: fixed "Task with name 'check' not found" when the plugin is applied with `plugins { ... }`
+
 v1.72
 * jandex-plugin: add `maxErrors` option to show several errors rather than stop on the first one
 * gradle-extensions-plugin: fix output of exceptions with multiple nested suppressed exceptions

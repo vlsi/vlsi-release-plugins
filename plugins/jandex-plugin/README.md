@@ -111,7 +111,10 @@ to the resource directory, and it would be included into the jar.
 Changelog
 =========
 
-1.72
+v1.73
+* Fixed "Task with name 'check' not found" when the plugin is applied with `plugins { ... }`
+
+v1.72
 * Add `maxErrors` option to show several errors rather than stop on the first one
 
-1.71 - Initial version
+v1.71 - Initial version
