@@ -35,6 +35,5 @@ dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.3.202401111512-r")
     implementation("org.ajoberstar.grgit:grgit-gradle:4.1.1")
     implementation("org.ajoberstar.grgit:grgit-core:4.1.1")
-    implementation("de.marcphilipp.gradle:nexus-publish-plugin:0.4.0")
-    implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.2")
+    implementation("io.github.gradle-nexus:publish-plugin:2.0.0")
 }
