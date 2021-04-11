@@ -83,8 +83,13 @@ open class ReleaseArtifacts @Inject constructor(
             }
         }
         project.artifacts {
-            // https://github.com/gradle/gradle/issues/10960
             add(RELEASE_SIGNATURES_CONFIGURATION_NAME, sha512File) {
+                // https://github.com/gradle/gradle/issues/16777
+                // The exact values do not seem to be really important, are they?
+                name = shaTask.name
+                classifier = ""
+                extension = "sha512"
+                // https://github.com/gradle/gradle/issues/10960
                 type = "sha512"
                 builtBy(shaTask)
             }

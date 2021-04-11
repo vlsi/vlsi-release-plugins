@@ -191,6 +191,7 @@ Change log
 ----------
 v1.74
 * checksum-dependency: skip checksum verification when artifact resolves to a directory
+* stage-vote-release: add workaround for Gradle 7.0 compatibility (see https://github.com/gradle/gradle/issues/16777)
 
 v1.73
 * jandex-plugin: fixed "Task with name 'check' not found" when the plugin is applied with `plugins { ... }`
