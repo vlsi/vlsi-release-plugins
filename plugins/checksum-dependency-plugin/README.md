@@ -484,6 +484,9 @@ Verification options
 
 Changelog
 ---------
+v1.74
+* Skip checksum verification when artifact resolves to a directory
+
 v1.62:
 * Added `Bundle-License: Apache-2.0` to `META-INF/MANIFEST.MF`
 

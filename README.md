@@ -189,6 +189,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.74
+* checksum-dependency: skip checksum verification when artifact resolves to a directory
+
 v1.73
 * jandex-plugin: fixed "Task with name 'check' not found" when the plugin is applied with `plugins { ... }`
 

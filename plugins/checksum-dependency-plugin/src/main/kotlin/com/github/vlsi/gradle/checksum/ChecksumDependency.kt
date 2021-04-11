@@ -154,6 +154,10 @@ class ChecksumDependency(
         for (artifact in originalArtifacts) {
             val dependencyNotation = artifact.id.signatureDependency
             val dependencyId = artifact.id.artifactDependencyId
+            if (artifact.file.isDirectory) {
+                logger.warn("Resolved directory for artifact, so will skip checksum verification for it. Artifact ${dependencyId.dependencyNotation}, directory: artifact.file")
+                continue
+            }
             val verificationConfig = verificationDb.getConfigFor(dependencyId)
             logger.debug { "Adding $dependencyNotation to $pgpConfiguration" }
             val prevFile = originalFiles.put(dependencyId, artifact.file)
