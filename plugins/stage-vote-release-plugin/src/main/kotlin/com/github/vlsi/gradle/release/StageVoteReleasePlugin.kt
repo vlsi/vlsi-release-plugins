@@ -20,10 +20,10 @@ import com.github.vlsi.gradle.properties.dsl.props
 import com.github.vlsi.gradle.release.svn.LsDepth
 import com.github.vlsi.gradle.release.svn.Svn
 import com.github.vlsi.gradle.release.svn.SvnEntry
-import de.marcphilipp.gradle.nexus.InitializeNexusStagingRepository
-import de.marcphilipp.gradle.nexus.NexusPublishExtension
-import io.codearte.gradle.nexus.NexusStagingExtension
-import io.codearte.gradle.nexus.NexusStagingPlugin
+import io.github.gradlenexus.publishplugin.CloseNexusStagingRepository
+import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
+import io.github.gradlenexus.publishplugin.NexusPublishExtension
+import io.github.gradlenexus.publishplugin.ReleaseNexusStagingRepository
 import org.ajoberstar.grgit.Grgit
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.ObjectId
@@ -48,6 +48,7 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.invoke
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.the
@@ -58,6 +59,7 @@ import org.gradle.plugins.signing.SigningPlugin
 import java.io.File
 import java.net.URI
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 import javax.inject.Inject
 
 class StageVoteReleasePlugin @Inject constructor(private val instantiator: Instantiator) :
@@ -122,8 +124,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
     private fun Project.configureRoot() {
         apply(plugin = "org.ajoberstar.grgit")
-        apply(plugin = "io.codearte.nexus-staging")
-        apply(plugin = "de.marcphilipp.nexus-publish")
+        apply(plugin = "io.github.gradle-nexus.publish-plugin")
 
         val releaseFilesConfiguration = configurations[RELEASE_FILES_CONFIGURATION_NAME]
         val releaseSignaturesConfiguration = configurations[RELEASE_SIGNATURES_CONFIGURATION_NAME]
@@ -141,16 +142,14 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         val validateRcIndexSpecified = tasks.register(VALIDATE_RC_INDEX_SPECIFIED_TASK_NAME)
         val validateBeforeBuildingReleaseArtifacts = tasks.register(VALIDATE_BEFORE_ARTIFACT_BUILD_TASK_NAME)
 
-        configureNexusPublish(validateNexusCredentials, validateBeforeBuildingReleaseArtifacts)
-
-        configureNexusStaging(releaseExt)
+        configureNexusPublish(releaseExt, validateNexusCredentials, validateBeforeBuildingReleaseArtifacts)
 
         tasks.named("init").hide()
         hideMavenPublishTasks()
 
         // Tasks from NexusStagingPlugin
-        val closeRepository = tasks.named("closeRepository")
-        val releaseRepository = tasks.named("releaseRepository")
+        val closeRepository = tasks.named("close${REPOSITORY_NAME.capitalize()}StagingRepository")
+        val releaseRepository = tasks.named("release${REPOSITORY_NAME.capitalize()}StagingRepository")
 
         val pushRcTag = createPushRcTag(releaseExt, validateRcIndexSpecified, validateBeforeBuildingReleaseArtifacts, closeRepository)
         val pushReleaseTag = createPushReleaseTag(releaseExt, validateRcIndexSpecified, releaseRepository)
@@ -185,23 +184,17 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         }
         closeRepository.hide()
         releaseRepository.hide()
-        tasks.named("closeAndReleaseRepository").hide()
-        tasks.named("getStagingProfile").hide()
+        // https://github.com/gradle-nexus/publish-plugin/issues/51
+        afterEvaluate {
+            tasks.named("closeAndReleaseStagingRepository").hide()
+        }
+        tasks.named("closeAndRelease${REPOSITORY_NAME.capitalize()}StagingRepository").hide()
 
         releaseRepository {
             // Note: publishSvnDist might fail, and it is easier to rollback than "rollback Nexus"
             // So we publish to SVN first, and release Nexus later
             mustRunAfter(publishSvnDist)
             dependsOn(validateNexusCredentials)
-        }
-
-        // closeRepository does not wait all publications by default, so we add that dependency
-        allprojects {
-            plugins.withType<PublishingPlugin> {
-                closeRepository.configure {
-                    dependsOn(tasks.named(PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME))
-                }
-            }
         }
 
         pushRcTag {
@@ -218,11 +211,25 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             dependsOn(closeRepository)
         }
 
-        tasks.register(REMOVE_STALE_ARTIFACTS_TASK_NAME, RemoveStaleArtifactsTask::class) {
+        // Make sure stageDist depends on all the relevant publish tasks
+        allprojects {
+            plugins.withType<MavenPublishPlugin> {
+                stageDist {
+                    dependsOn(tasks.named("publishAllPublicationsTo${REPOSITORY_NAME.capitalize()}Repository"))
+                }
+            }
+        }
+
+        val removeStaleArtifacts = tasks.register(REMOVE_STALE_ARTIFACTS_TASK_NAME, RemoveStaleArtifactsTask::class) {
             description = "Removes stale artifacts from dist.apache.org (dry run with -PasfDryRun)"
             group = RELEASE_GROUP
             onlyIf { releaseExt.svnDistEnabled.get() }
             mustRunAfter(publishSvnDist)
+        }
+        afterEvaluate {
+            if (!releaseExt.svnDistEnabled.get()) {
+                removeStaleArtifacts.hide()
+            }
         }
 
         pushReleaseTag {
@@ -369,11 +376,15 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
     private fun Project.hideMavenPublishTasks() {
         allprojects {
+            plugins.withType<PublishingPlugin> {
+                tasks.named(PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME).hide()
+            }
             plugins.withType<MavenPublishPlugin> {
                 afterEvaluate {
                     tasks.withType<PublishToMavenRepository>().hide()
                     tasks.withType<PublishToMavenLocal>().hide()
                     tasks.withType<GenerateModuleMetadata>().hide()
+                    tasks.named("publishAllPublicationsTo${REPOSITORY_NAME.capitalize()}Repository").hide()
                     val generatePomTasks = tasks.withType<GenerateMavenPom>()
                     generatePomTasks.hide()
                     tasks.register("generatePom") {
@@ -511,44 +522,6 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
         return pushPreviewSite
     }
 
-    private fun Project.configureNexusStaging(releaseExt: ReleaseExtension) {
-        plugins.withType<NexusStagingPlugin> {
-            tasks {
-                // Hide "deprecated" tasks from "./gradlew tasks"
-                named("closeAndPromoteRepository").hide()
-                named("promoteRepository").hide()
-                // Hide "internal" tasks
-                named("createRepository").hide()
-            }
-        }
-        // The fields of releaseExt are not configured yet (the extension is not yet used in build scripts),
-        // so we populate NexusStaging properties after the project is configured
-        afterEvaluate {
-            configure<NexusStagingExtension> {
-                val nexus = project.the<ReleaseExtension>().nexus
-                packageGroup = nexus.packageGroup.get()
-                username = nexus.credentials.username(project)
-                password = nexus.credentials.password(project)
-                stagingProfileId = nexus.stagingProfileId.orNull
-                delayBetweenRetriesInMillis = 2000
-                numberOfRetries = (releaseExt.nexus.operationTimeout.get().toMillis() / 2000).toInt()
-                if (releaseExt.release.get()) {
-                    repositoryDescription =
-                        "Release ${releaseExt.componentName.get()} ${releaseExt.releaseTag.get()} (${releaseExt.rcTag.orNull ?: ""})"
-                }
-                val nexusPublish = project.the<NexusPublishExtension>()
-                val repo = nexusPublish.repositories[REPOSITORY_NAME]
-                serverUrl =
-                    repo.run { if (nexusPublish.useStaging.get()) nexusUrl else snapshotRepositoryUrl }
-                        .get().toString()
-
-                stagingRepositoryId.set(
-                    project.provider { releaseExt.repositoryIdStore.getOrLoad(REPOSITORY_NAME) }
-                )
-            }
-        }
-    }
-
     private fun URI.replacePath(path: String) = URI(
         scheme,
         userInfo,
@@ -560,70 +533,46 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
     )
 
     private fun Project.configureNexusPublish(
+        releaseExt: ReleaseExtension,
         validateNexusCredentials: TaskProvider<*>,
         validateBeforeBuildingReleaseArtifacts: TaskProvider<*>
     ) {
-        val releaseExt = project.the<ReleaseExtension>()
-        val nexusPublish = the<NexusPublishExtension>()
-        val repo = nexusPublish.repositories.create(REPOSITORY_NAME) {
-            nexusUrl.set(releaseExt.nexus.url.map { it.replacePath("/service/local/") })
-            snapshotRepositoryUrl.set(releaseExt.nexus.url.map { it.replacePath("/content/repositories/snapshots/") })
-            username.set(project.provider { releaseExt.nexus.credentials.username(project) })
-            password.set(project.provider { releaseExt.nexus.credentials.password(project) })
-        }
-
-        nexusPublish.connectTimeout.set(releaseExt.nexus.connectTimeout)
-        nexusPublish.clientTimeout.set(releaseExt.nexus.operationTimeout)
-
-        val rootInitStagingRepository = tasks.named("initialize${repo.name.capitalize()}StagingRepository")
-        // Use the same settings for all subprojects that apply MavenPublishPlugin
-        subprojects {
-            plugins.withType<MavenPublishPlugin> {
-                apply(plugin = "de.marcphilipp.nexus-publish")
-
-                configure<NexusPublishExtension> {
-                    connectTimeout.set(nexusPublish.connectTimeout)
-                    clientTimeout.set(nexusPublish.clientTimeout)
-                    repositories.create(repo.name) {
-                        nexusUrl.set(repo.nexusUrl)
-                        snapshotRepositoryUrl.set(repo.snapshotRepositoryUrl)
-                        username.set(repo.username)
-                        password.set(repo.password)
-                    }
-                    useStaging.set(nexusPublish.useStaging)
-                }
+        configure<NexusPublishExtension> {
+            val repo = repositories.create(REPOSITORY_NAME) {
+                nexusUrl.set(releaseExt.nexus.url.map { it.replacePath("/service/local/") })
+                snapshotRepositoryUrl.set(releaseExt.nexus.url.map { it.replacePath("/content/repositories/snapshots/") })
+                username.set(project.provider { releaseExt.nexus.credentials.username(project) })
+                password.set(project.provider { releaseExt.nexus.credentials.password(project) })
             }
-            plugins.withId("de.marcphilipp.nexus-publish") {
-                tasks.withType<InitializeNexusStagingRepository>().configureEach {
-                    // Allow for some parallelism, so the staging repository is created by the root task
-                    dependsOn(rootInitStagingRepository)
-                }
+            connectTimeout.set(releaseExt.nexus.connectTimeout)
+            clientTimeout.set(releaseExt.nexus.operationTimeout)
+            val nexus = releaseExt.nexus
+            packageGroup.set(nexus.packageGroup)
+            transitionCheckOptions {
+                delayBetween.set(Duration.ofSeconds(10))
+                maxRetries.set(nexus.operationTimeout.map { (1 + it.toSeconds() / 10).toInt() })
             }
-        }
-
-        // We don't know which project will be the first to initialize the staging repository,
-        // so we watch all the projects
-        // The goal of this block is to fetch and save the Id of newly created staging repository
-        allprojects {
-            plugins.withId("de.marcphilipp.nexus-publish") {
-                // Hide unused task: https://github.com/marcphilipp/nexus-publish-plugin/issues/14
-                configure<NexusPublishExtension> {
-                    repositories.whenObjectAdded {
-                        tasks.named("publishTo${name.capitalize()}") {
-                            group = null
-                        }
-                    }
+            repositoryDescription.set(project.provider {
+                if (releaseExt.release.get()) {
+                    project.run { "$group:$name:$version" }
+                } else {
+                    "Release ${releaseExt.componentName.get()} ${releaseExt.releaseTag.get()} (${releaseExt.rcTag.orNull ?: ""})"
                 }
-                tasks.withType<InitializeNexusStagingRepository>().configureEach {
-                    dependsOn(validateBeforeBuildingReleaseArtifacts)
-                    dependsOn(validateNexusCredentials)
-                    doLast {
-                        // nexus-publish puts stagingRepositoryId to NexusStagingExtension so we get it from there
-                        val repoName = this@configureEach.repositoryName.get()
-                        val stagingRepositoryId =
-                            rootProject.the<NexusStagingExtension>().stagingRepositoryId.get()
-                        releaseExt.repositoryIdStore[repoName] = stagingRepositoryId
-                    }
+            })
+
+            tasks.named<ReleaseNexusStagingRepository>("release${REPOSITORY_NAME.capitalize()}StagingRepository") {
+                stagingRepositoryId.set(project.provider { releaseExt.repositoryIdStore.getOrLoad(REPOSITORY_NAME) })
+            }
+            tasks.named<InitializeNexusStagingRepository>("initialize${repo.name.capitalize()}StagingRepository") {
+                dependsOn(validateBeforeBuildingReleaseArtifacts)
+                dependsOn(validateNexusCredentials)
+                doLast {
+                    val repoName = repository.get().name
+                    val closeRepoTask =
+                        rootProject.tasks.named<CloseNexusStagingRepository>("close${repoName.capitalize()}StagingRepository")
+                    val stagingRepositoryId =
+                        closeRepoTask.get().stagingRepositoryId.get()
+                    releaseExt.repositoryIdStore[repoName] = stagingRepositoryId
                 }
             }
         }

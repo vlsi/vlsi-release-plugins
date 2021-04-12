@@ -22,6 +22,13 @@ dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.6.1.202002131546-r")
     implementation("org.ajoberstar.grgit:grgit-gradle:4.0.1")
     implementation("org.ajoberstar.grgit:grgit-core:4.0.1")
-    implementation("de.marcphilipp.gradle:nexus-publish-plugin:0.4.0")
-    implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.2")
+    implementation("io.github.gradle-nexus:publish-plugin:0.1.0-SNAPSHOT")
+}
+
+repositories {
+    maven("https://oss.sonatype.org/content/repositories/snapshots/") {
+        mavenContent {
+            snapshotsOnly()
+        }
+    }
 }
