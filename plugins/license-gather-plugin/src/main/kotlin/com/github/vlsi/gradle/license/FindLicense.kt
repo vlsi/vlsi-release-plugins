@@ -24,11 +24,13 @@ import javax.inject.Inject
 val LICENSE_FILES =
     listOf("LICENSE", "NOTICE", "COPYING", "COPYING.LESSER")
 
-fun looksLiceLicense(name: String) =
-    LICENSE_FILES.any { name.startsWith(it, ignoreCase = true) }
-
-private fun String.looksLikeLicense() =
-    !endsWith(".class") && looksLiceLicense(substringAfterLast('/'))
+fun looksLikeLicense(name: String): Boolean {
+    if (name.endsWith(".class")) {
+        return false
+    }
+    val fileName = name.substringAfterLast('/')
+    return LICENSE_FILES.any { fileName.startsWith(it, ignoreCase = true) }
+}
 
 class FindLicense @Inject constructor(
     private val id: String,
@@ -45,12 +47,12 @@ class FindLicense @Inject constructor(
         ZipFile(file).use { zipFile ->
             for (e in zipFile.entries()) {
                 val entryName = e.name
-                if (e.isDirectory || !entryName.looksLikeLicense()
+                if (e.isDirectory || !looksLikeLicense(entryName)
                     || entryName.contains("../")
                 ) {
                     continue
                 }
-                val outFile = File(outputDir, entryName.removePrefix("/").removePrefix("META-INF/"))
+                val outFile = File(outputDir, entryName.removePrefix("/"))
                 outFile.parentFile.mkdirs()
                 outFile.outputStream().use { out ->
                     zipFile.getInputStream(e).use {

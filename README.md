@@ -148,7 +148,7 @@ plugins {
 }
 
 tasks.register('generateLicense', GatherLicenseTask.class) {
-    configurations.add(project.configurations.runtime)
+    configurations.add(project.configurations.runtimeClasspath)
     outputFile.set(file("$buildDir/result.txt"))
 
     doLast {
@@ -164,7 +164,7 @@ plugins {
 }
 
 tasks.register("generateLicense", GatherLicenseTask::class) {
-    configurations.add(project.configurations.runtime)
+    configurations.add(project.configurations.runtimeClasspath)
     outputFile.set(file("$buildDir/result.txt"))
 
     doLast {
@@ -191,6 +191,7 @@ Change log
 ----------
 v1.75
 * crlf-plugin: remove input specification from FindGitAttributes task properties to workaround non-declared task dependency warning (see https://github.com/gradle/gradle/issues/18882)
+* license-gather-plugin: support jars that have both /LICENSE and /META-INF/LICENSE files
 
 v1.74
 * checksum-dependency: skip checksum verification when artifact resolves to a directory

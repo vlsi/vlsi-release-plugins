@@ -255,7 +255,7 @@ open class GatherLicenseTask @Inject constructor(
     fun configuration(conf: Provider<out Configuration>) = configurations.add(conf)
 
     private fun File.containsLicenseFile() =
-        listFiles { _, name -> looksLiceLicense(name) }?.isNotEmpty() == true
+        walk().any { it.isFile && looksLikeLicense(it.name) }
 
     @TaskAction
     fun run() {
