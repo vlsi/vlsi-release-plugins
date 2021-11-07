@@ -189,6 +189,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.75
+* crlf-plugin: remove input specification from FindGitAttributes task properties to workaround non-declared task dependency warning (see https://github.com/gradle/gradle/issues/18882)
+
 v1.74
 * checksum-dependency: skip checksum verification when artifact resolves to a directory
 * stage-vote-release: add workaround for Gradle 7.0 compatibility (see https://github.com/gradle/gradle/issues/16777)

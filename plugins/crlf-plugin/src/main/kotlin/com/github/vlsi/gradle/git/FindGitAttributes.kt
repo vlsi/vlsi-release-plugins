@@ -28,10 +28,12 @@ import javax.inject.Inject
 open class FindGitAttributes @Inject constructor(
     objectFactory: ObjectFactory
 ) : DefaultTask() {
-    @InputDirectory
+    // @InputDirectory, see https://github.com/gradle/gradle/issues/18882
+    @Internal
     val root = objectFactory.directoryProperty()
 
-    @Input
+    // @Input, see https://github.com/gradle/gradle/issues/18882
+    @Internal
     val maxDepth = objectFactory.property<Int>().convention(Int.MAX_VALUE)
 
     @Internal
