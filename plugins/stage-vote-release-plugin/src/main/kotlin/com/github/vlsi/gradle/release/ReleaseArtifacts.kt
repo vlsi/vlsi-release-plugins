@@ -66,8 +66,9 @@ open class ReleaseArtifacts @Inject constructor(
         }
         val archiveFile = taskProvider.flatMap { it.archiveFile }
         val sha512File = archiveFile.map { File(it.asFile.absolutePath + ".sha512") }
+        val archiveBuilt = taskProvider.map { it.state.run { executed && !skipped } }
         val shaTask = project.tasks.register(taskProvider.name + "Sha512") {
-            onlyIf { archiveFile.get().asFile.exists() }
+            onlyIf { archiveBuilt.get() }
             inputs.file(archiveFile)
             outputs.file(sha512File)
             doLast {
@@ -103,7 +104,7 @@ open class ReleaseArtifacts @Inject constructor(
                 configuration = project.configurations[RELEASE_SIGNATURES_CONFIGURATION_NAME]
                 val signTasks = sign(taskProvider.get())
                 for (signTask in signTasks) {
-                    signTask.onlyIf { archiveFile.get().asFile.exists() }
+                    signTask.onlyIf { archiveBuilt.get() }
                 }
                 configuration = prevSignConfiguration
                 project.tasks.named(BasePlugin.ASSEMBLE_TASK_NAME) {

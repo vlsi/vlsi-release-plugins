@@ -194,6 +194,7 @@ v1.75
 * license-gather-plugin: support jars that have both /LICENSE and /META-INF/LICENSE files
 * gradle-extensions: avoid printing stacktrace when Kotlin compilation fails
 * gradle-extensions: avoid printing stacktraces for autostyle failures
+* stage-vote-release: use task.state instead of archiveFile.exists() to skip sha512 and sign tasks
 
 v1.74
 * checksum-dependency: skip checksum verification when artifact resolves to a directory
