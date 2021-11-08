@@ -79,6 +79,9 @@ class ThrowablePrinter {
             listOf<Predicate<Throwable>>(
                 { it is LocationAwareException && it.message == it.cause?.message },
                 { it is UncheckedException || it is UncheckedIOException },
+                { it is AssertionError
+                        && it.stackTrace.firstOrNull()?.className?.startsWith("com.github.autostyle.") == true
+                },
                 {
                     it.javaClass.name == "org.opentest4j.MultipleFailuresError" &&
                             it.message?.startsWith("Multiple Failures") == true
@@ -89,7 +92,9 @@ class ThrowablePrinter {
             listOf<Predicate<Throwable>>(
                 { it is NullPointerException || it is KotlinNullPointerException },
                 { it is IllegalStateException || it is IllegalArgumentException },
-                { it is AssertionError }
+                { it is AssertionError
+                        && it.stackTrace.firstOrNull()?.className?.startsWith("com.github.autostyle.") != true
+                }
             )
 
         private val defaultHideStacktrace =
@@ -104,6 +109,9 @@ class ThrowablePrinter {
                 },
                 {
                     it.message?.startsWith("Compilation error. See log for more details") == true
+                },
+                {
+                    it::class.qualifiedName?.startsWith("com.github.autostyle") == true
                 },
                 {
                     it.message?.startsWith("This version of the kotlin-sam-with-receiver Gradle plugin") == true
