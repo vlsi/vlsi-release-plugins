@@ -16,10 +16,13 @@
  */
 package com.github.vlsi.jandex
 
+import com.github.vlsi.jandex.JandexProcessResources.Companion.getTaskName
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.javadoc.Javadoc
+import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
@@ -80,8 +83,13 @@ open class JandexPlugin : Plugin<Project> {
                         })
                     }
                 }
-                if (sourceSet.jarTaskName == JavaPlugin.JAR_TASK_NAME) {
-                    tasks.named(JavaPlugin.JAR_TASK_NAME) {
+                val jarTaskName = sourceSet.jarTaskName
+                val sourcesJarTaskName = sourceSet.sourcesJarTaskName
+                tasks.withType<Jar>().matching { it.name == jarTaskName || it.name == sourcesJarTaskName }.configureEach {
+                    dependsOn(processJandexIndex)
+                }
+                sourceSet.javadocTaskName.let { taskName ->
+                    tasks.withType<Javadoc>().matching { it.name == taskName }.configureEach {
                         dependsOn(processJandexIndex)
                     }
                 }
