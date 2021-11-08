@@ -103,6 +103,12 @@ class ThrowablePrinter {
                             it.message?.startsWith("There were failing tests.") == true
                 },
                 {
+                    it.message?.startsWith("Compilation error. See log for more details") == true
+                },
+                {
+                    it.message?.startsWith("This version of the kotlin-sam-with-receiver Gradle plugin") == true
+                },
+                {
                     it.message?.startsWith("The following files have format violations") == true
                 },
                 {
