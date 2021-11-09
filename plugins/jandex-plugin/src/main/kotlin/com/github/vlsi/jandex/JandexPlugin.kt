@@ -19,8 +19,9 @@ package com.github.vlsi.jandex
 import com.github.vlsi.jandex.JandexProcessResources.Companion.getTaskName
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.provideDelegate
@@ -66,7 +67,7 @@ open class JandexPlugin : Plugin<Project> {
                     })
                 }
                 val processJandexIndex = tasks.register(
-                    JandexProcessResources.getTaskName(sourceSet),
+                    getTaskName(sourceSet),
                     JandexProcessResources::class
                 ) {
                     description = "Copies Jandex index for $sourceSet to the resources"
@@ -83,14 +84,39 @@ open class JandexPlugin : Plugin<Project> {
                         })
                     }
                 }
-                val jarTaskName = sourceSet.jarTaskName
-                val sourcesJarTaskName = sourceSet.sourcesJarTaskName
-                tasks.withType<Jar>().matching { it.name == jarTaskName || it.name == sourcesJarTaskName }.configureEach {
-                    dependsOn(processJandexIndex)
-                }
-                sourceSet.javadocTaskName.let { taskName ->
-                    tasks.withType<Javadoc>().matching { it.name == taskName }.configureEach {
+                if (name == SourceSet.MAIN_SOURCE_SET_NAME) {
+                    // Assume all sourceSets depend on main one, so we make ALL tasks depend on
+                    // processJandexIndex from the main sourceSet
+                    val compileJavaTaskName = sourceSet.compileJavaTaskName
+                    tasks.withType<JavaCompile>()
+                        .matching { it.name != compileJavaTaskName }
+                        .configureEach {
+                            dependsOn(processJandexIndex)
+                        }
+                    tasks.withType<Jar>().configureEach {
                         dependsOn(processJandexIndex)
+                    }
+                    tasks.withType<Javadoc>().configureEach {
+                        dependsOn(processJandexIndex)
+                    }
+                    tasks.matching {
+                        it.name.startsWith("forbiddenApis")
+                                || it.name.startsWith("compile") && it.name.endsWith("Kotlin") && it.name != "compileKotlin"
+                    }
+                        .configureEach {
+                            dependsOn(processJandexIndex)
+                        }
+                } else {
+                    // Non-main sourceSets depend on their processJandexIndex as well
+                    val jarTaskName = sourceSet.jarTaskName
+                    val sourcesJarTaskName = sourceSet.sourcesJarTaskName
+                    tasks.withType<Jar>().matching { it.name == jarTaskName || it.name == sourcesJarTaskName }.configureEach {
+                        dependsOn(processJandexIndex)
+                    }
+                    sourceSet.javadocTaskName.let { taskName ->
+                        tasks.withType<Javadoc>().matching { it.name == taskName }.configureEach {
+                            dependsOn(processJandexIndex)
+                        }
                     }
                 }
             }
@@ -98,7 +124,7 @@ open class JandexPlugin : Plugin<Project> {
                 tasks.named(getTaskName(JANDEX_TASK_NAME, null)) {
                     enabled = false
                 }
-                tasks.named(JandexProcessResources.getTaskName(this)) {
+                tasks.named(getTaskName(this)) {
                     enabled = false
                 }
             }
