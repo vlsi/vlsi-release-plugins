@@ -189,6 +189,10 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.77
+* crlf-plugin: bump jgit to 5.13.0.202109080827-r
+* stage-vote-release: bump jgit to 5.13.0.202109080827-r
+
 v1.76
 * jandex-plugin: workaround warnings with forbiddenApis and compileTestJava
 
