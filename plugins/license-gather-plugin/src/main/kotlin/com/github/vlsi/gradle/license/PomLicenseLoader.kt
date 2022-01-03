@@ -108,7 +108,7 @@ fun GPathResult.attr(name: String): String = get("@$name").text()
 @Suppress("UNCHECKED_CAST")
 fun GPathResult.getList(name: String) = getProperty(name) as Iterable<GPathResult>
 
-private fun File.parseXml(): GPathResult = XmlSlurper().parse(this)
+private fun File.parseXml(): GPathResult = XmlSlurper(false, false).parse(this)
 
 fun GPathResult.parsePom(): PomContents {
     fun GPathResult.parseId(parentGroup: String = "") =

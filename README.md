@@ -191,6 +191,7 @@ Change log
 ----------
 v1.78
 * chore: bump Gradle 6.7 -> 6.9.1
+* license-gather: ignore xml namespaces when parsing POM files (see #43)
 
 v1.77
 * crlf-plugin: bump jgit to 5.13.0.202109080827-r
