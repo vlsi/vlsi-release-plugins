@@ -189,6 +189,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.78
+* chore: bump Gradle 6.7 -> 6.9.1
+
 v1.77
 * crlf-plugin: bump jgit to 5.13.0.202109080827-r
 * stage-vote-release: bump jgit to 5.13.0.202109080827-r

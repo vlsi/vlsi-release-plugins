@@ -5,6 +5,7 @@
   <trusted-keys>
     <trusted-key id='379ce192d401ab61' group='com.diffplug.durian' />
     <trusted-key id='105cb91cac2aee0e' group='com.github.autostyle' />
+    <trusted-key id='62c82e50836eb3ee' group='com.github.gundy' />
     <trusted-key id='461a804f2609fd89' group='com.github.shyiko.klob' />
     <trusted-key id='105cb91cac2aee0e' group='com.github.vlsi.gradle' />
     <trusted-key id='59a252fb1199d873' group='com.google.code.findbugs' />
@@ -32,9 +33,11 @@
     <trusted-key id='efe8086f9e93774e' group='junit' />
     <trusted-key id='098a31f381819057' group='net.sourceforge.nekohtml' />
     <trusted-key id='c84125c13bf6f2f2' group='org.ajoberstar.grgit' />
+    <trusted-key id='6b1b008864323b92' group='org.antlr' />
     <trusted-key id='9daadc1c9fcc82d0' group='org.apache.commons' />
     <trusted-key id='7c25280eae63ebe5' group='org.apache.httpcomponents' />
     <trusted-key id='873a8e86b4372146' group='org.apache.maven' />
+    <trusted-key id='ae5a7fb608a0221c' group='org.apache.maven' />
     <trusted-key id='c7bf26d0bb617866' group='org.apache.maven' />
     <trusted-key id='164bd2247b936711' group='org.apiguardian' />
     <trusted-key id='e2b3d84202b812d9' group='org.assertj' />
@@ -67,6 +70,9 @@
     <dependency group='com.gradle.publish' module='plugin-publish-plugin' version='0.11.0'>
       <sha512>33BE4AD747DA5D557E1D0A55A4A4875F4D814798EF7D9B0431C02256C8123C0D0B7D70091DFCDAED50190B029DC5D86DDA7985C233A67E29167D018B793F5422</sha512>
     </dependency>
+    <dependency group='com.gradle.publish' module='plugin-publish-plugin' version='0.17.0'>
+      <sha512>FE1606A6553694500560562D3BD8588F31A2DB06BA4811681BCE92EB3AD04ED30D49777D793467476CFDF3ADB4223D3D6CD8BB9631C88924978D3A7821844E20</sha512>
+    </dependency>
     <dependency group='de.marcphilipp.gradle' module='nexus-publish-plugin' version='0.2.0'>
       <sha512>36DFDADA6745D7AF5CF2807E197AFD111073C30536CB29C531522F73D4086C2A7AB70756975FEC290657012B8C9090414F76811731A920D8BC4EEC1DEC0AB2DF</sha512>
     </dependency>
@@ -84,6 +90,9 @@
     </dependency>
     <dependency group='org.codehaus.groovy.modules.http-builder' module='http-builder' version='0.7.1'>
       <sha512>BC7BC2A514F8CA104A392ECF8736F4A3D316EE988FA91299D33B0AF46134B38E14E4A5061449D17B2DF7A521643E6C02DFA37CC277ED7CAB7CE83C28C00E9719</sha512>
+    </dependency>
+    <dependency group='org.gradle.kotlin' module='gradle-kotlin-dsl-plugins' version='1.4.9'>
+      <sha512>E2E7D75380BBFB3A6DAA93A75FAB9D8F4038D42FFBA93B9FE8A350C1BD735FF746A01E3FB76A62DFA7B26EDADA638EB045D45F47568A427E6C1505F70A92AE79</sha512>
     </dependency>
     <dependency group='org.gradle.kotlin' module='plugins' version='1.2.9'>
       <sha512>F672FEB39919B2A78E0AEFA95E8BE023C856EA802FBB652EE97FF6BC935BB6E29B9E5E36CC62B9B52D970DE6C49AC0D07C1EC5588771FC2B89787AB94CAE6AC7</sha512>
@@ -111,6 +120,9 @@
     </dependency>
     <dependency group='org.jetbrains.dokka' module='dokka-gradle-plugin' version='0.9.17'>
       <sha512>6BBCCF8853D66906AEF3A346FCBDC18AAB97419216A222770C9DC11BC345E0774749E606ED88BBFD6EA13C3523CA383593331D3B0C4ACA31634A67412B1FF406</sha512>
+    </dependency>
+    <dependency group='org.jetbrains.kotlin' module='kotlin-gradle-plugin' version='1.4.20'>
+      <sha512>BEEB633A0C9E3AC38A02CC8E901F2327F4668085D1A8AAFF45088DD7FB24B56E0300D42468238AC7429C570C13B86E167637EF50E646F95F2503AA52D8A3FF81</sha512>
     </dependency>
     <dependency group='org.slf4j' module='jcl-over-slf4j' version='1.6.2'>
       <sha512>3BA508C96EE0985865C9E86EBE803D1903835F7C198EB15723CDC86B028D6C82DBB7E96ECB01CEFAD7CC6EC7023155676D034B6B730A911D0FFE9F91FE532592</sha512>
