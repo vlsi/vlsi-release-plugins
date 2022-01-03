@@ -484,7 +484,7 @@ open class GatherLicenseTask @Inject constructor(
                 )
                 continue
             }
-            if (!file.endsWith(".jar")) {
+            if (file.extension != "jar") {
                 logger.debug(
                     "File {} for artifact {} does not look like a JAR. Will skip MANIFEST.MF check",
                     file,
@@ -500,7 +500,11 @@ open class GatherLicenseTask @Inject constructor(
             )
             JarFile(file).use { jar ->
                 val bundleLicense = jar.manifest.mainAttributes.getValue("Bundle-License")
-                val license = bundleLicense?.substringBefore(";")?.let {
+                if (bundleLicense == null || bundleLicense.startsWith("http://") || bundleLicense.startsWith("https://")) {
+                    // Ignore URLs here as it will fail during parsing
+                    return
+                }
+                val license = bundleLicense.substringBefore(";")?.let {
                     licenseExpressionParser.parse(it)
                 }
                 if (license != null) {
