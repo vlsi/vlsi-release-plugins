@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gradle-version: [wrapper, rc, nightly]
+        gradle-version: [wrapper]
     name: 'Calcite Avatica ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
@@ -63,7 +63,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gradle-version: [wrapper, rc, nightly]
+        gradle-version: [wrapper]
     name: 'Calcite ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
