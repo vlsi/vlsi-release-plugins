@@ -147,6 +147,16 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
                             .initializer("values().associateBy { it.id }")
                             .build()
                     )
+                    .addProperty(
+                        PropertySpec.builder(
+                            "uriToInstance",
+                            Map::class.asClassName()
+                                .parameterizedBy(URI::class.asClassName(), className),
+                            KModifier.PRIVATE
+                        )
+                            .initializer("values().flatMap { e -> (e.uri + e.detailsUri).map { it to e } }.toMap()")
+                            .build()
+                    )
                     .addFunction(
                         FunSpec.builder("fromId")
                             .addParameter("id", String::class)
@@ -157,6 +167,30 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
                         FunSpec.builder("fromIdOrNull")
                             .addParameter("id", String::class)
                             .addStatement("return idToInstance[id]")
+                            .build()
+                    )
+                    .addFunction(
+                        FunSpec.builder("fromUri")
+                            .addParameter("uri", URI::class)
+                            .addStatement(
+                                "return fromUriOrNull(uri) ?: throw %T(%P)",
+                                NoSuchElementException::class,
+                                "No license found for given URI: \$uri"
+                            )
+                            .build()
+                    )
+                    .addFunction(
+                        FunSpec.builder("fromUriOrNull")
+                            .addParameter("uri", URI::class)
+                            .addStatement("return uriToInstance[uri.toHttps()]")
+                            .build()
+                    )
+                    .addFunction(
+                        FunSpec.builder("toHttps")
+                            .addModifiers(KModifier.PRIVATE)
+                            .receiver(URI::class)
+                            .returns(URI::class)
+                            .addStatement("return if (!toString().startsWith(\"http://\")) this else URI(toString().replaceFirst(\"http:\", \"https:\"))")
                             .build()
                     )
                     .build()
@@ -179,10 +213,21 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
                             TypeSpec.anonymousClassBuilder()
                                 .addSuperclassConstructorParameter("%S", it.id)
                                 .addSuperclassConstructorParameter("%S", it.name)
-                                .addSuperclassConstructorParameter("%S", it.detailsUrl)
-                                .addSuperclassConstructorParameter("arrayOf(%L)",
-                                    it.seeAlso.map { url -> CodeBlock.of("%S", url.trim()) }
-                                        .joinToCode(", "))
+                                .addSuperclassConstructorParameter(
+                                    "%S",
+                                    it.detailsUrl.replaceFirst("http://", "https://")
+                                )
+                                .addSuperclassConstructorParameter(
+                                    "arrayOf(%L)",
+                                    it.seeAlso
+                                        .map { url ->
+                                            CodeBlock.of(
+                                                "%S",
+                                                url.trim().replaceFirst("http://", "https://")
+                                            )
+                                        }
+                                        .joinToCode(", ")
+                                )
                                 .build()
                         )
                     }

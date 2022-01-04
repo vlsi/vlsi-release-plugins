@@ -22,6 +22,8 @@ import com.github.vlsi.gradle.license.api.JustLicense
 import com.github.vlsi.gradle.license.api.License
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.LicenseExpressionParser
+import com.github.vlsi.gradle.license.api.OsgiBundleLicenseParser
+import com.github.vlsi.gradle.license.api.ParseException
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.asExpression
 import com.github.vlsi.gradle.license.api.text
@@ -471,6 +473,9 @@ open class GatherLicenseTask @Inject constructor(
         detectedLicenses: MutableMap<ComponentIdentifier, LicenseInfo>,
         licenseExpressionParser: LicenseExpressionParser
     ) {
+        val bundleLicenseParser = OsgiBundleLicenseParser(licenseExpressionParser) {
+            SpdxLicense.fromUriOrNull(it)?.asExpression()
+        }
         for (e in detectedLicenses) {
             if (e.value.license != null) {
                 continue
@@ -500,14 +505,8 @@ open class GatherLicenseTask @Inject constructor(
             )
             JarFile(file).use { jar ->
                 val bundleLicense = jar.manifest.mainAttributes.getValue("Bundle-License")
-                if (bundleLicense == null || bundleLicense.startsWith("http://") || bundleLicense.startsWith("https://")) {
-                    // Ignore URLs here as it will fail during parsing
-                    return
-                }
-                val license = bundleLicense.substringBefore(";")?.let {
-                    licenseExpressionParser.parse(it)
-                }
-                if (license != null) {
+                    ?: return@use
+                bundleLicenseParser.parseOrNull(bundleLicense, file)?.let { license ->
                     logger.debug("Detected license for ${e.key}: $license")
                     e.setValue(e.value.copy(license = license))
                 }
