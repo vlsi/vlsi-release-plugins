@@ -100,24 +100,13 @@ subprojects {
                     // Implementation-Version is not here to make jar reproducible across versions
                 }
             }
-
-            withType<DokkaTask>().configureEach {
-                outputFormat = "javadoc"
-                outputDirectory = "$buildDir/javadoc"
-                configuration {
-                    reportUndocumented = false
-                    jdkVersion = 8
-                    perPackageOption {
-                        prefix = "com.github.vlsi.gradle"
-                        suppress = true
-                    }
-                }
-            }
         }
 
-        val javadocJar by tasks.creating(org.gradle.api.tasks.bundling.Jar::class) {
+        val javadocJar by tasks.registering(org.gradle.api.tasks.bundling.Jar::class) {
+            group = LifecycleBasePlugin.BUILD_GROUP
+            description = "Assembles a jar archive containing javadoc"
             archiveClassifier.set("javadoc")
-            from(tasks.named("dokka"))
+            from(tasks.named("dokkaJavadoc"))
         }
 
         // used by plugin-publish plugin

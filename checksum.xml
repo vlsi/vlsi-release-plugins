@@ -4,6 +4,10 @@
   <ignored-keys />
   <trusted-keys>
     <trusted-key id='379ce192d401ab61' group='com.diffplug.durian' />
+    <trusted-key id='c9fbaa83a8753994' group='com.fasterxml.jackson.core' />
+    <trusted-key id='c9fbaa83a8753994' group='com.fasterxml.jackson.dataformat' />
+    <trusted-key id='c9fbaa83a8753994' group='com.fasterxml.jackson.module' />
+    <trusted-key id='c9fbaa83a8753994' group='com.fasterxml.woodstox' />
     <trusted-key id='105cb91cac2aee0e' group='com.github.autostyle' />
     <trusted-key id='62c82e50836eb3ee' group='com.github.gundy' />
     <trusted-key id='461a804f2609fd89' group='com.github.shyiko.klob' />
@@ -18,6 +22,7 @@
     <trusted-key id='a50569c7ca7fa1f0' group='com.jcraft' />
     <trusted-key id='aa49c633b4734832' group='com.pinterest' />
     <trusted-key id='aa49c633b4734832' group='com.pinterest.ktlint' />
+    <trusted-key id='03281aa0289ff53a' group='com.soywiz.korlibs.korte' />
     <trusted-key id='8671a8df71296252' group='com.squareup.okhttp3' />
     <trusted-key id='8671a8df71296252' group='com.squareup.okio' />
     <trusted-key id='602ec18d20c4661c' group='com.thoughtworks.xstream' />
@@ -30,6 +35,8 @@
     <trusted-key id='6449005f96bc97a3' group='de.undercouch' />
     <trusted-key id='379ce192d401ab61' group='info.picocli' />
     <trusted-key id='5b30d3b10694f057' group='io.codearte.gradle.nexus' />
+    <trusted-key id='d908a43fb7ec07ac' group='jakarta.activation' />
+    <trusted-key id='8118b3bcdb1a5000' group='jakarta.xml.bind' />
     <trusted-key id='efe8086f9e93774e' group='junit' />
     <trusted-key id='098a31f381819057' group='net.sourceforge.nekohtml' />
     <trusted-key id='c84125c13bf6f2f2' group='org.ajoberstar.grgit' />
@@ -46,15 +53,20 @@
     <trusted-key id='41321490758aad6f' group='org.codehaus.groovy' />
     <trusted-key id='6525fd70cc303655' group='org.codehaus.mojo' />
     <trusted-key id='466caed6e0747d50' group='org.codehaus.plexus' />
+    <trusted-key id='c9fbaa83a8753994' group='org.codehaus.woodstox' />
     <trusted-key id='0e91c2de43b72bb1' group='org.ec4j.core' />
     <trusted-key id='c7bf26d0bb617866' group='org.eclipse.aether' />
     <trusted-key id='5b05ccde140c2876' group='org.eclipse.jgit' />
     <trusted-key id='a6adfc93ef34893e' group='org.hamcrest' />
     <trusted-key id='bcf4173966770193' group='org.jetbrains' />
+    <trusted-key id='c1b12a5d99c0729d' group='org.jetbrains' />
+    <trusted-key id='d89d05374952262b' group='org.jetbrains.dokka' />
     <trusted-key id='379ce192d401ab61' group='org.jetbrains.intellij.deps' />
     <trusted-key id='6a0975f8b1127b83' group='org.jetbrains.kotlin' />
     <trusted-key id='98fe03a974ce0a0b' group='org.jetbrains.kotlin' />
     <trusted-key id='379ce192d401ab61' group='org.jetbrains.kotlinx' />
+    <trusted-key id='3967d4eda591b991' group='org.jetbrains.kotlinx' />
+    <trusted-key id='f42e87f9665015c9' group='org.jsoup' />
     <trusted-key id='85911f425ec61b51' group='org.junit.jupiter' />
     <trusted-key id='85911f425ec61b51' group='org.junit.platform' />
     <trusted-key id='85911f425ec61b51' group='org.opentest4j' />
@@ -111,6 +123,7 @@
     </dependency>
     <dependency group='org.jetbrains.dokka' module='dokka-fatjar' version='0.10.1'>
       <sha512>C00F0A03E07FB0339763CBDC086446D5F06E9A84206003CC6E9576B8E4807955A2BC593EC4FC6A4EAD17962C3B7FAA84A2988F3E383ED6BF04BF23B3434DAEC9</sha512>
+      <sha512>C20F89E69EE49007F7AB4A642A586C54F5E8904BC1E7C77EE16F005A6D91A60A184D11E4BDA6EE23A913BDBAFD756CF9201690E35FFC07965A4C68D9811F4478</sha512>
     </dependency>
     <dependency group='org.jetbrains.dokka' module='dokka-fatjar' version='0.9.17'>
       <sha512>599E1F17E2160C5B04F23D4E58A7DD54B7C18D1722497A0CA314C920DC56A0ABA312BD8C871F015937526D004CC9F2C01BD8265A4F83E8556FF1854F35BFC662</sha512>

@@ -19,7 +19,7 @@ package com.github.vlsi.gradle.publishing.dsl
 import org.gradle.api.publish.maven.MavenPom
 
 /**
- * Removes [<scope>compile</scope>] and removes [<dependencyManagement>] to make pom.xml smaller.
+ * Removes `<scope>compile</scope>` and removes `<dependencyManagement>` to make pom.xml smaller.
  */
 fun MavenPom.simplifyXml() = withXml {
     val sb = asString()
