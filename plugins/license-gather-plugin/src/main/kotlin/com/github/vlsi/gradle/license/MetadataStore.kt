@@ -26,6 +26,7 @@ import com.github.vlsi.gradle.license.api.LicenseException
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.LicenseExpressionParser
 import com.github.vlsi.gradle.license.api.LicenseExpressionSet
+import com.github.vlsi.gradle.license.api.LicenseExpressionSetExpression
 import com.github.vlsi.gradle.license.api.OrLaterLicense
 import com.github.vlsi.gradle.license.api.SimpleLicense
 import com.github.vlsi.gradle.license.api.SimpleLicenseExpression
@@ -170,7 +171,7 @@ object MetadataStore {
                                 when (this) {
                                     is SimpleLicenseExpression -> license.providerId()
                                     is WithException -> license.providerId()
-                                    is LicenseExpressionSet ->
+                                    is LicenseExpressionSetExpression->
                                         unordered.map { it.providerId() }.distinct().let {
                                             if (it.size == 1) it.first() else null
                                         }

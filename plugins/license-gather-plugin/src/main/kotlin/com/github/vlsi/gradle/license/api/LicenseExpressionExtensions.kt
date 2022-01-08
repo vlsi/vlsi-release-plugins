@@ -15,6 +15,8 @@
  *
  */
 
+@file:JvmName("LicenseExpressionExtensions")
+
 package com.github.vlsi.gradle.license.api
 
 fun License.asExpression(): JustLicense = JustLicense(this)
@@ -35,12 +37,24 @@ infix fun LicenseExpression.or(other: License): LicenseExpression = this or othe
 infix fun License.or(other: License): LicenseExpression = asExpression() or other
 infix fun License.or(other: LicenseExpression): LicenseExpression = other or this
 
+@Deprecated(
+    "Use member function LicenseExpression.disjunctions()",
+    replaceWith = ReplaceWith("disjunctions"),
+    level = DeprecationLevel.WARNING
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 fun LicenseExpression.disjunctions() =
     when (this) {
         is DisjunctionLicenseExpression -> unordered
         else -> setOf(this)
     }
 
+@Deprecated(
+    "Use member function LicenseExpression.conjunctions()",
+    replaceWith = ReplaceWith("conjunctions"),
+    level = DeprecationLevel.WARNING
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 fun LicenseExpression.conjunctions() =
     when (this) {
         is ConjunctionLicenseExpression -> unordered

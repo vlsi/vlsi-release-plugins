@@ -19,13 +19,19 @@ package com.github.vlsi.gradle.license.api
 
 import java.net.URI
 
-sealed class LicenseExpression {
+sealed class LicenseExpression : LicenseExpressionSet, java.io.Serializable {
     companion object {
         val NATURAL_ORDER = compareBy<LicenseExpression>(
             { it.weight() },
             { it.toString() }
         )
     }
+
+    override val conjunctions: Set<LicenseExpression>
+        get() = setOf(this)
+
+    override val disjunctions: Set<LicenseExpression>
+        get() = setOf(this)
 
     object NONE : LicenseExpression()
     object NOASSERTION : LicenseExpression()
@@ -65,8 +71,15 @@ data class WithException(
         }
 }
 
-abstract class LicenseExpressionSet : LicenseExpression() {
+abstract class LicenseExpressionSetExpression : LicenseExpression() {
     abstract val unordered: Set<LicenseExpression>
+    abstract val operation: LicenseExpressionSetOperation
+
+    override val disjunctions: Set<LicenseExpression>
+        get() = if (operation == LicenseExpressionSetOperation.OR) unordered else setOf(this)
+
+    override val conjunctions: Set<LicenseExpression>
+        get() = if (operation == LicenseExpressionSetOperation.AND) unordered else setOf(this)
 
     val ordered: List<LicenseExpression>
         get() = unordered.sortedWith(
@@ -85,9 +98,12 @@ abstract class LicenseExpressionSet : LicenseExpression() {
 
 data class ConjunctionLicenseExpression(
     val licenses: Set<LicenseExpression>
-) : LicenseExpressionSet() {
+) : LicenseExpressionSetExpression() {
     override val unordered: Set<LicenseExpression>
         get() = licenses
+
+    override val operation: LicenseExpressionSetOperation
+        get() = LicenseExpressionSetOperation.AND
 
     override fun toString() =
         ordered.joinToString(" AND ") {
@@ -100,9 +116,12 @@ data class ConjunctionLicenseExpression(
 
 data class DisjunctionLicenseExpression(
     val licenses: Set<LicenseExpression>
-) : LicenseExpressionSet() {
+) : LicenseExpressionSetExpression() {
     override val unordered: Set<LicenseExpression>
         get() = licenses
+
+    override val operation: LicenseExpressionSetOperation
+        get() = LicenseExpressionSetOperation.OR
 
     override fun toString() =
         ordered.joinToString(" OR ")

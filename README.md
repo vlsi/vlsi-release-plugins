@@ -191,8 +191,9 @@ Change log
 ----------
 v1.78
 * chore: bump Gradle 6.7 -> 6.9.1
-* license-gather: ignore xml namespaces when parsing POM files (see #43)
-* license-gather: fix license inference from Bundle-License manifest attribute (see #48)
+* license-gather: ignore xml namespaces when parsing POM files (see [issue #43](https://github.com/vlsi/vlsi-release-plugins/issues/43))
+* license-gather: fix license inference from Bundle-License manifest attribute (see [issue #48](https://github.com/vlsi/vlsi-release-plugins/issues/48))
+* license-gather: implement VerifyLicenseCompatibilityTask for verifying license compatibility (see [pr #49](https://github.com/vlsi/vlsi-release-plugins/pull/49))
 
 Thanks to [Florian Dreier](https://github.com/DreierF) for identifying bugs and suggesting fixes.
 

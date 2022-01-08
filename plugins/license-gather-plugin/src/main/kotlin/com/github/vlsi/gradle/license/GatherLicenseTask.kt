@@ -96,6 +96,11 @@ open class GatherLicenseTask @Inject constructor(
     objectFactory: ObjectFactory,
     private val workerExecutor: WorkerExecutor
 ) : DefaultTask() {
+    init {
+        // TODO: capture [licenseOverrides] as input
+        outputs.upToDateWhen { false }
+    }
+
     @InputFiles
     val configurations = objectFactory.setProperty<Configuration>()
 

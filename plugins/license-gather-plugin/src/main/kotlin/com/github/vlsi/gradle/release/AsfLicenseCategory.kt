@@ -14,12 +14,15 @@
  * limitations under the License.
  *
  */
+
 package com.github.vlsi.gradle.release
 
-import com.github.vlsi.gradle.license.api.JustLicense
+import com.github.vlsi.gradle.license.api.DisjunctionLicenseExpression
 import com.github.vlsi.gradle.license.api.License
 import com.github.vlsi.gradle.license.api.LicenseEquivalence
 import com.github.vlsi.gradle.license.api.LicenseExpression
+import com.github.vlsi.gradle.license.api.LicenseExpressionSet
+import com.github.vlsi.gradle.license.api.LicenseExpressionSetOperation
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.SpdxLicenseException
 import com.github.vlsi.gradle.license.api.asExpression
@@ -30,27 +33,37 @@ import com.github.vlsi.gradle.license.api.with
 /**
  * See https://apache.org/legal/resolved.html
  */
-enum class AsfLicenseCategory {
+enum class AsfLicenseCategory : LicenseExpressionSet {
     A, B, X, UNKNOWN;
 
+    override val disjunctions: Set<LicenseExpression>
+        get() = when (this) {
+            A -> aLicenses
+            B -> bLicenses
+            X -> xLicenses
+            UNKNOWN -> setOf()
+        }
+
+    override val conjunctions: Set<LicenseExpression>
+        get() = setOf(DisjunctionLicenseExpression(disjunctions))
+
     companion object {
-        private fun of(license: License?) =
-            when (license) {
-                in bLicenses -> B
-                else -> null
-            }
+        @JvmStatic
+        fun of(license: License) = of(license.asExpression())
 
         @JvmStatic
         fun of(expr: LicenseExpression) =
             when (expr) {
                 in aLicenses -> A
+                in bLicenses -> B
                 in xLicenses -> X
-                is JustLicense -> of(expr.license)
                 else -> null
             }
 
+        private val equivalence = LicenseEquivalence()
+
         // For the purposes of being included in an Apache Software Foundation product, the following licenses are considered to be similar in terms to the Apache License 2.0
-        private val aLicenses = setOf(
+        private val aLicenses : Set<LicenseExpression> = listOf(
             SpdxLicense.Apache_2_0,
             SpdxLicense.Apache_1_0,
             SpdxLicense.Apache_1_1,
@@ -104,7 +117,7 @@ enum class AsfLicenseCategory {
         ).asSequence()
             .map { it.asExpression() }
             .plus(
-                LicenseEquivalence().expand(
+                equivalence.expand(
                     SpdxLicense.GPL_1_0_or_later with SpdxLicenseException.Classpath_exception_2_0
                 ).disjunctions()
             )
@@ -112,7 +125,7 @@ enum class AsfLicenseCategory {
 
         // Software under the following licenses may be included in binary form within an Apache product if the inclusion is appropriately labeled (see above)
         // By including only the object/binary form, there is less exposed surface area of the third-party work from which a work might be derived; this addresses the second guiding principle of this policy
-        private val bLicenses = setOf(
+        private val bLicenses: Set<LicenseExpression> = listOf(
             SpdxLicense.CDDL_1_0,
             SpdxLicense.CDDL_1_1,
             SpdxLicense.CPL_1_0,
@@ -139,10 +152,10 @@ enum class AsfLicenseCategory {
             SpdxLicense.IPA,
             SpdxLicense.Ruby,
             SpdxLicense.EPL_2_0
-        )
+        ).mapTo(mutableSetOf()) { it.asExpression() }
 
         // The following licenses may NOT be included within Apache products
-        private val xLicenses = setOf(
+        private val xLicenses : Set<LicenseExpression> = listOf(
             // Binary Code License (BCL)
             // Intel Simplified Software License
             // JSR-275 License
@@ -178,7 +191,7 @@ enum class AsfLicenseCategory {
                 SpdxLicense.AGPL_3_0_only,
                 SpdxLicense.LGPL_2_0_only
             )
-                .flatMap { LicenseEquivalence().expand(it.orLater()).disjunctions() })
+                .flatMap { equivalence.expand(it.orLater()).disjunctions() })
             .toSet()
     }
 }

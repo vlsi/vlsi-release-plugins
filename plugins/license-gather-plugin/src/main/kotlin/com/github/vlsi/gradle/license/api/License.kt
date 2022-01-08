@@ -19,12 +19,18 @@ package com.github.vlsi.gradle.license.api
 
 import java.net.URI
 
-interface License {
+interface License : LicenseExpressionSet, java.io.Serializable {
     val title: String
     val uri: List<URI>
+
+    override val disjunctions: Set<LicenseExpression>
+        get() = setOf(asExpression())
+
+    override val conjunctions: Set<LicenseExpression>
+        get() = disjunctions
 }
 
-interface LicenseException {
+interface LicenseException : java.io.Serializable {
     val title: String
     val uri: List<URI>
 }
