@@ -503,13 +503,17 @@ open class GatherLicenseTask @Inject constructor(
                 file,
                 e.key
             )
-            JarFile(file).use { jar ->
-                val bundleLicense = jar.manifest.mainAttributes.getValue("Bundle-License")
-                    ?: return@use
-                bundleLicenseParser.parseOrNull(bundleLicense, file)?.let { license ->
-                    logger.debug("Detected license for ${e.key}: $license")
-                    e.setValue(e.value.copy(license = license))
+            try {
+                JarFile(file).use { jar ->
+                    jar.manifest?.mainAttributes?.getValue("Bundle-License")
+                        ?.let { bundleLicenseParser.parseOrNull(it, file) }
+                        ?.let { license ->
+                            logger.debug("Detected license for ${e.key}: $license")
+                            e.setValue(e.value.copy(license = license))
+                        }
                 }
+            } catch (e: Throwable) {
+                logger.warn("Unable to parse Bundle-License from {}", file, e)
             }
         }
     }
