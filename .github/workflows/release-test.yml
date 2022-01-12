@@ -3,7 +3,7 @@ name: Release test
 on:
   push:
     branches:
-      - '*'
+      - master
   pull_request:
     branches:
       - '*'
