@@ -31,6 +31,7 @@ interface LicenseException {
 
 data class SimpleLicense(override val title: String, override val uri: List<URI>) :
     License {
+    @JvmOverloads
     constructor(title: String, uri: URI? = null) : this(
         title,
         if (uri == null) emptyList() else listOf(uri)
@@ -39,6 +40,7 @@ data class SimpleLicense(override val title: String, override val uri: List<URI>
 
 data class SimpleException(override val title: String, override val uri: List<URI>) :
     LicenseException {
+    @JvmOverloads
     constructor(title: String, uri: URI? = null) : this(
         title,
         if (uri == null) emptyList() else listOf(uri)
