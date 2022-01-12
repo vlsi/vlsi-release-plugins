@@ -100,8 +100,8 @@ open class JandexPlugin : Plugin<Project> {
                         dependsOn(processJandexIndex)
                     }
                     tasks.matching {
-                        it.name.startsWith("forbiddenApis")
-                                || it.name.startsWith("compile") && it.name.endsWith("Kotlin") && it.name != "compileKotlin"
+                        it.name.startsWith("forbiddenApis") ||
+                                it.name.startsWith("compile") && it.name.endsWith("Kotlin") && it.name != "compileKotlin"
                     }
                         .configureEach {
                             dependsOn(processJandexIndex)

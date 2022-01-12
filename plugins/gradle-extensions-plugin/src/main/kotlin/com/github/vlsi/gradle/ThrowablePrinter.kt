@@ -79,8 +79,8 @@ class ThrowablePrinter {
             listOf<Predicate<Throwable>>(
                 { it is LocationAwareException && it.message == it.cause?.message },
                 { it is UncheckedException || it is UncheckedIOException },
-                { it is AssertionError
-                        && it.stackTrace.firstOrNull()?.className?.startsWith("com.github.autostyle.") == true
+                { it is AssertionError &&
+                        it.stackTrace.firstOrNull()?.className?.startsWith("com.github.autostyle.") == true
                 },
                 {
                     it.javaClass.name == "org.opentest4j.MultipleFailuresError" &&
@@ -92,8 +92,8 @@ class ThrowablePrinter {
             listOf<Predicate<Throwable>>(
                 { it is NullPointerException || it is KotlinNullPointerException },
                 { it is IllegalStateException || it is IllegalArgumentException },
-                { it is AssertionError
-                        && it.stackTrace.firstOrNull()?.className?.startsWith("com.github.autostyle.") != true
+                { it is AssertionError &&
+                        it.stackTrace.firstOrNull()?.className?.startsWith("com.github.autostyle.") != true
                 }
             )
 
