@@ -23,7 +23,6 @@ import com.github.vlsi.gradle.license.api.License
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.LicenseExpressionParser
 import com.github.vlsi.gradle.license.api.OsgiBundleLicenseParser
-import com.github.vlsi.gradle.license.api.ParseException
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.asExpression
 import com.github.vlsi.gradle.license.api.text
@@ -329,9 +328,15 @@ open class GatherLicenseTask @Inject constructor(
             spdxPredictor
         workerExecutor.await()
 
+        val licenseNormalizer =
+            GuessBasedNormalizer(logger, similarityThreshold.get().toDouble())
+
         if (predictor != null) {
             findManifestLicenses(allDependencies, licenseExpressionParser)
-            findPomLicenses(allDependencies)
+            findPomLicenses(
+                allDependencies,
+                licenseNormalizer
+            )
             findLicenseFromFiles(allDependencies, predictor)
         }
 
@@ -341,6 +346,11 @@ open class GatherLicenseTask @Inject constructor(
         val metadata = mutableMapOf<ModuleComponentIdentifier, LicenseInfo>()
 
         val licenseTextCache = mutableMapOf<SpdxLicense, String>()
+
+        val ignoreMissingLicenseFor = ignoreMissingLicenseFor.get().map {
+            licenseNormalizer.normalize(it)
+        }
+
         for ((id, licenseInfo) in allDependencies) {
             if (licenseInfo.license == null) {
                 missingLicenseId.add(id)
@@ -349,7 +359,7 @@ open class GatherLicenseTask @Inject constructor(
             if (licenseFiles != null && !licenseFiles.containsLicenseFile()) {
                 // Add default license text if needed
                 val licenseExpression = licenseInfo.license
-                if (licenseExpression != null && licenseExpression in ignoreMissingLicenseFor.get()) {
+                if (licenseExpression != null && licenseExpression in ignoreMissingLicenseFor) {
                     logger.debug(
                         "No LICENSE file detected for component ${id.displayName}" +
                                 " however licenseid $licenseExpression is included in ignoreMissingLicenseFor set." +
@@ -521,7 +531,8 @@ open class GatherLicenseTask @Inject constructor(
     operator fun GPathResult.get(name: String) = getProperty(name) as GPathResult
 
     private fun findPomLicenses(
-        detectedLicenses: MutableMap<ComponentIdentifier, LicenseInfo>
+        detectedLicenses: MutableMap<ComponentIdentifier, LicenseInfo>,
+        licenseNormalizer: GuessBasedNormalizer
     ) {
         val compIds =
             detectedLicenses
@@ -533,9 +544,7 @@ open class GatherLicenseTask @Inject constructor(
             return
         }
 
-        val normalizer = GuessBasedNormalizer(logger, similarityThreshold.get().toDouble())
-
-        val licenses = loadLicenses(compIds, project, licenseOverrides, normalizer)
+        val licenses = loadLicenses(compIds, project, licenseOverrides, licenseNormalizer)
         val failures = mutableListOf<Throwable>()
         for ((id, licenseResult) in compIds.zip(licenses)) {
             if (licenseResult.isFailure) {

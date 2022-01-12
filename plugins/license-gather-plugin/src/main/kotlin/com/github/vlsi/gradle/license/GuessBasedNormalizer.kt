@@ -30,8 +30,7 @@ import java.net.URI
 class GuessBasedNormalizer(
     private val logger: Logger,
     private val similarityThreshold: Double = 42.0
-) :
-    LicenseExpressionNormalizer() {
+) : LicenseExpressionNormalizer() {
 
     private val nameGuesser = TfIdfBuilder<LicenseExpression>().apply {
         SpdxLicense.values().forEach { addDocument(it.asExpression(), it.title) }
