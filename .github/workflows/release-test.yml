@@ -153,7 +153,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gradle-version: [wrapper, rc, nightly]
+        gradle-version: [wrapper]
     name: 'Autostyle ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
@@ -198,7 +198,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gradle-version: [wrapper, rc, nightly]
+        gradle-version: [wrapper]
     name: 'pgjdbc ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
