@@ -65,6 +65,8 @@ val expectedSha512 = mapOf(
             to "okhttp-4.1.0.jar",
     "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
             to "okio-2.2.2.jar",
+    "8279CE951A125BB629741909373473FC64C65C5CCCC4DCCC37278ABC136AAB8CDA4CDDC1F60F18940CA9854A1BF02ADC0003A25576AAF1FC6C8ED7609AEFDF8D"
+            to "gradle-multi-cache-1.0.jar",
     settings.extra["com.github.vlsi.checksum-dependency.sha512"].toString()
             to "checksum-dependency-plugin.jar"
 )
