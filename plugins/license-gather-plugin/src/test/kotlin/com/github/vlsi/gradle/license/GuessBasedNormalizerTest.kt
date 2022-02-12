@@ -20,7 +20,6 @@ package com.github.vlsi.gradle.license
 
 import com.github.vlsi.gradle.license.api.SimpleLicense
 import com.github.vlsi.gradle.license.api.SpdxLicense
-import com.github.vlsi.gradle.license.api.asExpression
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
@@ -34,7 +33,7 @@ class GuessBasedNormalizerTest {
         val n = GuessBasedNormalizer(logger)
         for (v in SpdxLicense.values()) {
             val normalized = n.normalize(SimpleLicense(v.title))
-            Assertions.assertEquals(v.asExpression(), normalized) { "normalize(${v.title})" }
+            Assertions.assertEquals(v.expression, normalized) { "normalize(${v.title})" }
         }
     }
 

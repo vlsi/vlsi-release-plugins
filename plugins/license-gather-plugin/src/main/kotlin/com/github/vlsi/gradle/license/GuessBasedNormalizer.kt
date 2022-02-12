@@ -23,7 +23,6 @@ import com.github.vlsi.gradle.license.api.SimpleLicense
 import com.github.vlsi.gradle.license.api.SimpleLicenseExpression
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.WithException
-import com.github.vlsi.gradle.license.api.asExpression
 import org.slf4j.Logger
 import java.net.URI
 
@@ -33,7 +32,7 @@ class GuessBasedNormalizer(
 ) : LicenseExpressionNormalizer() {
 
     private val nameGuesser = TfIdfBuilder<LicenseExpression>().apply {
-        SpdxLicense.values().forEach { addDocument(it.asExpression(), it.title) }
+        SpdxLicense.values().forEach { addDocument(it.expression, it.title) }
     }.build()
 
     private fun String.trimTextExtensions() = removeSuffix(".txt").removeSuffix(".md")
@@ -52,9 +51,9 @@ class GuessBasedNormalizer(
 
     override fun normalize(license: SimpleLicense): LicenseExpression? {
         if (license.title.equals("PUBLIC DOMAIN", ignoreCase = true)) {
-            return SpdxLicense.CC0_1_0.asExpression()
+            return SpdxLicense.CC0_1_0.expression
         }
-        SpdxLicense.fromIdOrNull(license.title)?.let { return it.asExpression() }
+        SpdxLicense.fromIdOrNull(license.title)?.let { return it.expression }
 
         val guessList = nameGuesser.predict(license.title)
             .entries

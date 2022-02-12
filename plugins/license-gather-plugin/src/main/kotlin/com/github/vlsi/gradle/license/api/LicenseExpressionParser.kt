@@ -111,8 +111,8 @@ class LicenseExpressionParser(private val titleParser: LicenseParser = DefaultLi
                         t.value == "NOASSERION" -> result.push(LicenseExpression.NOASSERTION)
                         rpn.peekFirst()?.type != TokenType.WITH -> result.push(
                             titleParser.parseLicense(
-                                t.value
-                            ).asExpression()
+                                                        t.value
+                                                    ).expression
                         )
                         else -> {
                             val withToken = rpn.pop()
@@ -165,7 +165,7 @@ class LicenseExpressionParser(private val titleParser: LicenseParser = DefaultLi
                             value
                         )
                     }
-                    result.push(license.orLater())
+                    result.push(license.orLater)
                 }
                 TokenType.LBRACE -> throw ParseException("Unclosed open brace", t.position, value)
                 TokenType.RBRACE -> throw ParseException("Extra closing brace", t.position, value)

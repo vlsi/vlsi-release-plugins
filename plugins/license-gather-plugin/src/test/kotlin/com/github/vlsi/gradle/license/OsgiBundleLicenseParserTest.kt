@@ -20,7 +20,6 @@ package com.github.vlsi.gradle.license
 import com.github.vlsi.gradle.license.api.LicenseExpressionParser
 import com.github.vlsi.gradle.license.api.OsgiBundleLicenseParser
 import com.github.vlsi.gradle.license.api.SpdxLicense
-import com.github.vlsi.gradle.license.api.asExpression
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.params.ParameterizedTest
@@ -38,7 +37,7 @@ class OsgiBundleLicenseParserTest {
     )
     fun success(comment: String, expected: String, input: String) {
         val parser = OsgiBundleLicenseParser(LicenseExpressionParser()) {
-            SpdxLicense.fromUriOrNull(it)?.asExpression()
+            SpdxLicense.fromUriOrNull(it)?.expression
         }
         assertEquals(expected, parser.parseOrNull(input, "test input").toString()) {
             "$comment, input: $input"
@@ -55,7 +54,7 @@ class OsgiBundleLicenseParserTest {
     )
     fun fail(comment: String, input: String) {
         val parser = OsgiBundleLicenseParser(LicenseExpressionParser()) {
-            SpdxLicense.fromUriOrNull(it)?.asExpression()
+            SpdxLicense.fromUriOrNull(it)?.expression
         }
         assertNull(parser.parseOrNull(input, "test input")) {
             "$comment should cause OsgiBundleLicenseParser.parse failure, input: $input"

@@ -25,8 +25,6 @@ import com.github.vlsi.gradle.license.api.LicenseExpressionSet
 import com.github.vlsi.gradle.license.api.LicenseExpressionSetOperation
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.SpdxLicenseException
-import com.github.vlsi.gradle.license.api.asExpression
-import com.github.vlsi.gradle.license.api.disjunctions
 import com.github.vlsi.gradle.license.api.orLater
 import com.github.vlsi.gradle.license.api.with
 
@@ -49,7 +47,7 @@ enum class AsfLicenseCategory : LicenseExpressionSet {
 
     companion object {
         @JvmStatic
-        fun of(license: License) = of(license.asExpression())
+        fun of(license: License) = of(license.expression)
 
         @JvmStatic
         fun of(expr: LicenseExpression) =
@@ -115,11 +113,11 @@ enum class AsfLicenseCategory : LicenseExpressionSet {
             // Open Grid Forum License
             // IP Rights Grant
         ).asSequence()
-            .map { it.asExpression() }
+            .map { it.expression }
             .plus(
                 equivalence.expand(
                     SpdxLicense.GPL_1_0_or_later with SpdxLicenseException.Classpath_exception_2_0
-                ).disjunctions()
+                ).disjunctions
             )
             .toSet()
 
@@ -152,7 +150,7 @@ enum class AsfLicenseCategory : LicenseExpressionSet {
             SpdxLicense.IPA,
             SpdxLicense.Ruby,
             SpdxLicense.EPL_2_0
-        ).mapTo(mutableSetOf()) { it.asExpression() }
+        ).mapTo(mutableSetOf()) { it.expression }
 
         // The following licenses may NOT be included within Apache products
         private val xLicenses : Set<LicenseExpression> = listOf(
@@ -180,7 +178,7 @@ enum class AsfLicenseCategory : LicenseExpressionSet {
             // The "Don't Be A Dick" Public License
             SpdxLicense.JSON
         ).asSequence()
-            .map { it.asExpression() }
+            .map { it.expression }
             .plus(listOf(
                 // Creative Commons Non-Commercial variants
                 SpdxLicense.CC_BY_NC_1_0,
@@ -191,7 +189,7 @@ enum class AsfLicenseCategory : LicenseExpressionSet {
                 SpdxLicense.AGPL_3_0_only,
                 SpdxLicense.LGPL_2_0_only
             )
-                .flatMap { equivalence.expand(it.orLater()).disjunctions() })
+                .flatMap { equivalence.expand(it.orLater).disjunctions })
             .toSet()
     }
 }

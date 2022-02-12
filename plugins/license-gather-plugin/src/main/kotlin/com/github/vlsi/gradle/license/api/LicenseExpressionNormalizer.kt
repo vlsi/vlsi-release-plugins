@@ -51,8 +51,8 @@ abstract class LicenseExpressionNormalizer {
 
     fun normalize(expression: LicenseExpression): LicenseExpression =
         when (expression) {
-            is JustLicense -> normalizeLicense(expression, expression.license) { asExpression() }
-            is OrLaterLicense -> normalizeLicense(expression, expression.license) { orLater() }
+            is JustLicense -> normalizeLicense(expression, expression.license) { this.expression }
+            is OrLaterLicense -> normalizeLicense(expression, expression.license) { orLater }
             is WithException -> {
                 val license = normalize(expression.license) as SimpleLicenseExpression
                 val exception = normalize(expression.exception)

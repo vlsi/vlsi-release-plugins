@@ -18,7 +18,6 @@ package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.SpdxLicense
-import com.github.vlsi.gradle.license.api.asExpression
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 
 internal enum class LicenseGroup {
@@ -58,9 +57,9 @@ internal fun licenseGroupOf(
     license == null -> LicenseGroup.UNCLEAR
     id.looksLikeApache() ->
         when (license) {
-            SpdxLicense.Apache_2_0.asExpression() -> LicenseGroup.ASF_AL2
+            SpdxLicense.Apache_2_0.expression -> LicenseGroup.ASF_AL2
             else -> LicenseGroup.ASF_OTHER
         }
-    license == SpdxLicense.Apache_2_0.asExpression() -> LicenseGroup.AL2
+    license == SpdxLicense.Apache_2_0.expression -> LicenseGroup.AL2
     else -> LicenseGroup.OTHER
 }

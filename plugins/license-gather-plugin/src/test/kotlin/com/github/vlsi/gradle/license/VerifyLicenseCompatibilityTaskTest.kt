@@ -62,7 +62,6 @@ class VerifyLicenseCompatibilityTaskTest {
             import com.github.vlsi.gradle.license.GatherLicenseTask
             import com.github.vlsi.gradle.license.VerifyLicenseCompatibilityTask
             import com.github.vlsi.gradle.release.AsfLicenseCategory
-            import com.github.vlsi.gradle.license.api.LicenseExpressionExtensions
             import com.github.vlsi.gradle.license.api.SpdxLicense
             import com.github.vlsi.gradle.license.api.SimpleLicense
 
@@ -87,14 +86,14 @@ class VerifyLicenseCompatibilityTaskTest {
                 runtimeOnly("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2")
             }
 
-            def generateLicense = tasks.register("generateLicense", GatherLicenseTask.class) {
+            def gatherLicense = tasks.register("gatherLicense", GatherLicenseTask.class) {
                 configurations.add(project.configurations.runtimeClasspath)
                 ignoreMissingLicenseFor(SpdxLicense.BSD_2_Clause)
                 ignoreMissingLicenseFor(SpdxLicense.MIT)
             }
 
             tasks.register("verifyLicenses", VerifyLicenseCompatibilityTask.class) {
-                metadata.from(generateLicense)
+                metadata.from(gatherLicense)
                 allow(SpdxLicense.EPL_2_0) {
                     because("JUnit is OK")
                 }
@@ -102,7 +101,7 @@ class VerifyLicenseCompatibilityTaskTest {
                     because("ISSUE-42: John Smith decided the license is OK")
                 }
                 // No reason, for test purposes
-                allow(LicenseExpressionExtensions.orLater(SpdxLicense.SAX_PD))
+                allow(SpdxLicense.SAX_PD.orLater)
                 allow(AsfLicenseCategory.A) {
                     because("The ASF category A is allowed")
                 }

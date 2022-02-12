@@ -22,7 +22,6 @@ import com.github.vlsi.gradle.license.api.License
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.LicenseExpressionNormalizer
 import com.github.vlsi.gradle.license.api.SimpleLicense
-import com.github.vlsi.gradle.license.api.asExpression
 import groovy.util.XmlSlurper
 import groovy.util.slurpersupport.GPathResult
 import kotlinx.coroutines.runBlocking
@@ -76,12 +75,12 @@ class LicenseDetector(
             } else {
                 val parsedRawLicense =
                     if (licenses.size == 1) {
-                        licenses.first().asExpression()
+                        licenses.first().expression
                     } else {
                         // When more than one license is present, assume AND was intended
                         // It allows less freedom, however it seems to be a safe choice.
                         ConjunctionLicenseExpression(
-                            licenses.mapTo(mutableSetOf()) { it.asExpression() }
+                            licenses.mapTo(mutableSetOf()) { it.expression }
                         )
                     }
                 normalizer.normalize(parsedRawLicense)

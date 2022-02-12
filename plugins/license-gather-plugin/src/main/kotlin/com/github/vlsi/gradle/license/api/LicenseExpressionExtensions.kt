@@ -19,23 +19,92 @@
 
 package com.github.vlsi.gradle.license.api
 
-fun License.asExpression(): JustLicense = JustLicense(this)
-fun License.orLater(): SimpleLicenseExpression = OrLaterLicense(this)
-fun JustLicense.orLater(): LicenseExpression = OrLaterLicense(license)
+@Deprecated(
+    "Use .expression",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("expression")
+)
+fun License.asExpression(): JustLicense = expression
 
+@Deprecated(
+    "Use .orLater",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("orLater")
+)
+fun License.orLater(): SimpleLicenseExpression = orLater
+
+@Deprecated(
+    "Use .orLater",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("orLater")
+)
+fun JustLicense.orLater(): LicenseExpression = orLater
+
+@Deprecated(
+    "Use .with(LicenseException)",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("this with exception")
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 infix fun License.with(exception: LicenseException): LicenseExpression =
-    asExpression() with exception
+    expression with exception
 
+@Deprecated(
+    "Use .with(LicenseException)",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("this with exception")
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 infix fun SimpleLicenseExpression.with(exception: LicenseException): LicenseExpression =
-    WithException(this, exception)
+    this with exception
 
-infix fun LicenseExpression.and(other: License): LicenseExpression = this and other.asExpression()
-infix fun License.and(other: License): LicenseExpression = asExpression() and other
-infix fun License.and(other: LicenseExpression): LicenseExpression = other and this
+@Deprecated(
+    "Use .and",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("this and other")
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+infix fun LicenseExpression.and(other: License): LicenseExpression = this and other
 
-infix fun LicenseExpression.or(other: License): LicenseExpression = this or other.asExpression()
-infix fun License.or(other: License): LicenseExpression = asExpression() or other
-infix fun License.or(other: LicenseExpression): LicenseExpression = other or this
+@Deprecated(
+    "Use .and",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("this and other")
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+infix fun License.and(other: License): LicenseExpression = this and other
+
+@Deprecated(
+    "Use .and",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("this and other")
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+infix fun License.and(other: LicenseExpression): LicenseExpression = this and other
+
+@Deprecated(
+    "Use .or",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("this or other")
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+infix fun LicenseExpression.or(other: License): LicenseExpression = this or other
+
+@Deprecated(
+    "Use .or",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("this or other")
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+infix fun License.or(other: License): LicenseExpression = this or other
+
+@Deprecated(
+    "Use .or",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("this or other")
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+infix fun License.or(other: LicenseExpression): LicenseExpression = this or other
 
 @Deprecated(
     "Use member function LicenseExpression.disjunctions()",
@@ -43,11 +112,7 @@ infix fun License.or(other: LicenseExpression): LicenseExpression = other or thi
     level = DeprecationLevel.WARNING
 )
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-fun LicenseExpression.disjunctions() =
-    when (this) {
-        is DisjunctionLicenseExpression -> unordered
-        else -> setOf(this)
-    }
+fun LicenseExpression.disjunctions() = disjunctions
 
 @Deprecated(
     "Use member function LicenseExpression.conjunctions()",
@@ -55,38 +120,22 @@ fun LicenseExpression.disjunctions() =
     level = DeprecationLevel.WARNING
 )
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-fun LicenseExpression.conjunctions() =
-    when (this) {
-        is ConjunctionLicenseExpression -> unordered
-        else -> setOf(this)
-    }
+fun LicenseExpression.conjunctions() = conjunctions
 
-infix fun LicenseExpression.and(other: LicenseExpression): LicenseExpression {
-    fun LicenseExpression.ops() =
-        when (this) {
-            is ConjunctionLicenseExpression -> licenses
-            else -> setOf(this)
-        }
+@Deprecated(
+    "Use .and",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("this and other")
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+infix fun LicenseExpression.and(other: LicenseExpression): LicenseExpression =
+    this and other
 
-    val ops = ops() + other.ops()
-    return when (ops.size) {
-        0 -> throw IllegalArgumentException("Empty argument to ConjunctionLicenseExpression")
-        1 -> ops.first()
-        else -> ConjunctionLicenseExpression(ops)
-    }
-}
-
-infix fun LicenseExpression.or(other: LicenseExpression): LicenseExpression {
-    fun LicenseExpression.ops() =
-        when (this) {
-            is DisjunctionLicenseExpression -> licenses
-            else -> setOf(this)
-        }
-
-    val ops = ops() + other.ops()
-    return when (ops.size) {
-        0 -> throw IllegalArgumentException("Empty argument to DisjunctionLicenseExpression")
-        1 -> ops.first()
-        else -> DisjunctionLicenseExpression(ops)
-    }
-}
+@Deprecated(
+    "Use .or",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("this or other")
+)
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+infix fun LicenseExpression.or(other: LicenseExpression): LicenseExpression =
+    this or other

@@ -20,7 +20,6 @@ import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.SpdxLicenseException
 import com.github.vlsi.gradle.license.api.and
-import com.github.vlsi.gradle.license.api.asExpression
 import com.github.vlsi.gradle.license.api.or
 import com.github.vlsi.gradle.license.api.with
 import org.junit.jupiter.api.Assertions
@@ -36,7 +35,7 @@ class Apache2LicenseInterpreterTest {
             return listOf(
                 Arguments.of(
                     AsfLicenseCategory.A,
-                    SpdxLicense.MIT.asExpression()
+                    SpdxLicense.MIT.expression
                 ),
                 Arguments.of(
                     AsfLicenseCategory.A,

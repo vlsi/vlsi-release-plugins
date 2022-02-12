@@ -23,7 +23,7 @@ object SpdxLicenseEquivalence {
     val map: Map<LicenseExpression, Set<LicenseExpression>> =
         licenseVersions(AFL_1_1, AFL_1_2, AFL_2_0, AFL_2_1, AFL_3_0)
             .plus(SpdxLicense.values()
-                .map { it.orLater() to setOf(it.asExpression()) })
+                .map { it.orLater to setOf(it.expression) })
             .plus(licenseVersions(AFL_1_1, AFL_1_2, AFL_2_0, AFL_2_1, AFL_3_0))
             .plusOrLater(AGPL_1_0_or_later)
             .plusOrLater(AGPL_3_0_or_later)
@@ -153,18 +153,18 @@ private fun Sequence<Pair<LicenseExpression, Set<LicenseExpression>>>.plusLicens
     license: License,
     equivalence: LicenseExpression
 ) =
-    plusElement(license.asExpression() to setOf(equivalence))
+    plusElement(license.expression to setOf(equivalence))
 
 private fun Sequence<Pair<LicenseExpression, Set<LicenseExpression>>>.plusOrLater(license: SpdxLicense) =
-    plusElement(license.asExpression() to setOf(valueOf(license.name.removeSuffix("_or_later") + "_only").orLater()))
+    plusElement(license.expression to setOf(valueOf(license.name.removeSuffix("_or_later") + "_only").orLater))
 
 fun licenseVersions(vararg licenses: License) =
     licenses
         .asSequence()
         .windowed(size = 2, partialWindows = true) { w ->
             if (w.size == 2) {
-                w[0].orLater() to setOf(w[0].asExpression(), w[1].orLater())
+                w[0].orLater to setOf(w[0].expression, w[1].orLater)
             } else { // The latest version
-                w[0].orLater() to setOf(w[0].asExpression())
+                w[0].orLater to setOf(w[0].expression)
             }
         }

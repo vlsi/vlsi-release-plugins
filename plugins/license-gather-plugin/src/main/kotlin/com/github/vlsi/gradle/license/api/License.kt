@@ -24,10 +24,25 @@ interface License : LicenseExpressionSet, java.io.Serializable {
     val uri: List<URI>
 
     override val disjunctions: Set<LicenseExpression>
-        get() = setOf(asExpression())
+        get() = setOf(expression)
 
     override val conjunctions: Set<LicenseExpression>
         get() = disjunctions
+
+    val expression: JustLicense
+        get() = JustLicense(this)
+
+    val orLater: OrLaterLicense
+        get() = OrLaterLicense(this)
+
+    infix fun with(exception: LicenseException): LicenseExpression =
+        expression with exception
+
+    infix fun and(other: License): LicenseExpression = expression and other
+    infix fun and(other: LicenseExpression): LicenseExpression = expression and other
+
+    infix fun or(other: License): LicenseExpression = expression or other
+    infix fun or(other: LicenseExpression): LicenseExpression = expression or other
 }
 
 interface LicenseException : java.io.Serializable {

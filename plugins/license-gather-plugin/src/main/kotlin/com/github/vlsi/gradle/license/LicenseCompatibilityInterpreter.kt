@@ -24,7 +24,6 @@ import com.github.vlsi.gradle.license.api.ConjunctionLicenseExpression
 import com.github.vlsi.gradle.license.api.DisjunctionLicenseExpression
 import com.github.vlsi.gradle.license.api.LicenseEquivalence
 import com.github.vlsi.gradle.license.api.LicenseExpression
-import com.github.vlsi.gradle.license.api.disjunctions
 
 enum class CompatibilityResult {
     ALLOW, UNKNOWN, REJECT;
@@ -54,7 +53,7 @@ internal class LicenseCompatibilityInterpreter(
     private val resolvedCases: Map<LicenseExpression, LicenseCompatibility>
 ) {
     val resolvedParts = resolvedCases.asSequence().flatMap { (license, _) ->
-        licenseEquivalence.expand(license).disjunctions().asSequence().map { it to license }
+        licenseEquivalence.expand(license).disjunctions.asSequence().map { it to license }
     }.groupingBy { it.first }.aggregate { key, acc: LicenseExpression?, element, first ->
         if (first) {
             element.second

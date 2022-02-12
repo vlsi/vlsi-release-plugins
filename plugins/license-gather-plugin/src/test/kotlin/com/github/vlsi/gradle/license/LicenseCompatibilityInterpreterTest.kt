@@ -24,11 +24,6 @@ import com.github.vlsi.gradle.license.api.LicenseEquivalence
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.SpdxLicenseException
-import com.github.vlsi.gradle.license.api.and
-import com.github.vlsi.gradle.license.api.asExpression
-import com.github.vlsi.gradle.license.api.or
-import com.github.vlsi.gradle.license.api.orLater
-import com.github.vlsi.gradle.license.api.with
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
@@ -39,21 +34,21 @@ class LicenseCompatibilityInterpreterTest {
         private val interpreter = LicenseCompatibilityInterpreter(
             LicenseEquivalence(),
             mapOf(
-                SpdxLicense.CC0_1_0.asExpression() to LicenseCompatibility(
+                SpdxLicense.CC0_1_0.expression to LicenseCompatibility(
                     ALLOW,
                     "Public domain is OK"
                 ),
-                SpdxLicense.MIT.asExpression() to LicenseCompatibility(ALLOW, ""),
-                SpdxLicense.Apache_2_0.asExpression() to LicenseCompatibility(
+                SpdxLicense.MIT.expression to LicenseCompatibility(ALLOW, ""),
+                SpdxLicense.Apache_2_0.expression to LicenseCompatibility(
                     ALLOW,
                     "ISSUE-2: Apache Category A licenses are ok"
                 ),
-                (SpdxLicense.Apache_1_0.orLater() and SpdxLicense.GPL_1_0_or_later) to
+                (SpdxLicense.Apache_1_0.orLater and SpdxLicense.GPL_1_0_or_later) to
                         LicenseCompatibility(
                             REJECT,
                             "If both Apache1+ and GPL1+, then we are fine"
                         ),
-                SpdxLicense.LGPL_3_0_or_later.asExpression() to
+                SpdxLicense.LGPL_3_0_or_later.expression to
                         LicenseCompatibility(
                             UNKNOWN,
                             "See ISSUE-23, the use of LGPL 3.0+ needs to be decided"
@@ -69,7 +64,7 @@ class LicenseCompatibilityInterpreterTest {
         @JvmStatic
         fun data() = listOf(
             arguments(
-                SpdxLicense.MIT.asExpression(),
+                SpdxLicense.MIT.expression,
                 ResolvedLicenseCompatibility(ALLOW, "MIT: ALLOW")
             ),
             arguments(
@@ -92,11 +87,11 @@ class LicenseCompatibilityInterpreterTest {
                 ResolvedLicenseCompatibility(UNKNOWN, "No rules found for GFDL-1.1-only")
             ),
             arguments(
-                SpdxLicense.Apache_1_0.asExpression(),
+                SpdxLicense.Apache_1_0.expression,
                 ResolvedLicenseCompatibility(UNKNOWN, "No rules found for Apache-1.0")
             ),
             arguments(
-                SpdxLicense.Apache_1_0.orLater(),
+                SpdxLicense.Apache_1_0.orLater,
                 ResolvedLicenseCompatibility(
                     ALLOW,
                     "Apache-2.0: ISSUE-2: Apache Category A licenses are ok"

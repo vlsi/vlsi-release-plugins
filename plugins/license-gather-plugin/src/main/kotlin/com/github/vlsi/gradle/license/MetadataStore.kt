@@ -34,7 +34,6 @@ import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.StandardLicense
 import com.github.vlsi.gradle.license.api.StandardLicenseException
 import com.github.vlsi.gradle.license.api.WithException
-import com.github.vlsi.gradle.license.api.asExpression
 import com.github.vlsi.gradle.license.api.orLater
 import groovy.util.XmlSlurper
 import groovy.util.slurpersupport.GPathResult
@@ -86,8 +85,8 @@ object MetadataStore {
 
         fun GPathResult.readLicenseExpression(): LicenseExpression =
             when (name()) {
-                "license" -> toLicense().asExpression()
-                "or-later" -> toLicense().orLater()
+                "license" -> toLicense().expression
+                "or-later" -> toLicense().orLater
                 "expression" -> expressionParser.parse(text())
                 "and" -> ConjunctionLicenseExpression(
                     getList("*")

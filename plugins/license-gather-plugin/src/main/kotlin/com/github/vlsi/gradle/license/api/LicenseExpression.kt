@@ -33,6 +33,27 @@ sealed class LicenseExpression : LicenseExpressionSet, java.io.Serializable {
     override val disjunctions: Set<LicenseExpression>
         get() = setOf(this)
 
+    infix fun and(other: License): LicenseExpression = this and other.expression
+    infix fun or(other: License): LicenseExpression = this or other.expression
+
+    infix fun and(other: LicenseExpression): LicenseExpression {
+        val ops = conjunctions + other.conjunctions
+        return when (ops.size) {
+            0 -> throw IllegalArgumentException("Empty argument to ConjunctionLicenseExpression")
+            1 -> ops.first()
+            else -> ConjunctionLicenseExpression(ops)
+        }
+    }
+
+    infix fun or(other: LicenseExpression): LicenseExpression {
+        val ops = disjunctions + other.disjunctions
+        return when (ops.size) {
+            0 -> throw IllegalArgumentException("Empty argument to DisjunctionLicenseExpression")
+            1 -> ops.first()
+            else -> DisjunctionLicenseExpression(ops)
+        }
+    }
+
     object NONE : LicenseExpression()
     object NOASSERTION : LicenseExpression()
 }
@@ -50,10 +71,16 @@ abstract class SimpleLicenseExpression(open val license: License) : LicenseExpre
             else -> it.title + it.uri.asString()
         }
     }
+
+    infix fun with(exception: LicenseException): WithException =
+        WithException(this, exception)
 }
 
 data class JustLicense(override val license: License) : SimpleLicenseExpression(license) {
     override fun toString() = super.toString()
+
+    val orLater: OrLaterLicense
+        get() = OrLaterLicense(license)
 }
 
 data class OrLaterLicense(override val license: License) : SimpleLicenseExpression(license) {

@@ -21,10 +21,6 @@ import com.github.vlsi.gradle.license.api.LicenseEquivalence
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.SpdxLicenseException
-import com.github.vlsi.gradle.license.api.asExpression
-import com.github.vlsi.gradle.license.api.or
-import com.github.vlsi.gradle.license.api.orLater
-import com.github.vlsi.gradle.license.api.with
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -37,33 +33,33 @@ class EquivalenceTest {
         private fun expressions(): Iterable<Arguments> {
             return listOf(
                 Arguments.of(
-                    SpdxLicense.GPL_1_0_or_later.asExpression(),
+                    SpdxLicense.GPL_1_0_or_later.expression,
                     SpdxLicense.GPL_1_0_only or SpdxLicense.GPL_2_0_only or SpdxLicense.GPL_3_0_only
                 ),
                 Arguments.of(
-                    SpdxLicense.GPL_1_0_or_later.orLater(),
+                    SpdxLicense.GPL_1_0_or_later.orLater,
                     SpdxLicense.GPL_1_0_only or SpdxLicense.GPL_2_0_only or SpdxLicense.GPL_3_0_only
                 ),
                 Arguments.of(
-                    SpdxLicense.GPL_2_0_only.orLater(),
+                    SpdxLicense.GPL_2_0_only.orLater,
                     SpdxLicense.GPL_2_0_only or SpdxLicense.GPL_3_0_only
                 ),
                 Arguments.of(
-                    SpdxLicense.GPL_2_0_only.asExpression(),
-                    SpdxLicense.GPL_2_0_only.asExpression()
+                    SpdxLicense.GPL_2_0_only.expression,
+                    SpdxLicense.GPL_2_0_only.expression
                 ),
                 Arguments.of(
-                    SpdxLicense.GPL_2_0_or_later.orLater() with SpdxLicenseException.Classpath_exception_2_0,
+                    SpdxLicense.GPL_2_0_or_later.orLater with SpdxLicenseException.Classpath_exception_2_0,
                     (SpdxLicense.GPL_2_0_only with SpdxLicenseException.Classpath_exception_2_0) or
                             (SpdxLicense.GPL_3_0_only with SpdxLicenseException.Classpath_exception_2_0)
                 ),
                 Arguments.of(
-                    SpdxLicense.MIT.asExpression(),
-                    SpdxLicense.MIT.asExpression()
+                    SpdxLicense.MIT.expression,
+                    SpdxLicense.MIT.expression
                 ),
                 Arguments.of(
-                    SpdxLicense.MIT.orLater(),
-                    SpdxLicense.MIT.asExpression()
+                    SpdxLicense.MIT.orLater,
+                    SpdxLicense.MIT.expression
                 )
             )
         }

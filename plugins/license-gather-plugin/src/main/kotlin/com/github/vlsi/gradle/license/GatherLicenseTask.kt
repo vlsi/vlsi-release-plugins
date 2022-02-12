@@ -24,7 +24,6 @@ import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.LicenseExpressionParser
 import com.github.vlsi.gradle.license.api.OsgiBundleLicenseParser
 import com.github.vlsi.gradle.license.api.SpdxLicense
-import com.github.vlsi.gradle.license.api.asExpression
 import com.github.vlsi.gradle.license.api.text
 import groovy.util.slurpersupport.GPathResult
 import org.gradle.api.Action
@@ -137,8 +136,8 @@ open class GatherLicenseTask @Inject constructor(
         objectFactory.setProperty<LicenseExpression>()
             .convention(
                 listOf(
-                    SpdxLicense.Apache_2_0.asExpression(),
-                    SpdxLicense.MPL_2_0.asExpression()
+                    SpdxLicense.Apache_2_0.expression,
+                    SpdxLicense.MPL_2_0.expression
                 )
             )
 
@@ -152,7 +151,7 @@ open class GatherLicenseTask @Inject constructor(
         objectFactory.setProperty<LicenseExpression>()
 
     fun ignoreMissingLicenseFor(license: License) {
-        ignoreMissingLicenseFor(license.asExpression())
+        ignoreMissingLicenseFor(license.expression)
     }
 
     fun ignoreMissingLicenseFor(license: LicenseExpression) {
@@ -186,7 +185,7 @@ open class GatherLicenseTask @Inject constructor(
     private val licenseExpressionParser = LicenseExpressionParser()
 
     fun addDependency(module: String, license: License) {
-        addDependency(module, license.asExpression())
+        addDependency(module, license.expression)
     }
 
     fun addDependency(module: String, licenseExpression: LicenseExpression) {
@@ -202,7 +201,7 @@ open class GatherLicenseTask @Inject constructor(
     }
 
     fun expectLicense(module: String, license: License) {
-        expectLicense(module, license.asExpression())
+        expectLicense(module, license.expression)
     }
 
     fun expectLicense(module: String, licenseExpression: LicenseExpression) {
@@ -212,7 +211,7 @@ open class GatherLicenseTask @Inject constructor(
     }
 
     fun overrideLicense(module: String, license: License) {
-        overrideLicense(module, license.asExpression())
+        overrideLicense(module, license.expression)
     }
 
     fun overrideLicense(module: String, licenseExpression: LicenseExpression) {
@@ -224,7 +223,7 @@ open class GatherLicenseTask @Inject constructor(
     private fun Any.toLicenseExpression() =
         when (this) {
             is String -> licenseExpressionParser.parse(this)
-            is License -> this.asExpression()
+            is License -> this.expression
             is LicenseExpression -> this
             else -> throw GradleException("Illegal value $this for LicenseExpression. Expecting String, License, or LicenseExpression")
         }
@@ -489,7 +488,7 @@ open class GatherLicenseTask @Inject constructor(
         licenseExpressionParser: LicenseExpressionParser
     ) {
         val bundleLicenseParser = OsgiBundleLicenseParser(licenseExpressionParser) {
-            SpdxLicense.fromUriOrNull(it)?.asExpression()
+            SpdxLicense.fromUriOrNull(it)?.expression
         }
         for (e in detectedLicenses) {
             if (e.value.license != null) {

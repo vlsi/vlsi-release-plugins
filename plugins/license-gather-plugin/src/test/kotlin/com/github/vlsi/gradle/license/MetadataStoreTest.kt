@@ -22,10 +22,6 @@ import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.SimpleLicense
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.SpdxLicenseException
-import com.github.vlsi.gradle.license.api.and
-import com.github.vlsi.gradle.license.api.or
-import com.github.vlsi.gradle.license.api.orLater
-import com.github.vlsi.gradle.license.api.with
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -36,7 +32,7 @@ class MetadataStoreTest {
     fun spdxExpression() {
         saveMetadata(
             (SpdxLicense.Apache_2_0 or SpdxLicense.MIT) and
-                    (SpdxLicense.GPL_2_0_only.orLater() with SpdxLicenseException.Classpath_exception_2_0),
+                    (SpdxLicense.GPL_2_0_only.orLater with SpdxLicenseException.Classpath_exception_2_0),
             """
                 <license-list version='1'>
                   <components>
@@ -55,7 +51,7 @@ class MetadataStoreTest {
     fun nonStandardLicense() {
         saveMetadata(
             (SpdxLicense.Apache_2_0 or SimpleLicense("WTFYWPL")) and
-                    (SpdxLicense.GPL_2_0_only.orLater() with SpdxLicenseException.Classpath_exception_2_0),
+                    (SpdxLicense.GPL_2_0_only.orLater with SpdxLicenseException.Classpath_exception_2_0),
             """
                 <license-list version='1'>
                   <components>
