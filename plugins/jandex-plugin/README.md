@@ -1,4 +1,4 @@
-[![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/github/vlsi/jandex/jandex-plugin/maven-metadata.xml.svg?colorB=007ec6&label=gradle)](https://plugins.gradle.org/plugin/com.github.vlsi.jandex)
+[![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/repo1.maven.org/maven2/com/github/vlsi/jandex/jandex-plugin/maven-metadata.xml.svg?colorB=007ec6&label=latest%20version)](https://plugins.gradle.org/plugin/com.github.vlsi.jandex)
 
 Jandex Gradle Plugin
 ====================

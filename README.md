@@ -54,45 +54,8 @@ CRLF Plugin
 Adds Kotlin DSL to specify CRLF/LF filtering for `CopySpec`.
 Enables to use `.gitignore` and `.gitattributes` for building `CopySpec`.
 
-Usage
------
+See [crlf-plugin description](plugins/crlf-plugin/README.md) for configuration options.
 
-Kotlin DSL:
-
-```kotlin
-// Loads .gitattributes and .gitignore from rootDir (and subdirs)
-val gitProps by tasks.registering(FindGitAttributes::class) {
-    // Scanning for .gitignore and .gitattributes files in a task avoids doing that
-    // when distribution build is not required (e.g. code is just compiled)
-    root.set(rootDir)
-}
-
-fun CrLfSpec.sourceLayout() = copySpec {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    gitattributes(gitProps)
-    into(baseFolder) {
-        // Note: license content is taken from "/build/..", so gitignore should not be used
-        // Note: this is a "license + third-party licenses", not just Apache-2.0
-        dependencyLicenses(sourceLicense)
-        // Include all the source files
-        from(rootDir) {
-            gitignore(gitProps)
-        }
-    }
-}
-
-for (archive in listOf(Zip::class, Tar::class)) {
-    tasks.register("dist${archive.simpleName}", archive) {
-        val eol = if (archive == Tar::class) LineEndings.LF else LineEndings.CRLF
-        if (this is Tar) {
-            compression = Compression.GZIP
-        }
-        CrLfSpec(eol).run {
-            with(sourceLayout())
-        }
-    }
-}
-```
 
 IDE Plugin
 ==========
@@ -104,74 +67,9 @@ IDE Plugin
 License Gather Plugin
 =====================
 
-The purpose of the plugin is to analyze and infer license names for the dependencies.
-The plugin checks for 3 places: MANIFEST.MF (`Bundle-License` attribute),
-`pom.xml` (`licenses/license` tags), and finally `LICENSE`-like files.
-Note: for now only fuzzy-match is implemented, and by default a similarity threshold of 42% is used.
+The purpose of the plugin is to analyze and infer license names for the dependencies, and verify license compatibility.
 
-License Gather Plugin uses https://github.com/spdx/license-list-data for the list of licenses.
-
-Prior art
----------
-
-https://github.com/jk1/Gradle-License-Report
-
-Gradle-License-Report is nice (it is), however there are certain pecularities (as of 2019-06-04)
-
-* It can't generate multiple lists within a single project (e.g. license for source / binary artifacts)
-* The model for imported/discovered licenses is differnet
-* There's no way to override license detection
-
-https://github.com/eskatos/honker-gradle
-
-* There's no way to override license files
-* [SPDX](https://spdx.org/licenses/) is not used
-
-Features
---------
-
-* LICENSE file generation
-* License whitelisting
-* The detected licenses can be overridden
-* Support for incremental-builds (discovery does not run in case dependencies do not change)
-* Type-safe license enumeration (based on SPDX):
-
-    com.github.vlsi.gradle.license.api.SpdxLicense#Apache_2_0
-
-Usage
------
-
-Gradle (Groovy DSL):
-```groovy
-plugins {
-    id('com.github.vlsi.license-gather') version '1.0.0'
-}
-
-tasks.register('generateLicense', GatherLicenseTask.class) {
-    configurations.add(project.configurations.runtimeClasspath)
-    outputFile.set(file("$buildDir/result.txt"))
-
-    doLast {
-        println(outputFile.get().asFile.text)
-    }
-}
-```
-
-Gradle (Kotlin DSL):
-```groovy
-plugins {
-    id("com.github.vlsi.license-gather") version "1.0.0"
-}
-
-tasks.register("generateLicense", GatherLicenseTask::class) {
-    configurations.add(project.configurations.runtimeClasspath)
-    outputFile.set(file("$buildDir/result.txt"))
-
-    doLast {
-        println(outputFile.get().asFile.readText())
-    }
-}
-```
+See [license-gather-plugin description](plugins/license-gather-plugin/README.md) for configuration options.
 
 Gettext Plugin
 ==============
