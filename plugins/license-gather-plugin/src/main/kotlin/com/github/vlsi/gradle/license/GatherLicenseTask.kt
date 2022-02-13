@@ -97,7 +97,7 @@ open class GatherLicenseTask @Inject constructor(
 ) : DefaultTask() {
     init {
         // TODO: capture [licenseOverrides] as input
-        outputs.upToDateWhen { false }
+        outputs.upToDateWhen { licenseOverrides.isEmpty() }
     }
 
     @InputFiles

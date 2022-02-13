@@ -24,6 +24,8 @@ class LicenseOverrides {
     private val map = mutableMapOf<String, LicenseOverride>()
     private val usedOverrides = mutableSetOf<String>()
 
+    fun isEmpty(): Boolean = map.isEmpty()
+
     val unusedOverrides: Set<String> get() = map.keys.minus(usedOverrides)
 
     fun configurationComplete() {
