@@ -74,6 +74,7 @@ Expected checksums for `checksum-dependency-plugin.jar`
 
 SHA-512
 
+* v1.78: `C297874DB24FADAACD097C4BF3BC2E4A1F684D04EAD286B6FED9919C563AB9BC5BF86B679156D72B700C2BEC429633291DFF680253088151D702CD6B4DD3A4EE`
 * v1.74: `84572B7F654D1F9842DDD7E0D4331461DC55B92CDC1DA8EBA2269870CE027B021AB91D1942043145825B00521A92029C969BFA388A27BD63CC509BF7AB18E35F`
 * v1.62: `2EEF57945455B271AC8189C1541DF09C507F37947EF1DB70AC56E84F5CACA672264F8660818FF33C9FBE6AC868512CFDFD593EC48D0F5726DB0E5D21F67D69DE`
 * v1.61: `1239290894AE69F1AE5885FFBE71C14FBD0CA1BD3B113EA819AD23FDA6013B7637C757725D3B94EEB0A32F2F1F53F7A8936DD3AD49E2F01D588810A4A584FB4`
@@ -127,7 +128,7 @@ Kotlin DSL:
 // Checksum plugin sources can be validated at https://github.com/vlsi/vlsi-release-plugins
 buildscript {
     dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.62") {
+        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:1.68") {
             // Gradle ships kotlin-stdlib which is good enough
             exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         }
@@ -147,8 +148,8 @@ val expectedSha512 = mapOf(
             to "okhttp-4.1.0.jar",
     "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
             to "okio-2.2.2.jar",
-    "84572B7F654D1F9842DDD7E0D4331461DC55B92CDC1DA8EBA2269870CE027B021AB91D1942043145825B00521A92029C969BFA388A27BD63CC509BF7AB18E35F"
-            to "checksum-dependency-plugin-1.74.jar"
+    "C297874DB24FADAACD097C4BF3BC2E4A1F684D04EAD286B6FED9919C563AB9BC5BF86B679156D72B700C2BEC429633291DFF680253088151D702CD6B4DD3A4EE"
+            to "checksum-dependency-plugin-1.78.jar"
 )
 
 fun File.sha512(): String {
@@ -201,8 +202,8 @@ def expectedSha512 = [
     'okhttp-4.1.0.jar',
   '93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7':
     'okio-2.2.2.jar',
-  '84572B7F654D1F9842DDD7E0D4331461DC55B92CDC1DA8EBA2269870CE027B021AB91D1942043145825B00521A92029C969BFA388A27BD63CC509BF7AB18E35F':
-    'checksum-dependency-plugin-1.74.jar'
+  'C297874DB24FADAACD097C4BF3BC2E4A1F684D04EAD286B6FED9919C563AB9BC5BF86B679156D72B700C2BEC429633291DFF680253088151D702CD6B4DD3A4EE':
+    'checksum-dependency-plugin-1.78.jar'
 ]
 
 static def sha512(File file) {
@@ -402,6 +403,7 @@ Configuration properties
     `*.asc` signatures alone are not sufficient for signature validation, so PGP public keys needs to be downloaded
      to verify signatures.
 
+    1.78+: defaults to `https://keyserver.ubuntu.com,https://keys.openpgp.org`
     1.61+: default to `hkp://pool.sks-keyservers.net,https://keyserver.ubuntu.com,https://keys.openpgp.org`
     1.24.0+: default to `hkp://pool.sks-keyservers.net,https://keys.fedoraproject.org,https://keyserver.ubuntu.com,https://keys.openpgp.org`
     1.23.0: defaults to `hkp://hkps.pool.sks-keyservers.net`
@@ -434,7 +436,7 @@ Auto-generation mode for `config.xml`: `checksums=optional|mandatory`
 Key servers
 -----------
 
-PGP keys are resolved via `hkp://hkps.pool.sks-keyservers.net` pool.
+PGP keys are resolved via https://keyserver.ubuntu.com or https://keys.openpgp.org servers.
 
 It can be configured via `pgpKeyserver` property.
 
@@ -485,6 +487,9 @@ Verification options
 
 Changelog
 ---------
+v1.78
+* Retrieve keys from https://keyserver.ubuntu.com, and https://keys.openpgp.org by default (drop SKS keyserver pool since it has been deprecated)
+
 v1.74
 * Skip checksum verification when artifact resolves to a directory
 

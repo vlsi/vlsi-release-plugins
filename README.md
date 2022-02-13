@@ -92,6 +92,7 @@ v1.78
 * license-gather: ignore xml namespaces when parsing POM files (see [issue #43](https://github.com/vlsi/vlsi-release-plugins/issues/43))
 * license-gather: fix license inference from Bundle-License manifest attribute (see [issue #48](https://github.com/vlsi/vlsi-release-plugins/issues/48))
 * license-gather: implement VerifyLicenseCompatibilityTask for verifying license compatibility (see [pr #49](https://github.com/vlsi/vlsi-release-plugins/pull/49))
+* checksum-dependency: retrieve keys from https://keyserver.ubuntu.com, and https://keys.openpgp.org by default (drop SKS keyserver pool since it has been deprecated)
 
 Thanks to [Florian Dreier](https://github.com/DreierF) for identifying bugs and suggesting fixes.
 

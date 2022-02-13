@@ -116,8 +116,6 @@ class ShouldRetrySpec(
 class Retry(
     uris: List<URI> = listOf(
         URI("https://keys.openpgp.org"),
-        URI("hkp://pool.sks-keyservers.net"),
-        URI("https://keys.fedoraproject.org"),
         URI("https://keyserver.ubuntu.com")
     ),
     val keyResolutionTimeout: Duration = Duration.ofSeconds(40),

@@ -59,7 +59,7 @@ class KeyDownloader(
             path, query, fragment
         )
 
-    // Sample URL: http://pool.sks-keyservers.net/pks/lookup?op=vindex&fingerprint=on&search=0xbcf4173966770193
+    // Sample URL: https://keyserver.ubuntu.com/pks/lookup?op=vindex&fingerprint=on&search=0xbcf4173966770193
     private fun URI.retrieveKeyUri(keyId: Long, inetAddress: InetAddress) =
         URI(
             scheme, userInfo, host, port, "/pks/lookup",
