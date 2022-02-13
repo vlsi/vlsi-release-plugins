@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/vlsi/vlsi-release-plugins.svg?branch=master)](https://travis-ci.org/vlsi/vlsi-release-plugins)
+[![CI Status](https://github.com/vlsi/vlsi-release-plugins/workflows/CI/badge.svg)](https://github.com/vlsi/vlsi-release-plugins/actions)
 
 About
 =====
