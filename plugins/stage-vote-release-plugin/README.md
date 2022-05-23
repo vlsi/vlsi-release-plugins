@@ -51,7 +51,7 @@ If another release candidate is required, then `rc` index should be increased:
 Publishing a release
 --------------------
 
-    ./gradlew publishRelease -Pasf -Prc=2
+    ./gradlew publishDist -Pasf -Prc=2
 
 Removing stale artifacts
 ------------------------
@@ -92,7 +92,7 @@ Prepare release candidate:
 
 "Publish" the release:
 
-    ./gradlew publishRelease -Prc=2
+    ./gradlew publishDist -Prc=2
 
 Release configuration
 --------------------
