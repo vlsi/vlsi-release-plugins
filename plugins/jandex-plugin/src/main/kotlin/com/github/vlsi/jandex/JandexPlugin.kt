@@ -24,6 +24,7 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
@@ -58,27 +59,42 @@ open class JandexPlugin : Plugin<Project> {
             val sourceSets: SourceSetContainer by project
             sourceSets.all {
                 val sourceSet = this
-                val task = tasks.register(getTaskName(JANDEX_TASK_NAME, null), JandexTask::class) {
-                    description = "Generates Jandex index for the classes in $sourceSet"
-                    jandexBuildAction.convention(jandexExtension.jandexBuildAction)
+
+                // Keep "certain types" out of the serialized task configurations.
+                // See https://docs.gradle.org/7.4.2/userguide/configuration_cache.html#config_cache:requirements:disallowed_types
+
+                val sourceSetName = sourceSet.name
+                val classesDirs = sourceSet.output.classesDirs
+                val resourcesDir = sourceSet.output.resourcesDir!!
+
+                val jandexBuildAction = objects.property<JandexBuildAction>()
+                    .convention(JandexBuildAction.BUILD_AND_INCLUDE)
+                val taskJandexBuildAction = jandexBuildAction.convention(jandexExtension.jandexBuildAction)
+                val taskName = getTaskName(JANDEX_TASK_NAME, null)
+                val indexFile = objects.fileProperty()
+                    .convention(project.layout.buildDirectory.map { it.file("$JANDEX_TASK_NAME/$taskName/jandex.idx") })
+                val task = tasks.register(taskName, JandexTask::class, taskJandexBuildAction, indexFile)
+                task.configure {
+                    description = "Generates Jandex index for the classes in $sourceSetName"
                     classpath.from(jandexClasspath)
-                    inputFiles.from(sourceSet.output.classesDirs.asFileTree.matching {
+                    inputFiles.from(classesDirs.asFileTree.matching {
                         include("**/*.class")
                     })
                 }
+
                 val processJandexIndex = tasks.register(
                     getTaskName(sourceSet),
                     JandexProcessResources::class
                 ) {
-                    description = "Copies Jandex index for $sourceSet to the resources"
-                    destinationDir = sourceSet.output.resourcesDir!!
+                    description = "Copies Jandex index for $sourceSetName to the resources"
+                    destinationDir = resourcesDir
                     onlyIf {
-                        task.get().jandexBuildAction.get() != JandexBuildAction.NONE
+                        jandexBuildAction.get() != JandexBuildAction.NONE
                     }
                     into(indexDestinationPath) {
-                        from(task.map {
-                            when (it.jandexBuildAction.get()) {
-                                JandexBuildAction.BUILD_AND_INCLUDE -> it.indexFile
+                        from(taskJandexBuildAction.map {
+                            when (it) {
+                                JandexBuildAction.BUILD_AND_INCLUDE -> indexFile
                                 else -> listOf<Any>()
                             }
                         })

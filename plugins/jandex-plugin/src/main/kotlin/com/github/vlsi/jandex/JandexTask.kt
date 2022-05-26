@@ -18,7 +18,9 @@ package com.github.vlsi.jandex
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileType
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Console
@@ -39,6 +41,8 @@ import javax.inject.Inject
 
 @CacheableTask
 abstract class JandexTask @Inject constructor(
+    @Input val jandexBuildAction: Property<JandexBuildAction>,
+    @OutputFile val indexFile: RegularFileProperty,
     objects: ObjectFactory
 ) : DefaultTask() {
     @get:Inject
@@ -66,14 +70,6 @@ abstract class JandexTask @Inject constructor(
     @SkipWhenEmpty
     @PathSensitive(PathSensitivity.RELATIVE)
     val inputFiles = objects.fileCollection()
-
-    @OutputFile
-    val indexFile = objects.fileProperty()
-        .convention(project.layout.buildDirectory.map { it.file("${JandexPlugin.JANDEX_TASK_NAME}/$name/jandex.idx") })
-
-    @Input
-    val jandexBuildAction = objects.property<JandexBuildAction>()
-        .convention(JandexBuildAction.BUILD_AND_INCLUDE)
 
     @TaskAction
     fun run(inputChanges: InputChanges) {
