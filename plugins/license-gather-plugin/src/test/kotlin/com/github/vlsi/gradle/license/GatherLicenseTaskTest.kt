@@ -100,262 +100,262 @@ class GatherLicenseTaskTest {
             """
             <license-list version='1'>
               <components>
-                <component id='commons-io:commons-io:1.3.1' licenseFiles='texts/commons-io-1.3.1.jar'>
+                <component id='commons-io:commons-io:1.3.1' licenseFiles='texts/commons-io/commons-io-1.3.1'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='commons-logging:commons-logging:1.0.4' licenseFiles='texts/commons-logging-1.0.4.jar'>
+                <component id='commons-logging:commons-logging:1.0.4' licenseFiles='texts/commons-logging/commons-logging-1.0.4'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='io.github.microutils:kotlin-logging-jvm:2.0.5' licenseFiles='texts/kotlin-logging-jvm-2.0.5.jar'>
+                <component id='io.github.microutils:kotlin-logging-jvm:2.0.5' licenseFiles='texts/io.github.microutils/kotlin-logging-jvm-2.0.5'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-anim:1.14' licenseFiles='texts/batik-anim-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-anim:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-anim-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-awt-util:1.14' licenseFiles='texts/batik-awt-util-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-awt-util:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-awt-util-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-bridge:1.14' licenseFiles='texts/batik-bridge-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-bridge:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-bridge-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-codec:1.14' licenseFiles='texts/batik-codec-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-codec:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-codec-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-constants:1.14' licenseFiles='texts/batik-constants-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-constants:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-constants-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-css:1.14' licenseFiles='texts/batik-css-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-css:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-css-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-dom:1.14' licenseFiles='texts/batik-dom-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-dom:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-dom-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-ext:1.14' licenseFiles='texts/batik-ext-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-ext:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-ext-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-gvt:1.14' licenseFiles='texts/batik-gvt-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-gvt:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-gvt-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-i18n:1.14' licenseFiles='texts/batik-i18n-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-i18n:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-i18n-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-parser:1.14' licenseFiles='texts/batik-parser-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-parser:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-parser-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-script:1.14' licenseFiles='texts/batik-script-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-script:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-script-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-shared-resources:1.14' licenseFiles='texts/batik-shared-resources-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-shared-resources:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-shared-resources-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-svg-dom:1.14' licenseFiles='texts/batik-svg-dom-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-svg-dom:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-svg-dom-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-svggen:1.14' licenseFiles='texts/batik-svggen-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-svggen:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-svggen-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-transcoder:1.14' licenseFiles='texts/batik-transcoder-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-transcoder:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-transcoder-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-util:1.14' licenseFiles='texts/batik-util-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-util:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-util-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:batik-xml:1.14' licenseFiles='texts/batik-xml-1.14.jar'>
+                <component id='org.apache.xmlgraphics:batik-xml:1.14' licenseFiles='texts/org.apache.xmlgraphics/batik-xml-1.14'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apache.xmlgraphics:xmlgraphics-commons:2.6' licenseFiles='texts/xmlgraphics-commons-2.6.jar'>
+                <component id='org.apache.xmlgraphics:xmlgraphics-commons:2.6' licenseFiles='texts/org.apache.xmlgraphics/xmlgraphics-commons-2.6'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.apiguardian:apiguardian-api:1.0.0' licenseFiles='texts/apiguardian-api-1.0.0.jar'>
+                <component id='org.apiguardian:apiguardian-api:1.0.0' licenseFiles='texts/org.apiguardian/apiguardian-api-1.0.0'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.kotlin:kotlin-reflect:1.5.21' licenseFiles='texts/kotlin-reflect-1.5.21.jar'>
+                <component id='org.jetbrains.kotlin:kotlin-reflect:1.5.21' licenseFiles='texts/org.jetbrains.kotlin/kotlin-reflect-1.5.21'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.kotlin:kotlin-stdlib-common:1.5.21' licenseFiles='texts/kotlin-stdlib-common-1.5.21.jar'>
+                <component id='org.jetbrains.kotlin:kotlin-stdlib-common:1.5.21' licenseFiles='texts/org.jetbrains.kotlin/kotlin-stdlib-common-1.5.21'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.21' licenseFiles='texts/kotlin-stdlib-jdk7-1.5.21.jar'>
+                <component id='org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.21' licenseFiles='texts/org.jetbrains.kotlin/kotlin-stdlib-jdk7-1.5.21'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.21' licenseFiles='texts/kotlin-stdlib-jdk8-1.5.21.jar'>
+                <component id='org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.21' licenseFiles='texts/org.jetbrains.kotlin/kotlin-stdlib-jdk8-1.5.21'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.kotlin:kotlin-stdlib:1.5.21' licenseFiles='texts/kotlin-stdlib-1.5.21.jar'>
+                <component id='org.jetbrains.kotlin:kotlin-stdlib:1.5.21' licenseFiles='texts/org.jetbrains.kotlin/kotlin-stdlib-1.5.21'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3' licenseFiles='texts/kotlinx-html-jvm-0.7.3.jar'>
+                <component id='org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.3' licenseFiles='texts/org.jetbrains.kotlinx/kotlinx-html-jvm-0.7.3'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.lets-plot:base-portable-jvm:2.1.0' licenseFiles='texts/base-portable-jvm-2.1.0.jar'>
+                <component id='org.jetbrains.lets-plot:base-portable-jvm:2.1.0' licenseFiles='texts/org.jetbrains.lets-plot/base-portable-jvm-2.1.0'>
                   <license-expression>
                     <license providerId='SPDX' id='MIT' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.lets-plot:lets-plot-batik:2.1.0' licenseFiles='texts/lets-plot-batik-2.1.0.jar'>
+                <component id='org.jetbrains.lets-plot:lets-plot-batik:2.1.0' licenseFiles='texts/org.jetbrains.lets-plot/lets-plot-batik-2.1.0'>
                   <license-expression>
                     <license providerId='SPDX' id='MIT' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.lets-plot:lets-plot-common:2.1.0' licenseFiles='texts/lets-plot-common-2.1.0.jar'>
+                <component id='org.jetbrains.lets-plot:lets-plot-common:2.1.0' licenseFiles='texts/org.jetbrains.lets-plot/lets-plot-common-2.1.0'>
                   <license-expression>
                     <license providerId='SPDX' id='MIT' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2' licenseFiles='texts/plot-api-jvm-3.0.2.jar'>
+                <component id='org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2' licenseFiles='texts/org.jetbrains.lets-plot/lets-plot-kotlin-jvm-3.0.2'>
                   <license-expression>
                     <license providerId='SPDX' id='MIT' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.lets-plot:plot-base-portable-jvm:2.1.0' licenseFiles='texts/plot-base-portable-jvm-2.1.0.jar'>
+                <component id='org.jetbrains.lets-plot:plot-base-portable-jvm:2.1.0' licenseFiles='texts/org.jetbrains.lets-plot/plot-base-portable-jvm-2.1.0'>
                   <license-expression>
                     <license providerId='SPDX' id='MIT' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.lets-plot:plot-builder-portable-jvm:2.1.0' licenseFiles='texts/plot-builder-portable-jvm-2.1.0.jar'>
+                <component id='org.jetbrains.lets-plot:plot-builder-portable-jvm:2.1.0' licenseFiles='texts/org.jetbrains.lets-plot/plot-builder-portable-jvm-2.1.0'>
                   <license-expression>
                     <license providerId='SPDX' id='MIT' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.lets-plot:plot-common-portable-jvm:2.1.0' licenseFiles='texts/plot-common-portable-jvm-2.1.0.jar'>
+                <component id='org.jetbrains.lets-plot:plot-common-portable-jvm:2.1.0' licenseFiles='texts/org.jetbrains.lets-plot/plot-common-portable-jvm-2.1.0'>
                   <license-expression>
                     <license providerId='SPDX' id='MIT' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.lets-plot:plot-config-portable-jvm:2.1.0' licenseFiles='texts/plot-config-portable-jvm-2.1.0.jar'>
+                <component id='org.jetbrains.lets-plot:plot-config-portable-jvm:2.1.0' licenseFiles='texts/org.jetbrains.lets-plot/plot-config-portable-jvm-2.1.0'>
                   <license-expression>
                     <license providerId='SPDX' id='MIT' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains.lets-plot:vis-svg-portable-jvm:2.1.0' licenseFiles='texts/vis-svg-portable-jvm-2.1.0.jar'>
+                <component id='org.jetbrains.lets-plot:vis-svg-portable-jvm:2.1.0' licenseFiles='texts/org.jetbrains.lets-plot/vis-svg-portable-jvm-2.1.0'>
                   <license-expression>
                     <license providerId='SPDX' id='MIT' />
                   </license-expression>
                 </component>
-                <component id='org.jetbrains:annotations:13.0' licenseFiles='texts/annotations-13.0.jar'>
+                <component id='org.jetbrains:annotations:13.0' licenseFiles='texts/org.jetbrains/annotations-13.0'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.jodd:jodd-core:5.0.6' licenseFiles='texts/jodd-core-5.0.6.jar'>
+                <component id='org.jodd:jodd-core:5.0.6' licenseFiles='texts/org.jodd/jodd-core-5.0.6'>
                   <license-expression>
                     <license providerId='SPDX' id='BSD-2-Clause' />
                   </license-expression>
                 </component>
-                <component id='org.junit.jupiter:junit-jupiter-api:5.4.2' licenseFiles='texts/junit-jupiter-api-5.4.2.jar'>
+                <component id='org.junit.jupiter:junit-jupiter-api:5.4.2' licenseFiles='texts/org.junit.jupiter/junit-jupiter-api-5.4.2'>
                   <license-expression>
                     <license providerId='SPDX' id='EPL-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.junit.jupiter:junit-jupiter-engine:5.4.2' licenseFiles='texts/junit-jupiter-engine-5.4.2.jar'>
+                <component id='org.junit.jupiter:junit-jupiter-engine:5.4.2' licenseFiles='texts/org.junit.jupiter/junit-jupiter-engine-5.4.2'>
                   <license-expression>
                     <license providerId='SPDX' id='EPL-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.junit.jupiter:junit-jupiter-params:5.4.2' licenseFiles='texts/junit-jupiter-params-5.4.2.jar'>
+                <component id='org.junit.jupiter:junit-jupiter-params:5.4.2' licenseFiles='texts/org.junit.jupiter/junit-jupiter-params-5.4.2'>
                   <license-expression>
                     <license providerId='SPDX' id='EPL-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.junit.jupiter:junit-jupiter:5.4.2' licenseFiles='texts/junit-jupiter-5.4.2.jar'>
+                <component id='org.junit.jupiter:junit-jupiter:5.4.2' licenseFiles='texts/org.junit.jupiter/junit-jupiter-5.4.2'>
                   <license-expression>
                     <license providerId='SPDX' id='EPL-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.junit.platform:junit-platform-commons:1.4.2' licenseFiles='texts/junit-platform-commons-1.4.2.jar'>
+                <component id='org.junit.platform:junit-platform-commons:1.4.2' licenseFiles='texts/org.junit.platform/junit-platform-commons-1.4.2'>
                   <license-expression>
                     <license providerId='SPDX' id='EPL-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.junit.platform:junit-platform-engine:1.4.2' licenseFiles='texts/junit-platform-engine-1.4.2.jar'>
+                <component id='org.junit.platform:junit-platform-engine:1.4.2' licenseFiles='texts/org.junit.platform/junit-platform-engine-1.4.2'>
                   <license-expression>
                     <license providerId='SPDX' id='EPL-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.opentest4j:opentest4j:1.1.1' licenseFiles='texts/opentest4j-1.1.1.jar'>
+                <component id='org.opentest4j:opentest4j:1.1.1' licenseFiles='texts/org.opentest4j/opentest4j-1.1.1'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='org.slf4j:slf4j-api:1.7.29' licenseFiles='texts/slf4j-api-1.7.29.jar'>
+                <component id='org.slf4j:slf4j-api:1.7.29' licenseFiles='texts/org.slf4j/slf4j-api-1.7.29'>
                   <license-expression>
                     <license providerId='SPDX' id='MIT' />
                   </license-expression>
                 </component>
-                <component id='xalan:serializer:2.7.2' licenseFiles='texts/serializer-2.7.2.jar'>
+                <component id='xalan:serializer:2.7.2' licenseFiles='texts/xalan/serializer-2.7.2'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='xalan:xalan:2.7.2' licenseFiles='texts/xalan-2.7.2.jar'>
+                <component id='xalan:xalan:2.7.2' licenseFiles='texts/xalan/xalan-2.7.2'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='xml-apis:xml-apis-ext:1.3.04' licenseFiles='texts/xml-apis-ext-1.3.04.jar'>
+                <component id='xml-apis:xml-apis-ext:1.3.04' licenseFiles='texts/xml-apis/xml-apis-ext-1.3.04'>
                   <license-expression>
                     <license providerId='SPDX' id='Apache-2.0' />
                   </license-expression>
                 </component>
-                <component id='xml-apis:xml-apis:1.4.01' licenseFiles='texts/xml-apis-1.4.01.jar'>
+                <component id='xml-apis:xml-apis:1.4.01' licenseFiles='texts/xml-apis/xml-apis-1.4.01'>
                   <license-expression>
                     <and>
                       <license providerId='SPDX' id='Apache-2.0' />

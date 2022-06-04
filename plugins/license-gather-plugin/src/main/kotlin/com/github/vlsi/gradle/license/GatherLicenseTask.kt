@@ -277,7 +277,7 @@ open class GatherLicenseTask @Inject constructor(
                     allDependencies,
                     compId,
                     licenseTextDir,
-                    outDirectoryName = "${compId.module}-${compId.version}"
+                    outDirectoryName = "${compId.group}/${compId.module}-${compId.version}"
                 )
             }
         }
@@ -300,12 +300,12 @@ open class GatherLicenseTask @Inject constructor(
                     logger.warn("GatherLicenseTask supports only ModuleComponentIdentifier for now. Input component $compId is of type ${compId::class.simpleName}")
                     continue
                 }
-
+                val classifier = art.classifier?.let { "-$it" }
                 val artLicenseTexts = addDependency(
                     allDependencies,
                     compId,
                     licenseTextDir,
-                    outDirectoryName = art.file.name,
+                    outDirectoryName = "${compId.group}/${compId.module}-${compId.version}" + (classifier?.let { "-$it" } ?: ""),
                     artifactFile = art.file
                 )
 
@@ -441,7 +441,10 @@ open class GatherLicenseTask @Inject constructor(
         outDirectoryName: String,
         artifactFile: File? = null
     ): File {
-        val artLicenseTexts = File(licenseTextDir, outDirectoryName)
+        // OpenJDK JarIndex assumes that any entry in INDEX.LIST that ends with .jar is a jar file
+        // So we avoid using directories that end with .jar
+        val outDir = outDirectoryName + if (outDirectoryName.endsWith(".jar")) ".contents" else ""
+        val artLicenseTexts = File(licenseTextDir, outDir)
         if (artLicenseTexts.isDirectory) {
             project.delete(artLicenseTexts)
         }
