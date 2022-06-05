@@ -24,6 +24,7 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
@@ -58,22 +59,27 @@ open class JandexPlugin : Plugin<Project> {
             val sourceSets: SourceSetContainer by project
             sourceSets.all {
                 val sourceSet = this
-                val task = tasks.register(getTaskName(JANDEX_TASK_NAME, null), JandexTask::class) {
-                    description = "Generates Jandex index for the classes in $sourceSet"
+                val sourceSetName = sourceSet.name
+                val jandexTaskName = getTaskName(JANDEX_TASK_NAME, null)
+                val task = tasks.register(jandexTaskName, JandexTask::class) {
+                    description = "Generates Jandex index for the classes in $sourceSetName"
                     jandexBuildAction.convention(jandexExtension.jandexBuildAction)
                     classpath.from(jandexClasspath)
                     inputFiles.from(sourceSet.output.classesDirs.asFileTree.matching {
                         include("**/*.class")
                     })
                 }
+
+                val resourceDir = sourceSet.output.resourcesDir!!
                 val processJandexIndex = tasks.register(
                     getTaskName(sourceSet),
                     JandexProcessResources::class
                 ) {
-                    description = "Copies Jandex index for $sourceSet to the resources"
-                    destinationDir = sourceSet.output.resourcesDir!!
+                    description = "Copies Jandex index for $sourceSetName to the resources"
+                    destinationDir = resourceDir
+                    jandexBuildAction.set(task.flatMap { it.jandexBuildAction })
                     onlyIf {
-                        task.get().jandexBuildAction.get() != JandexBuildAction.NONE
+                        jandexBuildAction.get() != JandexBuildAction.NONE
                     }
                     into(indexDestinationPath) {
                         from(task.map {

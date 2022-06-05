@@ -31,6 +31,13 @@ abstract class JandexProcessResources : ProcessResources() {
     @get:Input
     abstract val indexDestinationPath: Property<String>
 
+    @get:Input
+    abstract val jandexBuildAction: Property<JandexBuildAction>
+
+    init {
+        jandexBuildAction.convention(JandexBuildAction.BUILD_AND_INCLUDE)
+    }
+
     init {
         indexDestinationPath.convention("META-INF")
     }
