@@ -11,6 +11,8 @@
 /plugins/out/
 /plugins/*/bin/
 /plugins/*/out/
+/*/build/
+/*/out/
 
 # Ignore Gradle project-specific cache directory
 .gradle

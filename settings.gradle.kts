@@ -33,6 +33,7 @@ rootProject.name = "vlsi-release-plugins"
 
 include(
     "plugins",
+    "testkit",
     "plugins:gradle-extensions-plugin",
     "plugins:checksum-dependency-plugin",
     "plugins:crlf-plugin",

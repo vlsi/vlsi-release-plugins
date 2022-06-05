@@ -44,6 +44,7 @@ subprojects {
 
     dependencies {
         "testImplementation"("org.junit.jupiter:junit-jupiter:5.4.2")
+        "testImplementation"(project(":testkit"))
     }
 
     val pluginDisplayName = project.property("plugin.display.name") as String

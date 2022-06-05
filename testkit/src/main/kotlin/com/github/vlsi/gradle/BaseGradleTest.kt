@@ -17,10 +17,16 @@
 package com.github.vlsi.gradle
 
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.util.GradleVersion
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 
 open class BaseGradleTest {
+    enum class ConfigurationCache {
+        ON, OFF
+    }
+
     protected val gradleRunner = GradleRunner.create().withPluginClasspath()
 
     @TempDir
@@ -47,4 +53,24 @@ open class BaseGradleTest {
             .withProjectDir(projectDir.toFile())
             .withArguments(*arguments)
             .forwardOutput()
+
+    protected fun enableConfigurationCache(
+        gradleVersion: String,
+        configurationCache: ConfigurationCache
+    ) {
+        if (configurationCache != ConfigurationCache.ON) {
+            return
+        }
+        if (GradleVersion.version(gradleVersion) < GradleVersion.version("7.0")) {
+            Assertions.fail<Unit>("Gradle version $gradleVersion does not support configuration cache")
+        }
+        // Gradle 6.5 expects values ON, OFF, WARN, so we add the option for 7.0 only
+        projectDir.resolve("gradle.properties").toFile().appendText(
+            """
+
+            org.gradle.unsafe.configuration-cache=true
+            org.gradle.unsafe.configuration-cache-problems=fail
+            """.trimIndent()
+        )
+    }
 }
