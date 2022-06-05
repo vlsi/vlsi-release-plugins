@@ -59,7 +59,12 @@ import java.util.jar.JarFile
 import javax.inject.Inject
 import kotlin.collections.set
 
-data class LicenseInfo(val license: LicenseExpression?, val file: File?, val licenseFiles: File?)
+data class LicenseInfo(
+    val license: LicenseExpression?,
+    val file: File?,
+    val licenseFiles: File?,
+    val licenseFilePath: String
+)
 
 fun moduleComponentId(group: String, artifact: String, version: String): ModuleComponentIdentifier =
     DefaultModuleComponentIdentifier.newId(
@@ -457,7 +462,8 @@ open class GatherLicenseTask @Inject constructor(
         allDependencies[compId] = LicenseInfo(
             license = if (licenseOverride?.expectedLicense == null) licenseOverride?.effectiveLicense else null,
             file = artifactFile,
-            licenseFiles = artLicenseTexts
+            licenseFiles = artLicenseTexts,
+            licenseFilePath = outDir
         )
 
         val licenseFiles =

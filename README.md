@@ -87,6 +87,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.80
+* license-gather: use META-INF/licenses/$group/$module-$version for storing license files in jar
+
 v1.79
 * license-gather: avoid generating directories that end with .jar to workaround OpenJDK's JarIndex issue
 

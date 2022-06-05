@@ -83,7 +83,8 @@ class MetadataStoreTest {
                     LicenseInfo(
                         license = licenseExpression,
                         file = null,
-                        licenseFiles = File(root, "def")
+                        licenseFiles = File(root, "def"),
+                        licenseFilePath = "def"
                     )
         )
         MetadataStore.save(sw, root, DependencyInfo(metadata))

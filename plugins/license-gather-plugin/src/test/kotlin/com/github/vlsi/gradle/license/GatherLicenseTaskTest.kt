@@ -367,7 +367,7 @@ class GatherLicenseTaskTest {
               </components>
             </license-list>
             """.trimIndent().normalizeEol() + "\n",
-            result.output.normalizeEol().replace("texts\\", "texts/")
+            result.output.normalizeEol()
         )
     }
 

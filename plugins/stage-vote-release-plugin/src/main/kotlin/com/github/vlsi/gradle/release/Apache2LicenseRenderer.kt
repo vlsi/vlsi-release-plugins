@@ -139,10 +139,11 @@ open class Apache2LicenseRenderer @Inject constructor(
         val dstSpec = dependencyLicenses.get().into(dependencySubfoder.get())
         dependencies
             .asSequence()
-            .mapNotNull { it.value.licenseFiles }
+            .map { it.value }
+            .filter { it.licenseFiles != null }
             .forEach {
-                dstSpec.into(it.name) {
-                    from(it)
+                dstSpec.into(it.licenseFilePath) {
+                    from(it.licenseFiles!!)
                 }
             }
     }

@@ -106,11 +106,13 @@ object MetadataStore {
             xml["components"].getList("component")
                 .associate {
                     val (g, a, v) = it.attr("id").split(":")
+                    val licenseFilePath = it.attr("licenseFiles")
                     moduleComponentId(g, a, v) to
                             LicenseInfo(
                                 license = it["license-expression"].getList("*").first().readLicenseExpression(),
                                 file = null, //File(relativePath, it.attr("file")),
-                                licenseFiles = File(relativePath, it.attr("licenseFiles"))
+                                licenseFiles = File(relativePath, licenseFilePath),
+                                licenseFilePath = licenseFilePath.removePrefix("texts/")
                             )
                 }
         )
@@ -141,7 +143,7 @@ object MetadataStore {
                             //     params["file"] = it.relativeTo(folder).path
                             // }
                             licenseFiles?.let {
-                                params["licenseFiles"] = it.relativeTo(folder).path
+                                params["licenseFiles"] = it.relativeTo(folder).path.replace('\\', '/')
                             }
                         }
                         "component"(params) {
