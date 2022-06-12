@@ -78,7 +78,7 @@ fun Test.printTestResults(
     fun printResult(descriptor: TestDescriptor, result: TestResult) {
         sb.clear()
         val test = descriptor as org.gradle.api.internal.tasks.testing.TestDescriptorInternal
-        val classDisplayName = test.className.withDisplayName(test.classDisplayName)
+        val classDisplayName = (test.className ?: test.parent?.className).withDisplayName(test.classDisplayName)
         val testDisplayName = test.name.withDisplayName(test.displayName)
         val durationMillis = result.endTime - result.startTime
         val formattedDuration = "%5.1fsec".format(durationMillis / 1000f)

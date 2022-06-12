@@ -87,6 +87,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.82
+* gradle-extensions: render class name for JUnit4 parameterized tests with several test methods (they treated as suites in Gradle 7)
+
 v1.81
 * jandex: add @IgnoreEmptyDirectories to fix Gradle 7 warning
 * gettext: add @IgnoreEmptyDirectories to fix Gradle 7 warning
