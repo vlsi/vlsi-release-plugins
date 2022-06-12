@@ -87,6 +87,10 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.81
+* jandex: add @IgnoreEmptyDirectories to fix Gradle 7 warning
+* gettext: add @IgnoreEmptyDirectories to fix Gradle 7 warning
+
 v1.80
 * license-gather: use META-INF/licenses/$group/$module-$version for storing license files in jar
 * jandex: support Gradle Configuration Cache

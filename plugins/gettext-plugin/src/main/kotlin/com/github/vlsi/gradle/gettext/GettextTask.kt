@@ -17,6 +17,7 @@
 package com.github.vlsi.gradle.gettext
 
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.tasks.IgnoreEmptyDirectories
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
@@ -47,6 +48,7 @@ open class GettextTask @Inject constructor(
 
     @InputFiles
     @SkipWhenEmpty
+    @IgnoreEmptyDirectories
     @PathSensitive(PathSensitivity.RELATIVE)
     val sourceFiles = objects.fileCollection()
 
