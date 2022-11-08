@@ -41,6 +41,7 @@ buildscript {
             val version = findProperty("released.version")
             classpath("com.github.vlsi.stage-vote-release:com.github.vlsi.stage-vote-release.gradle.plugin:$version")
         }
+        classpath("org.ajoberstar.grgit:grgit-gradle:4.1.1")
     }
 }
 
