@@ -44,7 +44,7 @@ class JandexPluginTest : BaseGradleTest() {
                 add(arguments("7.0", ConfigurationCache.ON))
                 add(arguments("7.4.2", ConfigurationCache.ON))
                 // Configuration cache supports custom caches since 7.5 only: https://github.com/gradle/gradle/issues/14874
-                add(arguments("7.5-20220421031748+0000", ConfigurationCache.ON))
+                add(arguments("7.5.1", ConfigurationCache.ON))
             }
         }
     }
