@@ -87,6 +87,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.84
+* no-op release, since some of the plugins failed to publish to Gradle Plugin Portal in v1.83
+
 v1.83
 * stage-vote-release: bump grgit to 4.1.1
 
