@@ -42,6 +42,8 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier
 import org.gradle.kotlin.dsl.dependencies
@@ -106,6 +108,7 @@ open class GatherLicenseTask @Inject constructor(
     }
 
     @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
     val configurations = objectFactory.setProperty<Configuration>()
 
     @Input
@@ -172,6 +175,7 @@ open class GatherLicenseTask @Inject constructor(
 
     @InputFiles
     @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
     val extraLicenseDir = objectFactory.directoryProperty().convention(
         project.layout.projectDirectory.dir("licenses")
     )
