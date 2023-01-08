@@ -108,7 +108,7 @@ open class GatherLicenseTask @Inject constructor(
     }
 
     @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
+    @PathSensitive(PathSensitivity.NONE)
     val configurations = objectFactory.setProperty<Configuration>()
 
     @Input
