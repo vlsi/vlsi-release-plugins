@@ -336,17 +336,17 @@ class ChecksumDependency(
             append("\n")
         }
         append("Checksum/PGP violations detected on resolving configuration ")
-            .appendln(name)
+            .appendPlatformLine(name)
         violations
             .groupByTo(TreeMap(), { it.second }, { it.first })
             .forEach { (violation, artifacts) ->
-                append("  ").append(violation).appendln(":")
+                append("  ").append(violation).appendPlatformLine(":")
                 artifacts
                     .asSequence()
                     .map { "${it.id.dependencyNotation} (pgp=${it.pgpKeys.hexKeys}, sha512=${it.sha512.ifEmpty { "[computation skipped]" }})" }
                     .sorted()
                     .forEach {
-                        append("    ").appendln(it)
+                        append("    ").appendPlatformLine(it)
                     }
             }
         return this
@@ -362,7 +362,7 @@ class ChecksumDependency(
             sb.appendViolations(configuration, violations)
         }
         if (failOn == FailOn.FIRST_ERROR) {
-            sb.appendln("\nThere might be more checksum violations," +
+            sb.appendPlatformLine("\nThere might be more checksum violations," +
                     " however, current configuration specifies the build to fail on the first violation.")
             sb.append("You might use the following properties:" +
                     "\n  * -PchecksumIgnore temporary disables checksum-dependency-plugin (e.g. to try new dependencies)")
@@ -371,7 +371,7 @@ class ChecksumDependency(
                     "\n  * -PchecksumUpdate updates checksum.xml and it will fail after the first violation so you can review the diff"
                 )
             }
-            sb.appendln(
+            sb.appendPlatformLine(
                     "\n  * -PchecksumUpdateAll (insecure) updates checksum.xml with all the new discovered checksums" +
                     "\n  * -PchecksumFailOn=build_finish (insecure) It will postpone the failure till the build finish"
             )

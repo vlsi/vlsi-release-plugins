@@ -65,7 +65,9 @@ open class GettextTask @Inject constructor(
         val inputFilesList = File(project.buildDir, "gettext/$name/input_files.txt")
         val baseDir = project.projectDir
         inputFilesList.writer().buffered().use { f ->
-            sourceFiles.files.forEach { f.appendln(it.relativeTo(baseDir).path) }
+            sourceFiles.files.forEach {
+                f.append(it.relativeTo(baseDir).path).append(System.lineSeparator())
+            }
         }
 
         val cmd = executable.get()

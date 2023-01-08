@@ -54,7 +54,7 @@ buildscript {
     fun String.v(): String = extra["$this.version"] as String
 
     dependencies {
-        if (property("noverify")?.ifEmpty { "false" } ?.toBoolean() == true) {
+        if (property("noverify")?.ifEmpty { "false" }?.toBoolean() == true) {
             // skip
         } else if (property("localCdp")?.ifEmpty { "true" }?.toBoolean() == true) {
             // Below enables use of locally built file for testing purposes
@@ -122,7 +122,7 @@ val violations =
         .joinToString("\n  ") { (file, sha512) -> "SHA-512(${file.name}) = $sha512 ($file)" }
 
 // This enables to skip checksum-dependency which is helpful for checksum-dependency development
-if (property("noverify")?.ifEmpty { "false" } ?.toBoolean() != true) {
+if (property("noverify")?.ifEmpty { "false" }?.toBoolean() != true) {
     if (violations.isNotBlank()) {
         val msg = "Buildscript classpath has non-whitelisted files:\n  $violations"
         if (property("localCdp")?.ifEmpty { "true" }?.toBoolean() == true) {

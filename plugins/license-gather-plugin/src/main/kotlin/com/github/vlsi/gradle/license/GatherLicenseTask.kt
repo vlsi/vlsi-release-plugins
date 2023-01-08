@@ -17,6 +17,7 @@
 
 package com.github.vlsi.gradle.license
 
+import com.github.vlsi.gradle.appendPlatformLine
 import com.github.vlsi.gradle.license.api.DependencyInfo
 import com.github.vlsi.gradle.license.api.JustLicense
 import com.github.vlsi.gradle.license.api.License
@@ -412,12 +413,12 @@ open class GatherLicenseTask @Inject constructor(
         val sb = StringBuilder()
         if (missingLicenseId.isNotEmpty()) {
             sb.appendTitle("LicenseID is not specified for components")
-            missingLicenseId.map { it.displayName }.sorted().forEach { sb.appendln("* $it") }
+            missingLicenseId.map { it.displayName }.sorted().forEach { sb.appendPlatformLine("* $it") }
         }
         if (nonModuleDependency.isNotEmpty()) {
             sb.appendTitle("Only ModuleComponentIdentifier are supported for now")
             missingLicenseId.sortedBy { it.displayName }
-                .forEach { sb.appendln("* ${it.displayName} (${it::class.simpleName}") }
+                .forEach { sb.appendPlatformLine("* ${it.displayName} (${it::class.simpleName}") }
         }
         if (missingLicenseFile.isNotEmpty()) {
             sb.appendTitle("LICENSE-like files are missing")
@@ -426,9 +427,9 @@ open class GatherLicenseTask @Inject constructor(
                     TreeMap(nullsFirst(LicenseExpression.NATURAL_ORDER))
                 ) { allDependencies[it]?.license }
                 .forEach { (license, ids) ->
-                    sb.appendln()
-                    sb.appendln(license ?: "Unknown license")
-                    ids.map { it.displayName }.forEach { sb.appendln("* $it") }
+                    sb.appendPlatformLine()
+                    sb.appendPlatformLine(license?.toString() ?: "Unknown license")
+                    ids.map { it.displayName }.forEach { sb.appendPlatformLine("* $it") }
                 }
         }
         val unusedOverrides = licenseOverrides.unusedOverrides
@@ -492,8 +493,8 @@ open class GatherLicenseTask @Inject constructor(
         if (isNotEmpty()) {
             append("\n")
         }
-        appendln(title)
-        appendln("=".repeat(title.length))
+        appendPlatformLine(title)
+        appendPlatformLine("=".repeat(title.length))
     }
 
     private fun findManifestLicenses(

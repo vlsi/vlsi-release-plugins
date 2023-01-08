@@ -33,7 +33,7 @@ object ReportBuildFailures : BuildAdapter() {
             gradle.rootProject.createThrowablePrinter()
         }
         throwablePrinter.indent = "    "
-        sb.appendln()
+        sb.appendPlatformLine()
         sb.append(result.action).append(" ")
         sb.withStyle(Style.BOLD) {
             append(gradle?.rootProject?.name ?: "unknown rootProject")
@@ -45,7 +45,7 @@ object ReportBuildFailures : BuildAdapter() {
         }
         // Sometimes the message interferes with Gradle's progress bar.
         // So we print extra spaces so the garbage after "reason" is wiped out.
-        sb.appendln(" reason:                                ")
+        sb.appendPlatformLine(" reason:                                ")
         throwablePrinter.print(failure, sb)
         if (throwablePrinter.interestingCases > 0 || throwablePrinter.classExcludes.isEmpty()) {
             println(sb.toString())

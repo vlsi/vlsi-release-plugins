@@ -16,6 +16,7 @@
  */
 package com.github.vlsi.gradle.git
 
+import com.github.vlsi.gradle.appendPlatformLine
 import org.eclipse.jgit.attributes.Attribute
 import org.eclipse.jgit.attributes.Attributes
 import org.eclipse.jgit.attributes.AttributesHandler
@@ -81,9 +82,9 @@ class DirectorySet<E> {
         StringBuilder().also {
             for ((path, value) in files.entries) {
                 if (it.isNotEmpty()) {
-                    it.appendln()
+                    it.appendPlatformLine()
                 }
-                it.append("# ").appendln(path)
+                it.append("# ").appendPlatformLine(path)
                 it.append(value)
             }
         }.toString()
@@ -199,11 +200,11 @@ class GitIgnoreNode(
 
     private fun appendNode(sb: StringBuilder) {
         if (sb.isNotEmpty()) {
-            sb.appendln()
+            sb.appendPlatformLine()
         }
         for (rule in ignoreNode.rules) {
             sb.appendIgnoreRule(rule)
-            sb.appendln()
+            sb.appendPlatformLine()
         }
     }
 
@@ -254,11 +255,11 @@ class GitAttributesNode(
 
     private fun appendNode(sb: StringBuilder) {
         if (sb.isNotEmpty()) {
-            sb.appendln()
+            sb.appendPlatformLine()
         }
         for (rule in attributesNode.rules) {
             sb.appendAttributesRule(rule)
-            sb.appendln()
+            sb.appendPlatformLine()
         }
     }
 

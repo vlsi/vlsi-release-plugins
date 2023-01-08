@@ -173,7 +173,7 @@ class ThrowablePrinter {
             if (!dejaVu.add(throwable)) {
                 out.append(indent).append(causeTitle)
                 val simpleName = throwable.javaClass.simpleName
-                out.append("[CIRCULAR REFERENCE ").append(simpleName).appendln("]")
+                out.append("[CIRCULAR REFERENCE ").append(simpleName).appendPlatformLine("]")
                 continue
             }
 
@@ -203,7 +203,7 @@ class ThrowablePrinter {
                     }
                     out.append(causeTitle).append(title)
                 }
-                out.appendln()
+                out.appendPlatformLine()
             }
 
             if (throwable is PlaceholderException &&
@@ -211,7 +211,7 @@ class ThrowablePrinter {
                 throwable.suppressed.isEmpty()
             ) {
                 out.append(indent)
-                out.appendln("    ^ stacktrace is not available, see https://github.com/ota4j-team/opentest4j/issues/64")
+                out.appendPlatformLine("    ^ stacktrace is not available, see https://github.com/ota4j-team/opentest4j/issues/64")
             }
 
             val ourStack = if (hideStacktrace) {
@@ -282,13 +282,13 @@ class ThrowablePrinter {
                 out.ifStyled {
                     switchTo(style)
                 }
-                out.append("at ").appendln(element.toString())
+                out.append("at ").appendPlatformLine(element.toString())
                 out.ifStyled { switchTo(prevStyle) }
             }
             if (lastFrame != ourStack.lastIndex) {
                 out.ifStyled { switchTo(faintStyle) }
                 out.append(nextIndent).append("... ")
-                out.append((ourStack.lastIndex - lastFrame).toString()).appendln(" more")
+                out.append((ourStack.lastIndex - lastFrame).toString()).appendPlatformLine(" more")
             }
             out.ifStyled {
                 switchTo(prevStyle)

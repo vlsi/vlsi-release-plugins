@@ -16,6 +16,7 @@
  */
 package com.github.vlsi.gradle.test.dsl
 
+import com.github.vlsi.gradle.appendPlatformLine
 import com.github.vlsi.gradle.createThrowablePrinter
 import com.github.vlsi.gradle.github.GitHubActionsLogger
 import com.github.vlsi.gradle.properties.dsl.props
@@ -112,7 +113,7 @@ fun Test.printTestResults(
             }
             if (showStacktrace) {
                 result.exceptions.forEach {
-                    sb.appendln()
+                    sb.appendPlatformLine()
                     throwablePrinter.print(it, sb)
                 }
             }
@@ -131,7 +132,7 @@ fun Test.printTestResults(
                 val msg = StringBuilder()
                 msg.append(formattedDuration).append(" ").append(displayName)
                 result.exceptions.forEach {
-                    msg.appendln()
+                    msg.appendPlatformLine()
                     throwablePrinter.print(it, msg, baseIndent = "")
                 }
                 println(

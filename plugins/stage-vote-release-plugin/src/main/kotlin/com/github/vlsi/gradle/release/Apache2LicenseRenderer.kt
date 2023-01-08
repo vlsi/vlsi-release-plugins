@@ -106,14 +106,14 @@ open class Apache2LicenseRenderer @Inject constructor(
             val license = mainLicenseFile.orNull?.asFile?.readText()
                 ?: mainLicenseText.orNull
                 ?: SpdxLicense.Apache_2_0.text
-            out.appendln(license)
+            out.appendPlatformLine(license)
 
             if (dependencies.isNotEmpty() && dependencySubfoder.get().isNotEmpty()) {
-                out.appendln(
+                out.appendPlatformLine(
                     "Additional License files can be found in the '${dependencySubfoder.get()}' folder " +
                             "located in the same directory as the LICENSE file (i.e. this file)"
                 )
-                out.appendln()
+                out.appendPlatformLine()
             }
             dependencies
                 .map { (id, licenseInfo) ->
@@ -123,7 +123,7 @@ open class Apache2LicenseRenderer @Inject constructor(
                     licenseGroupOf(id, license)
                 }
                 .forEach { (licenseGroup, components) ->
-                    out.appendln(licenseGroup.title)
+                    out.appendPlatformLine(licenseGroup.title)
                     out.appendComponents(components)
 
                     if (licenseGroup != LicenseGroup.OTHER) {
@@ -155,10 +155,10 @@ open class Apache2LicenseRenderer @Inject constructor(
             .groupByTo(TreeMap(nullsFirst(LicenseExpression.NATURAL_ORDER)),
                 { it.second }, { it.first })
             .forEach { (license, components) ->
-                appendln()
-                appendln(license?.toString() ?: "Unknown license")
+                appendPlatformLine()
+                appendPlatformLine(license?.toString() ?: "Unknown license")
                 components.forEach {
-                    appendln("* ${it.displayName}")
+                    appendPlatformLine("* ${it.displayName}")
                 }
             }
 
