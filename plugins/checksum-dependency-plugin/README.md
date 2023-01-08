@@ -500,6 +500,7 @@ Changelog
 ---------
 v1.85
 * Cache public PGP keys under `%{ROOT_DIR}/gradle/checksum-dependency-plugin/cached-pgp-keys` directory
+* Bump org.bouncycastle:bcpg-jdk15on to 1.70
 
 v1.78
 * Retrieve keys from https://keyserver.ubuntu.com, and https://keys.openpgp.org by default (drop SKS keyserver pool since it has been deprecated)

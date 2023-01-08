@@ -59,7 +59,7 @@ buildscript {
         } else if (property("localCdp")?.ifEmpty { "true" }?.toBoolean() == true) {
             // Below enables use of locally built file for testing purposes
             classpath(files("plugins/checksum-dependency-plugin/build/libs/checksum-dependency-plugin-${"project".v()}.jar"))
-            classpath("org.bouncycastle:bcpg-jdk15on:1.62")
+            classpath("org.bouncycastle:bcpg-jdk15on:1.70")
             classpath("com.squareup.okhttp3:okhttp:4.1.0") {
                 exclude("org.jetbrains.kotlin", "kotlin-stdlib")
             }

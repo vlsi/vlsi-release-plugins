@@ -90,6 +90,7 @@ Change log
 v1.85
 * licence-gather: better support for build cache by adding PathSensitivity
 * checksum-dependency: cache PGP public keys under `%{ROOT_DIR}/gradle/checksum-dependency-plugin/cached-pgp-keys`
+* checksum-dependency: bump org.bouncycastle:bcpg-jdk15on to 1.70
 
 v1.84
 * no-op release, since some of the plugins failed to publish to Gradle Plugin Portal in v1.83

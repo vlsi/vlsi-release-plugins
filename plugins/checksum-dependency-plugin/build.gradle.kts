@@ -16,7 +16,7 @@
  */
 
 dependencies {
-    implementation("org.bouncycastle:bcpg-jdk15on:1.62")
+    implementation("org.bouncycastle:bcpg-jdk15on:1.70")
     implementation("com.squareup.okhttp3:okhttp:4.1.0")
 }
 
