@@ -499,6 +499,9 @@ Verification options
 
 Changelog
 ---------
+v1.86
+* Use full fingerprint for PGP verification
+
 v1.85
 * Cache public PGP keys under `%{ROOT_DIR}/gradle/checksum-dependency-plugin/cached-pgp-keys` directory
 * Bump org.bouncycastle:bcpg-jdk15on to 1.70

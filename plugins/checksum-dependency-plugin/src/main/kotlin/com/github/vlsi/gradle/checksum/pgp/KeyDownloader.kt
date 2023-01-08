@@ -17,7 +17,6 @@
 package com.github.vlsi.gradle.checksum.pgp
 
 import com.github.vlsi.gradle.checksum.debug
-import com.github.vlsi.gradle.checksum.hexKey
 import java.net.InetAddress
 import java.net.URI
 import java.time.Duration
@@ -60,19 +59,17 @@ class KeyDownloader(
         )
 
     // Sample URL: https://keyserver.ubuntu.com/pks/lookup?op=vindex&fingerprint=on&search=0xbcf4173966770193
-    private fun URI.retrieveKeyUri(keyId: Long, inetAddress: InetAddress) =
+    private fun URI.retrieveKeyUri(keyId: PgpKeyId, inetAddress: InetAddress) =
         URI(
             scheme, userInfo, host, port, "/pks/lookup",
-            "op=get&options=mr&search=0x${keyId.hexKey}", null
+            "op=get&options=mr&search=0x$keyId", null
         )
 
-    fun findKey(keyId: String, comment: String) = findKey(`java.lang`.Long.parseUnsignedLong(keyId, 16), comment)
-
-    fun findKey(keyId: Long, comment: String): ByteArray? =
-        retry("Downloading key ${keyId.hexKey} for $comment") {
+    fun findKey(keyId: PgpKeyId, comment: String): ByteArray? =
+        retry("Downloading key $keyId for $comment") {
             val url = uri.prepare.retrieveKeyUri(keyId, inetAddress)
                 .toURL()
-            logger.debug { "Downloading PGP key ${keyId.hexKey} from $inetAddress, url: $url" }
+            logger.debug { "Downloading PGP key $keyId from $inetAddress, url: $url" }
             val request = Request.Builder()
                 .url(url)
                 .build()

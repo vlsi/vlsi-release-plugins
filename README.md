@@ -87,6 +87,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.86
+* checksum-dependency: use full fingerprint for PGP verification
+
 v1.85
 * licence-gather: better support for build cache by adding PathSensitivity
 * checksum-dependency: cache PGP public keys under `%{ROOT_DIR}/gradle/checksum-dependency-plugin/cached-pgp-keys`
