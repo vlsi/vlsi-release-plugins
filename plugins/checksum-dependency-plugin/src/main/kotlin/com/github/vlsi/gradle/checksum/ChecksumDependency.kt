@@ -219,8 +219,9 @@ class ChecksumDependency(
             val signatures = art.file.toSignatureList()
             keysToVerify[art] = signatures
             for (sign in signatures) {
-                if (verificationDb.isIgnored(sign.keyID)) {
-                    logger.debug("Public key ${sign.keyID.hexKey} is ignored via <ignored-keys>, so ${art.id.artifactDependency} is assumed to be not signed with that key")
+                val signKey = sign.pgpShortKeyId
+                if (verificationDb.isIgnored(signKey)) {
+                    logger.debug("Public key $signKey is ignored via <ignored-keys>, so ${art.id.artifactDependency} is assumed to be not signed with that key")
                     continue
                 }
             }
@@ -235,31 +236,35 @@ class ChecksumDependency(
                 logger.debug { "Resolved signature $signatureDependency" }
                 receivedSignatures.add(signatureDependency)
                 for (sign in art.file.toSignatureList()) {
-                    if (verificationDb.isIgnored(sign.keyID)) {
-                        logger.debug("Public key ${sign.keyID.hexKey} is ignored via <ignored-keys>, so ${art.id.artifactDependency} is assumed to be not signed with that key")
+                    val signKey = sign.pgpShortKeyId
+                    if (verificationDb.isIgnored(signKey)) {
+                        logger.debug("Public key $signKey is ignored via <ignored-keys>, so ${art.id.artifactDependency} is assumed to be not signed with that key")
                         continue
                     }
                     val verifySignature = keyStore
-                        .getKeyAsync(sign.keyID, signatureDependency, executors)
-                        .thenAcceptAsync({ publicKey ->
-                            if (publicKey == null) {
-                                logger.warn("Public key ${sign.keyID.hexKey} is not found. The key was used to sign ${art.id.artifactDependency}." +
+                        .getKeyAsync(signKey, signatureDependency, executors)
+                        .thenAcceptAsync({ publicKeys ->
+                            if (publicKeys.isEmpty()) {
+                                logger.warn("Public key $signKey is not found. The key was used to sign ${art.id.artifactDependency}." +
                                         " Please ask dependency author to publish the PGP key otherwise signature verification is not possibles")
-                                verificationDb.ignoreKey(sign.keyID)
+                                verificationDb.ignoreKey(signKey)
                                 return@thenAcceptAsync
                             }
-                            logger.debug { "Verifying signature ${sign.keyID.hexKey} for ${art.id.artifactDependency}" }
-                            val file = originalFiles[dependencyChecksum.id]!!
-                            val validSignature = signatureVerificationTimer(file.length()) {
-                                verifySignature(file, sign, publicKey)
-                            }
-                            if (validSignature) {
-                                synchronized(dependencyChecksum) {
-                                    dependencyChecksum.pgpKeys += sign.keyID
+                            for (publicKey in publicKeys) {
+                                val fullKeyId = publicKey.pgpFullKeyId
+                                logger.debug { "Verifying signature $fullKeyId for ${art.id.artifactDependency}" }
+                                val file = originalFiles[dependencyChecksum.id]!!
+                                val validSignature = signatureVerificationTimer(file.length()) {
+                                    verifySignature(file, sign, publicKey)
                                 }
-                            }
-                            logger.log(if (validSignature) LogLevel.DEBUG else LogLevel.LIFECYCLE) {
-                                "${if (validSignature) "OK" else "KO"}: verification of ${art.id.artifactDependency} via ${publicKey.keyID.hexKey}"
+                                if (validSignature) {
+                                    synchronized(dependencyChecksum) {
+                                        dependencyChecksum.pgpKeys += fullKeyId
+                                    }
+                                }
+                                logger.log(if (validSignature) LogLevel.DEBUG else LogLevel.LIFECYCLE) {
+                                    "${if (validSignature) "OK" else "KO"}: verification of ${art.id.artifactDependency} via $fullKeyId"
+                                }
                             }
                         }, executors.cpu)
                     verifyPgpTasks.add(verifySignature)
@@ -326,7 +331,14 @@ class ChecksumDependency(
     }
 
     private fun verifySignature(file: File, sign: PGPSignature, publicKey: PGPPublicKey): Boolean {
-        sign.init(BcPGPContentVerifierBuilderProvider(), publicKey)
+        try {
+            sign.init(BcPGPContentVerifierBuilderProvider(), publicKey)
+        } catch (e: Throwable) {
+            e.addSuppressed(
+                Throwable("Verifying $file with key ${publicKey.pgpFullKeyId}, sign ${sign.pgpShortKeyId}")
+            )
+            throw e
+        }
         file.forEachBlock { block, size -> sign.update(block, 0, size) }
         return sign.verify()
     }
@@ -343,7 +355,7 @@ class ChecksumDependency(
                 append("  ").append(violation).appendPlatformLine(":")
                 artifacts
                     .asSequence()
-                    .map { "${it.id.dependencyNotation} (pgp=${it.pgpKeys.hexKeys}, sha512=${it.sha512.ifEmpty { "[computation skipped]" }})" }
+                    .map { "${it.id.dependencyNotation} (pgp=${it.pgpKeys}, sha512=${it.sha512.ifEmpty { "[computation skipped]" }})" }
                     .sorted()
                     .forEach {
                         append("    ").appendPlatformLine(it)

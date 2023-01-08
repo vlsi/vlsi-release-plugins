@@ -16,11 +16,16 @@
  */
 package com.github.vlsi.gradle.checksum
 
+import com.github.vlsi.gradle.checksum.pgp.PgpKeyId
+import org.bouncycastle.bcpg.ArmoredOutputStream
 import java.io.File
 import java.io.InputStream
 import org.bouncycastle.openpgp.*
 import org.bouncycastle.openpgp.bc.BcPGPObjectFactory
 import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator
+import java.io.ByteArrayOutputStream
+import java.io.OutputStream
+import java.nio.ByteBuffer
 
 fun InputStream.toSignatureList() =
     buffered()
@@ -38,10 +43,56 @@ fun File.toSignatureList() = inputStream().toSignatureList()
 
 val PGPSignature.hexKey: String get() = keyID.hexKey
 
-val Iterable<Long>.hexKeys: String get() = sorted().joinToString(prefix = "[", postfix = "]") { it.hexKey }
+val PGPSignature.pgpShortKeyId: PgpKeyId.Short get() =
+    PgpKeyId.Short(ByteBuffer.allocate(8).putLong(keyID).array())
+
+val PGPPublicKey.pgpFullKeyId: PgpKeyId.Full get() =
+    PgpKeyId.Full(fingerprint)
+
+val PGPPublicKey.pgpShortKeyId: PgpKeyId.Short get() =
+    PgpKeyId.Short(ByteBuffer.allocate(8).putLong(keyID).array())
 
 // `java.lang`.Long.toHexString(this) does not generate leading 0
 val Long.hexKey: String get() = "%016x".format(this)
 
 fun InputStream.readPgpPublicKeys() =
     PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(this), BcKeyFingerprintCalculator())
+
+fun PGPPublicKeyRingCollection.publicKeysWithId(keyId: PgpKeyId.Short) =
+    keyRings.asSequence()
+        .flatMap { keyRing ->
+            keyRing.asSequence().filter { it.keyID == keyId.keyId }
+        }
+
+/**
+ * Remove all UserIDs and Signatures to avoid storing personally identifiable information.
+ */
+fun PGPPublicKeyRingCollection.strip() =
+    PGPPublicKeyRingCollection(
+            toList()
+            .map { pgpPublicKeyRing ->
+                PGPPublicKeyRing(
+                    pgpPublicKeyRing
+                        .map {
+                            it.signatures.asSequence()
+                                .fold(it) { key, signature ->
+                                    PGPPublicKey.removeCertification(key, signature)
+                                }
+                        }
+                        .map {
+                            it.rawUserIDs.asSequence()
+                                .fold(it) { key, userId ->
+                                    PGPPublicKey.removeCertification(key, userId)
+                                }
+                        }
+                )
+            }
+    )
+
+fun armourEncode(body: (OutputStream) -> Unit) =
+    ByteArrayOutputStream().apply {
+        ArmoredOutputStream(this).use {
+            it.clearHeaders()
+            body(it)
+        }
+    }.toByteArray()

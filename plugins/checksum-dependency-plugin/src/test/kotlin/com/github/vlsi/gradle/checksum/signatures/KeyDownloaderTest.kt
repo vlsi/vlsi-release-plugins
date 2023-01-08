@@ -17,6 +17,7 @@
 package com.github.vlsi.gradle.checksum.signatures
 
 import com.github.vlsi.gradle.checksum.pgp.KeyDownloader
+import com.github.vlsi.gradle.checksum.pgp.PgpKeyId
 import com.github.vlsi.gradle.checksum.readPgpPublicKeys
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -26,10 +27,10 @@ class KeyDownloaderTest {
 
     @Test
     internal fun goodKey() {
-        val keyId = `java.lang`.Long.parseUnsignedLong("bcf4173966770193", 16)
+        val keyId = PgpKeyId("bcf4173966770193") as PgpKeyId.Short
         val bytes = downloader.findKey(keyId, "KeyDownloaderTest")
         val keys = bytes!!.inputStream().readPgpPublicKeys()
-        val basicInfo = keys.getPublicKey(keyId).let {
+        val basicInfo = keys.getPublicKey(keyId.keyId).let {
             """
                algorithm: ${it.algorithm}
                bitStrength: ${it.bitStrength}

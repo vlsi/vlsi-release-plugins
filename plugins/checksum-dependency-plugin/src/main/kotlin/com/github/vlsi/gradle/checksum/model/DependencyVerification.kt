@@ -17,7 +17,7 @@
 package com.github.vlsi.gradle.checksum.model
 
 import com.github.vlsi.gradle.checksum.debug
-import com.github.vlsi.gradle.checksum.hexKeys
+import com.github.vlsi.gradle.checksum.pgp.PgpKeyId
 import org.gradle.api.artifacts.DependencyArtifact
 import org.gradle.api.logging.Logging
 
@@ -56,7 +56,7 @@ class DependencyChecksum(
     val id: Id
 ) {
     val sha512 = mutableSetOf<String>()
-    val pgpKeys = mutableSetOf<Long>()
+    val pgpKeys = mutableSetOf<PgpKeyId.Full>()
     val verificationConfig: VerificationConfig
         get() =
             VerificationConfig(
@@ -71,19 +71,19 @@ class DependencyChecksum(
         }
 
     override fun toString(): String {
-        return "DependencyChecksum(sha512=$sha512, pgpKeys=${pgpKeys.hexKeys}"
+        return "DependencyChecksum(sha512=$sha512, pgpKeys=$pgpKeys"
     }
 }
 
 class DependencyVerification(val defaultVerificationConfig: VerificationConfig) {
-    val ignoredKeys = mutableSetOf<Long>()
+    val ignoredKeys = mutableSetOf<PgpKeyId>()
 
-    val groupKeys = mutableMapOf<String, MutableSet<Long>>()
+    val groupKeys = mutableMapOf<String, MutableSet<PgpKeyId.Full>>()
 
-    fun add(group: String, key: Long): Boolean =
+    fun add(group: String, key: PgpKeyId.Full): Boolean =
         groupKeys.getOrPut(group) { mutableSetOf() }.add(key)
 
-    fun groupKeys(group: String): Set<Long>? = groupKeys[group]
+    fun groupKeys(group: String): Set<PgpKeyId.Full>? = groupKeys[group]
 
     val dependencies = mutableMapOf<Id, DependencyChecksum>()
 
@@ -100,7 +100,7 @@ class DependencyVerification(val defaultVerificationConfig: VerificationConfig) 
         }
 
     override fun toString(): String {
-        return "DependencyVerification(ignoredKeys=${ignoredKeys.hexKeys}, trustedKeys=${groupKeys.mapValues { it.value.hexKeys }}, dependencies=$dependencies)"
+        return "DependencyVerification(ignoredKeys=$ignoredKeys, trustedKeys=${groupKeys.mapValues { it.value.toString() }}, dependencies=$dependencies)"
     }
 }
 
@@ -123,9 +123,9 @@ class DependencyVerificationDb(
     fun getConfigFor(id: Id): VerificationConfig =
         verification.dependencies[id]?.verificationConfig ?: verification.defaultVerificationConfig
 
-    fun isIgnored(key: Long) = verification.ignoredKeys.contains(key)
+    fun isIgnored(key: PgpKeyId) = verification.ignoredKeys.contains(key)
 
-    fun ignoreKey(key: Long) {
+    fun ignoreKey(key: PgpKeyId) {
         updatedVerification.ignoredKeys += key
         hasUpdates = true
     }
@@ -153,18 +153,18 @@ class DependencyVerificationDb(
                     val pass = groupKeys.any { dependencyChecksum.pgpKeys.contains(it) }
                     logger.debug {
                         "${if (pass) "OK" else "KO"} PGP group verification for $id." +
-                                " The file was signed via ${dependencyChecksum.pgpKeys.hexKeys}," +
-                                " trusted keys for group ${id.group} are ${groupKeys.hexKeys}"
+                                " The file was signed via ${dependencyChecksum.pgpKeys}," +
+                                " trusted keys for group ${id.group} are $groupKeys"
                     }
                     if (pass) {
                         pgpResult = PgpLevel.GROUP
                     } else if (expected == null && verificationConfig.pgp == PgpLevel.GROUP) {
                         details +=
-                            "Trusted PGP keys for group ${id.group} are ${groupKeys.hexKeys}, " +
+                            "Trusted PGP keys for group ${id.group} are $groupKeys, " +
                                     if (dependencyChecksum.pgpKeys.isEmpty()) {
                                         "however no signature found"
                                     } else {
-                                        "however artifact is signed by ${dependencyChecksum.pgpKeys.hexKeys} only"
+                                        "however artifact is signed by ${dependencyChecksum.pgpKeys} only"
                                     }
                     }
                 }
@@ -186,13 +186,13 @@ class DependencyVerificationDb(
                     val pass = expected.pgpKeys.any { dependencyChecksum.pgpKeys.contains(it) }
                     logger.debug {
                         "${if (pass) "OK" else "KO"} PGP module verification for $id." +
-                                " The file was signed via ${dependencyChecksum.pgpKeys.hexKeys}," +
-                                " trusted keys for module are ${expected.pgpKeys.hexKeys}"
+                                " The file was signed via ${dependencyChecksum.pgpKeys}," +
+                                " trusted keys for module are ${expected.pgpKeys}"
                     }
                     if (pass) {
                         pgpResult = PgpLevel.MODULE
                     } else {
-                        details += "Expecting one of the following PGP signatures: ${expected.pgpKeys.hexKeys}, but artifact is signed by ${dependencyChecksum.pgpKeys.hexKeys} only"
+                        details += "Expecting one of the following PGP signatures: ${expected.pgpKeys}, but artifact is signed by ${dependencyChecksum.pgpKeys} only"
                     }
                 }
                 if (expected.sha512.isNotEmpty()) {

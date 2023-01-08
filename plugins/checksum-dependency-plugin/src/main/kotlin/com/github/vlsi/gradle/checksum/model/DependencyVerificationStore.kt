@@ -16,16 +16,16 @@
  */
 package com.github.vlsi.gradle.checksum.model
 
-import com.github.vlsi.gradle.checksum.hexKey
+import com.github.vlsi.gradle.checksum.pgp.PgpKeyId
 import groovy.util.XmlSlurper
 import groovy.util.slurpersupport.GPathResult
 import groovy.xml.MarkupBuilder
-import java.io.File
-import java.io.InputStream
-import java.io.Writer
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.DependencyArtifact
 import org.gradle.kotlin.dsl.withGroovyBuilder
+import java.io.File
+import java.io.InputStream
+import java.io.Writer
 
 private operator fun GPathResult.get(name: String) = getProperty(name) as GPathResult
 
@@ -41,17 +41,36 @@ private fun GPathResult.requiredAttr(name: String): String =
 @Suppress("UNCHECKED_CAST")
 private fun GPathResult.getList(name: String) = getProperty(name) as Iterable<GPathResult>
 
-private val String.parseKey: Long
+private val String.parseKey: PgpKeyId
     get() =
-        `java.lang`.Long.parseUnsignedLong(this, 16)
+        PgpKeyId(this)
 
-private fun GPathResult.toDependencyChecksum(): DependencyChecksum {
+private fun String.parseFullKey(skipUnparseable: Boolean, message: () -> String): PgpKeyId.Full? =
+    parseKey.let {
+        if (it !is PgpKeyId.Full) {
+            val errorMessage =
+                "checksum-dependency-plugin: incorrect key $it specified for ${message()}. " +
+                        "The key should have full length (20 or 16 byte fingerprint) rather than short form. " +
+                        "Short key ids are insecure as collisions are possible, so the short key will be ignored"
+            if (skipUnparseable) {
+                println(errorMessage)
+            } else {
+                throw IllegalArgumentException(errorMessage)
+            }
+            return null
+        }
+        it
+    }
+
+private fun GPathResult.toDependencyChecksum(skipUnparseable: Boolean): DependencyChecksum {
     val id = Id(requiredAttr("group"), requiredAttr("module"), attr("version"),
         attr("classifier").ifBlank { null },
         attr("extension").ifBlank { DependencyArtifact.DEFAULT_TYPE })
     return DependencyChecksum(id).apply {
         sha512 += getList("sha512").map { it.text() }
-        pgpKeys += getList("pgp").map { it.text().parseKey }
+        pgpKeys += getList("pgp").mapNotNull {
+            it.text().parseFullKey(skipUnparseable) { "allowable pgp key for module $id" }
+        }
     }
 }
 
@@ -67,23 +86,27 @@ private fun VerificationConfig.toMap(): Map<String, String> =
     mapOf("pgp" to pgp.name, "checksum" to checksum.name)
 
 object DependencyVerificationStore {
+    const val VERSION_1 = "1"
+    const val VERSION_2 = "2"
+
     @JvmStatic
-    fun load(file: File): DependencyVerification =
+    fun load(file: File, skipUnparseable: Boolean): DependencyVerification =
         file.inputStream().use {
-            load(it, file.absolutePath)
+            load(it, file.absolutePath, skipUnparseable = skipUnparseable)
         }
 
     @JvmStatic
     fun load(
         input: InputStream,
-        fileName: String
+        fileName: String,
+        skipUnparseable: Boolean
     ): DependencyVerification {
         val xml = XmlSlurper().parse(input)
         if (xml.name() != "dependency-verification") {
             throw GradleException("Root tag should be dependency-verification, actual one is ${xml.name()}")
         }
-        xml.requiredAttr("version").let {
-            it == "1" || throw GradleException("Unsupported version ($it) for dependency-verification file $fileName. Please upgrade checksum-dependency plugin")
+        xml.requiredAttr("version").also {
+            it in listOf(VERSION_1, VERSION_2) || throw GradleException("Unsupported version ($it) for dependency-verification file $fileName. Please upgrade checksum-dependency plugin")
         }
         val verificationConfig = xml["trust-requirement"].let {
             if (it.isEmpty) {
@@ -123,7 +146,14 @@ object DependencyVerificationStore {
                 }
             }
             .getList("trusted-key").forEach {
-                result.add(it.requiredAttr("group"), it.requiredAttr("id").parseKey)
+                val group = it.requiredAttr("group")
+                val key = it.requiredAttr("id").parseFullKey(skipUnparseable) { "trusted-key for group $group" }
+                if (key != null) {
+                    result.add(
+                        group,
+                        key
+                    )
+                }
             }
 
         xml["dependencies"]
@@ -133,7 +163,7 @@ object DependencyVerificationStore {
                 }
             }
             .getList("dependency").forEach {
-                val dep = it.toDependencyChecksum()
+                val dep = it.toDependencyChecksum(skipUnparseable)
                 result.dependencies[dep.id] = dep
             }
 
@@ -154,11 +184,11 @@ object DependencyVerificationStore {
                 mkp.xmlDeclaration(mapOf("version" to "1.0", "encoding" to "utf-8"))
             }
             .withGroovyBuilder {
-                "dependency-verification"(mapOf("version" to "1")) {
+                "dependency-verification"(mapOf("version" to VERSION_2)) {
                     "trust-requirement"(verification.defaultVerificationConfig.toMap())
                     "ignored-keys" {
                         verification.ignoredKeys
-                            .map { it.hexKey }
+                            .map { it.toString() }
                             .sorted()
                             .forEach {
                                 "ignored-key"(mapOf("id" to it))
@@ -166,7 +196,7 @@ object DependencyVerificationStore {
                     }
                     "trusted-keys" {
                         verification.groupKeys
-                            .flatMap { (group, keys) -> keys.map { group to it.hexKey } }
+                            .flatMap { (group, keys) -> keys.map { group to it.toString() } }
                             .sortedWith(compareBy({ it.first }, { it.second }))
                             .forEach {
                                 "trusted-key"(mapOf("id" to it.second, "group" to it.first))
@@ -178,7 +208,7 @@ object DependencyVerificationStore {
                             .sortedBy { it.key.toString() }
                             .forEach { (id, dependency) ->
                                 "dependency"(id.toMap()) {
-                                    dependency.pgpKeys.map { it.hexKey }.sorted().forEach {
+                                    dependency.pgpKeys.map { it.toString() }.sorted().forEach {
                                         "pgp"(it)
                                     }
                                     dependency.sha512.sorted().forEach {

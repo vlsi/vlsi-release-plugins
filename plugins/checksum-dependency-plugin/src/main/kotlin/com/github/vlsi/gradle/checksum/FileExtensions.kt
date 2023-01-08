@@ -43,4 +43,5 @@ internal fun File.sha512(): String {
         md.update(buffer, 0, bytesRead)
     }
     return BigInteger(1, md.digest()).toString(16).toUpperCase()
+        .padStart(128, '0')
 }
