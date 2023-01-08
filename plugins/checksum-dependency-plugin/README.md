@@ -390,13 +390,24 @@ Configuration properties
 
     since 1.29.0
 
-* checksumCpuThreads (int, default: `ForkJoinPool.getCommonPoolParallelism()`) specifies the number of threads for CPU-bound tasks (PGP verification and SHA computation)
+* `checksumCpuThreads` (int, default: `ForkJoinPool.getCommonPoolParallelism()`) specifies the number of threads for CPU-bound tasks (PGP verification and SHA computation)
 
     since 1.29.0
 
-* checksumIoThreads (int, default: `50`) specifies the number of threads to use for PGP key resolution
+* `checksumIoThreads` (int, default: `50`) specifies the number of threads to use for PGP key resolution
 
     since 1.29.0
+
+* `checksumCachedPgpKeysDir` (string, default: `%{ROOT_DIR}/gradle/checksum-dependency-plugin/cached-pgp-keys`) specifies the location for cached PGP keys
+
+    Public PGP keys are needed for verification, so it is recommended to cache them and commit the keys under source control.
+    It makes the build faster (as the keys are not downloaded on each build) and it reduces the chances for build failure caused by misbehaving PGP keyservers.
+
+    Placeholders:
+
+    * `%{ROOT_DIR}` replaces to `settings.rootDir.absolutePath`
+
+    since 1.85.0
 
 * `pgpKeyserver` (string, comma separated) specifies keyserver for retrieval of the keys.
 
@@ -487,6 +498,9 @@ Verification options
 
 Changelog
 ---------
+v1.85
+* Cache public PGP keys under `%{ROOT_DIR}/gradle/checksum-dependency-plugin/cached-pgp-keys` directory
+
 v1.78
 * Retrieve keys from https://keyserver.ubuntu.com, and https://keys.openpgp.org by default (drop SKS keyserver pool since it has been deprecated)
 

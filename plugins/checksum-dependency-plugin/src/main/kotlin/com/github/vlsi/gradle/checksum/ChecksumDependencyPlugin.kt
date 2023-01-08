@@ -74,6 +74,10 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
         val checksums = File(settings.rootDir, checksumFileName)
         val buildDir = settings.property("checksumBuildDir", "build/checksum")
         val buildFolder = File(settings.rootDir, buildDir)
+        val cachedKeysRoot =
+            settings.property("checksumCachedPgpKeysDir", "%{ROOT_DIR}/gradle/checksum-dependency-plugin/cached-pgp-keys")
+                .replace("%{ROOT_DIR}", settings.rootDir.absolutePath)
+                .let { File(it) }
 
         val checksumUpdateAll = settings.boolProperty("checksumUpdateAll")
         val checksumUpdate = checksumUpdateAll || settings.boolProperty("checksumUpdate")
@@ -133,7 +137,7 @@ open class ChecksumDependencyPlugin : Plugin<Settings> {
                 readTimeout = Duration.ofSeconds(pgpReadTimeout)
             )
         )
-        val keyStore = KeyStore(File(buildFolder, "keystore"), keyDownloader)
+        val keyStore = KeyStore(cachedKeysRoot, keyDownloader)
         val verification =
             if (checksums.exists()) {
                 DependencyVerificationStore.load(checksums)

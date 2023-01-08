@@ -82,7 +82,13 @@ class KeyStore(
                 Files.createDirectories(parentFile.toPath())
                 writeBytes(keyBytes)
                 if (!renameTo(cacheFile)) {
-                    logger.warn("Unable to rename $this to $cacheFile")
+                    if (cacheFile.exists()) {
+                        // Another thread (e.g. another build) has already received the same key
+                        // Ignore the error
+                        delete()
+                    } else {
+                        logger.warn("Unable to rename $this to $cacheFile")
+                    }
                 }
             }
             keyBytes.inputStream()
