@@ -1,59 +1,40 @@
 <?xml version='1.0' encoding='utf-8'?>
-<dependency-verification version='1'>
+<dependency-verification version='2'>
   <trust-requirement pgp='GROUP' checksum='NONE' />
   <ignored-keys />
   <trusted-keys>
-    <trusted-key id='379ce192d401ab61' group='com.diffplug.durian' />
-    <trusted-key id='c9fbaa83a8753994' group='com.fasterxml.jackson.core' />
-    <trusted-key id='c9fbaa83a8753994' group='com.fasterxml.jackson.module' />
-    <trusted-key id='105cb91cac2aee0e' group='com.github.autostyle' />
-    <trusted-key id='62c82e50836eb3ee' group='com.github.gundy' />
-    <trusted-key id='461a804f2609fd89' group='com.github.shyiko.klob' />
-    <trusted-key id='7a01b0f236e5430f' group='com.google.code.gson' />
-    <trusted-key id='7eb97d110dfadd60' group='com.googlecode.concurrent-trees' />
-    <trusted-key id='72475fd306b9cab7' group='com.googlecode.javaewah' />
-    <trusted-key id='a50569c7ca7fa1f0' group='com.jcraft' />
-    <trusted-key id='aa49c633b4734832' group='com.pinterest' />
-    <trusted-key id='aa49c633b4734832' group='com.pinterest.ktlint' />
-    <trusted-key id='685c46769dbb5e5d' group='com.squareup' />
-    <trusted-key id='86fdc7e2a11262cb' group='commons-codec' />
-    <trusted-key id='a41f13c999945293' group='commons-logging' />
-    <trusted-key id='6449005f96bc97a3' group='de.undercouch' />
-    <trusted-key id='379ce192d401ab61' group='info.picocli' />
-    <trusted-key id='efe8086f9e93774e' group='junit' />
-    <trusted-key id='6b1b008864323b92' group='org.antlr' />
-    <trusted-key id='7c25280eae63ebe5' group='org.apache.httpcomponents' />
-    <trusted-key id='e2b3d84202b812d9' group='org.assertj' />
-    <trusted-key id='b341ddb020fcb6ab' group='org.bouncycastle' />
-    <trusted-key id='41321490758aad6f' group='org.codehaus.groovy' />
-    <trusted-key id='0e91c2de43b72bb1' group='org.ec4j.core' />
-    <trusted-key id='5b05ccde140c2876' group='org.eclipse.jgit' />
-    <trusted-key id='a6adfc93ef34893e' group='org.hamcrest' />
-    <trusted-key id='bcf4173966770193' group='org.jetbrains' />
-    <trusted-key id='379ce192d401ab61' group='org.jetbrains.intellij.deps' />
-    <trusted-key id='6a0975f8b1127b83' group='org.jetbrains.kotlin' />
-    <trusted-key id='98fe03a974ce0a0b' group='org.jetbrains.kotlin' />
-    <trusted-key id='379ce192d401ab61' group='org.jetbrains.kotlinx' />
-    <trusted-key id='2c7b12f2a511e325' group='org.slf4j' />
+    <trusted-key id='6214760097dc5cfad0175ac2c9fbaa83a8753994' group='com.fasterxml.jackson.core' />
+    <trusted-key id='6214760097dc5cfad0175ac2c9fbaa83a8753994' group='com.fasterxml.jackson.module' />
+    <trusted-key id='d112630c899f508198c09018105cb91cac2aee0e' group='com.github.autostyle' />
+    <trusted-key id='55e770230e69cc6de143fb5b62c82e50836eb3ee' group='com.github.gundy' />
+    <trusted-key id='160a7a9cf46221a56b06ad64461a804f2609fd89' group='com.github.shyiko.klob' />
+    <trusted-key id='afcc4c7594d09e2182c60e0f7a01b0f236e5430f' group='com.google.code.gson' />
+    <trusted-key id='a9789342f598ad5b1175ef357eb97d110dfadd60' group='com.googlecode.concurrent-trees' />
+    <trusted-key id='015479e1055341431b4545ab72475fd306b9cab7' group='com.googlecode.javaewah' />
+    <trusted-key id='34d6ff19930adf43ac127792a50569c7ca7fa1f0' group='com.jcraft' />
+    <trusted-key id='a2570288e10932263e8326cbaa49c633b4734832' group='com.pinterest' />
+    <trusted-key id='a2570288e10932263e8326cbaa49c633b4734832' group='com.pinterest.ktlint' />
+    <trusted-key id='682f765eea718d250bbdb2f1685c46769dbb5e5d' group='com.squareup' />
+    <trusted-key id='1fa37fbe4453c1073e7ef61d6449005f96bc97a3' group='de.undercouch' />
+    <trusted-key id='8756c4f765c9ac3cb6b85d62379ce192d401ab61' group='info.picocli' />
+    <trusted-key id='d4c89ea4aaf455fd88b22087efe8086f9e93774e' group='junit' />
+    <trusted-key id='d54a395b5cf3f86eb45f6e426b1b008864323b92' group='org.antlr' />
+    <trusted-key id='a778fde933a96dda827840d8e2b3d84202b812d9' group='org.assertj' />
+    <trusted-key id='08f0aab4d0c1a4bdde340765b341ddb020fcb6ab' group='org.bouncycastle' />
+    <trusted-key id='7faa0f2206de228f0db01ad741321490758aad6f' group='org.codehaus.groovy' />
+    <trusted-key id='2e92113263fc31c74ccbaab20e91c2de43b72bb1' group='org.ec4j.core' />
+    <trusted-key id='7c669810892cbd3148fa92995b05ccde140c2876' group='org.eclipse.jgit' />
+    <trusted-key id='4db1a49729b053caf015cee9a6adfc93ef34893e' group='org.hamcrest' />
+    <trusted-key id='2e3a1affe42b5f53af19f780bcf4173966770193' group='org.jetbrains' />
+    <trusted-key id='8756c4f765c9ac3cb6b85d62379ce192d401ab61' group='org.jetbrains.intellij.deps' />
+    <trusted-key id='6f538074ccebf35f28af9b066a0975f8b1127b83' group='org.jetbrains.kotlin' />
+    <trusted-key id='bae5c184e3b70cb15617700598fe03a974ce0a0b' group='org.jetbrains.kotlin' />
+    <trusted-key id='8756c4f765c9ac3cb6b85d62379ce192d401ab61' group='org.jetbrains.kotlinx' />
+    <trusted-key id='475f3b8e59e6e63aa78067482c7b12f2a511e325' group='org.slf4j' />
   </trusted-keys>
   <dependencies>
     <dependency group='org.gradle.kotlin' module='gradle-kotlin-dsl-plugins' version='1.4.9'>
       <sha512>E2E7D75380BBFB3A6DAA93A75FAB9D8F4038D42FFBA93B9FE8A350C1BD735FF746A01E3FB76A62DFA7B26EDADA638EB045D45F47568A427E6C1505F70A92AE79</sha512>
-    </dependency>
-    <dependency group='org.gradle.kotlin' module='plugins' version='1.2.9'>
-      <sha512>F672FEB39919B2A78E0AEFA95E8BE023C856EA802FBB652EE97FF6BC935BB6E29B9E5E36CC62B9B52D970DE6C49AC0D07C1EC5588771FC2B89787AB94CAE6AC7</sha512>
-    </dependency>
-    <dependency group='org.gradle.kotlin' module='plugins' version='1.3.1'>
-      <sha512>8563C160EF97CF2E2C62875B438177212AC247304E4A94466C687F3E4D354E34D69BC31E790F8409BE55C16A25F2B0BABFC9C6311ECA64ADF932F68AB8B2B484</sha512>
-    </dependency>
-    <dependency group='org.gradle.kotlin' module='plugins' version='1.3.3'>
-      <sha512>651EACA737F0F794E5805ED6503E4E00A8105BD97DA60A6A75C161C03F2DCF649466D35831D9466D7B1297C707EBEC33D75B2C7FD411F713EB51522629995206</sha512>
-    </dependency>
-    <dependency group='org.gradle.kotlin' module='plugins' version='1.3.4'>
-      <sha512>B6F05B16B1826C3FD50D80AFD14965566B27313691A111EC8589867678D6B92AF827E5E098BECCE8F911D8B479AF5303322A6B2ECA971D1A2D985F42BD1AAA87</sha512>
-    </dependency>
-    <dependency group='org.gradle.kotlin' module='plugins' version='1.3.6'>
-      <sha512>FFC641492549525D06D6788A3D708C7108AFA06C35796EF0B3A71541672162A7BAFDE6DC8F90F63D524BA33D1447C172C589491C16CF3B91C2C3E150AAB71B46</sha512>
     </dependency>
     <dependency group='org.jetbrains.kotlin' module='kotlin-gradle-plugin' version='1.4.20'>
       <sha512>BEEB633A0C9E3AC38A02CC8E901F2327F4668085D1A8AAFF45088DD7FB24B56E0300D42468238AC7429C570C13B86E167637EF50E646F95F2503AA52D8A3FF81</sha512>
