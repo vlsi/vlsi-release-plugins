@@ -117,11 +117,6 @@ subprojects {
 
         configure<PublishingExtension> { // publishing
             publications {
-                afterEvaluate {
-                    named<MavenPublication>("pluginMaven") {
-                        artifact(javadocJar)
-                    }
-                }
                 withType<MavenPublication> {
                     // Use the resolved versions in pom.xml
                     // Gradle might have different resolution rules, so we set the versions
