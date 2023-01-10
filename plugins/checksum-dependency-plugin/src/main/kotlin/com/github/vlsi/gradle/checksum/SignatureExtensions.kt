@@ -85,6 +85,12 @@ fun PGPPublicKeyRingCollection.strip() =
                                     PGPPublicKey.removeCertification(key, userId)
                                 }
                         }
+                        .map {
+                            it.userAttributes.asSequence()
+                                .fold(it) { key, attribute ->
+                                    PGPPublicKey.removeCertification(key, attribute)
+                                }
+                        }
                 )
             }
     )
