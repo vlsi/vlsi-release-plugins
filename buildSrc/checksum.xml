@@ -24,6 +24,7 @@
     <trusted-key id='6b1b008864323b92' group='org.antlr' />
     <trusted-key id='7c25280eae63ebe5' group='org.apache.httpcomponents' />
     <trusted-key id='e2b3d84202b812d9' group='org.assertj' />
+    <trusted-key id='b341ddb020fcb6ab' group='org.bouncycastle' />
     <trusted-key id='41321490758aad6f' group='org.codehaus.groovy' />
     <trusted-key id='0e91c2de43b72bb1' group='org.ec4j.core' />
     <trusted-key id='5b05ccde140c2876' group='org.eclipse.jgit' />
