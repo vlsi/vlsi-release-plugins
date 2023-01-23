@@ -31,7 +31,7 @@ jobs:
       with:
         java-version: ${{ matrix.java-version }}
     - name: 'Test'
-      uses: burrunan/gradle-cache-action@v1
+      uses: burrunan/gradle-cache-action@v1.16
       with:
         job-id: jdk${{ matrix.java-version }}
         gradle-version: ${{ matrix.gradle-version }}
