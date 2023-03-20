@@ -96,11 +96,17 @@ class PropertyMapper internal constructor(private val project: Project) {
     fun string(name: String, default: String = "") =
         project.stringProperty(name, false) ?: default
 
-    fun int(name: String, default: Int = 0) =
-        project.stringProperty(name, false)?.toIntOrNull() ?: default
+    fun int(name: String, default: Int = 0) = project.stringProperty(name, false)?.let { value ->
+        value.toIntOrNull() ?: null.also {
+            project.logger.debug("Unable to parse $name=$value as Int, using default value: $default")
+        }
+    } ?: default
 
-    fun long(name: String, default: Long = 0) =
-        project.stringProperty(name, false)?.toLongOrNull() ?: default
+    fun long(name: String, default: Long = 0) = project.stringProperty(name, false)?.let { value ->
+        value.toLongOrNull() ?: null.also {
+            project.logger.debug("Unable to parse $name=$value as Long, using default value: $default")
+        }
+    } ?: default
 
     private fun <T> delegate(provider: (String) -> T) = ReadOnlyProperty { _: Any?, property ->
         provider(property.name)
