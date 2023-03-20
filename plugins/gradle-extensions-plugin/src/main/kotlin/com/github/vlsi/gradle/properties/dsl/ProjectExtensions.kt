@@ -19,13 +19,12 @@ package com.github.vlsi.gradle.properties.dsl
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 
 fun Project.stringProperty(property: String, required: Boolean = false): String? {
     val value = project.findProperty(property)
     if (value == null) {
         if (required) {
-            throw GradleException("Property $property is not specified")
+            throw GradleException("Project property '$property' is not specified")
         }
         logger.debug("Using null value for $property")
         return null
@@ -48,41 +47,78 @@ fun String?.toBool(nullAs: Boolean = false, blankAs: Boolean = true, default: Bo
         else -> equals("true", ignoreCase = true)
     }
 
+fun String?.toBoolOrNull(blankAs: Boolean? = null) = when {
+    this == null -> null
+    isBlank() -> blankAs
+    this == "true" -> true
+    this == "false" -> false
+    else -> null
+}
+
 val Project.props: PropertyMapper get() = PropertyMapper(this)
 
 class PropertyMapper internal constructor(private val project: Project) {
-    operator fun invoke(default: Boolean = false) = object : ReadOnlyProperty<Any?, Boolean> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean =
-            bool(property.name, default = default)
-    }
+    operator fun invoke(default: Boolean = false) = delegate { bool(it, default) }
 
-    operator fun invoke(default: String) = object : ReadOnlyProperty<Any?, String> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): String =
-            string(property.name, default)
-    }
+    operator fun invoke(default: String) = delegate { string(it, default) }
 
-    operator fun invoke(default: Int) = object : ReadOnlyProperty<Any?, Int> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Int =
-            int(property.name, default)
-    }
+    operator fun invoke(default: Int) = delegate { int(it, default) }
 
-    operator fun invoke(default: Long) = object : ReadOnlyProperty<Any?, Long> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Long =
-            long(property.name, default)
-    }
+    operator fun invoke(default: Long) = delegate { long(it, default) }
+
+    val bool get() = delegate { requiredBool(it) }
+
+    val string get() = delegate { requiredString(it) }
+
+    val int get() = delegate { requiredInt(it) }
+
+    val long get() = delegate { requiredLong(it) }
+
+    fun requiredString(name: String): String =
+        project.stringProperty(name, true)!!
+
+    fun requiredBool(name: String, blankAs: Boolean? = true) =
+        requiredString(name).let {
+            it.toBoolOrNull(blankAs = blankAs)
+                ?: throw GradleException("Project property \"$name\" should be a Boolean (true/false): '$it'")
+        }
+
+    fun requiredInt(name: String) =
+        requiredString(name).let {
+            it.toIntOrNull()
+                ?: throw GradleException("Project property \"$name\" should be an Int: '$it'")
+        }
+
+    fun requiredLong(name: String) =
+        requiredString(name).let {
+            it.toLongOrNull()
+                ?: throw GradleException("Project property \"$name\" should be a Long: '$it'")
+        }
 
     fun bool(name: String, default: Boolean = false, nullAs: Boolean = default, blankAs: Boolean = true) =
-        project.stringProperty(name, false)
+        project.stringProperty(name)
             .toBool(nullAs = nullAs, blankAs = blankAs, default = default)
 
     fun string(name: String, default: String = "") =
-        project.stringProperty(name, false) ?: default
+        project.stringProperty(name) ?: default
 
     fun int(name: String, default: Int = 0) =
-        project.stringProperty(name, false)?.toInt() ?: default
+        project.stringProperty(name)?.let { value ->
+            value.toIntOrNull() ?: null.also {
+                project.logger.debug("Unable to parse project property $name=$value as Int, using default value: $default")
+            }
+        } ?: default
 
     fun long(name: String, default: Long = 0) =
-        project.stringProperty(name, false)?.toLong() ?: default
+        project.stringProperty(name)?.let { value ->
+            value.toLongOrNull() ?: null.also {
+                project.logger.debug("Unable to parse project property $name=$value as Long, using default value: $default")
+            }
+        } ?: default
+
+    private fun <T> delegate(provider: (String) -> T) = ReadOnlyProperty { _: Any?, property ->
+        provider(property.name)
+    }
 }
 
 private val yearRegexp = Regex("\\d{4}")
