@@ -77,6 +77,12 @@ class ThrowablePrinter {
 
         private val defaultHideThrowables =
             listOf<Predicate<Throwable>>(
+                { it.message?.startsWith("Could not complete execution for") == true },
+                {
+                    it is PlaceholderException &&
+                            it.exceptionClassName.endsWith("TestSuiteExecutionException") &&
+                            it.message?.startsWith("Could not complete execution for") == true
+                },
                 { it is LocationAwareException && it.message == it.cause?.message },
                 { it is UncheckedException || it is UncheckedIOException },
                 { it is AssertionError &&
@@ -130,10 +136,11 @@ class ThrowablePrinter {
 
         private val defaultFaintPackages =
             setOf(
-                "java.util.stream.",
+                "java.",
                 "jdk.internal.",
+                "org.gradle.",
                 "org.junit.",
-                "org.gradle."
+                "org.testng."
             )
         private val defaultFrameStyles =
             listOf<(StackTraceElement) -> Style?> {

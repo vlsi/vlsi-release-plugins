@@ -168,6 +168,15 @@ fun Test.printTestResults(
             } else {
                 sb.appendTestName(displayName)
             }
+            if (showStacktrace && result.exceptions.isNotEmpty()) {
+                val throwablePrinter = project.createThrowablePrinter().apply {
+                    indent = "    "
+                }
+                result.exceptions.forEach {
+                    sb.appendPlatformLine()
+                    throwablePrinter.print(it, sb)
+                }
+            }
         }
         println(sb.toString())
     }
@@ -184,7 +193,8 @@ fun Test.printTestResults(
     )
     afterSuite(
         KotlinClosure2<TestDescriptor, TestResult, Any>({ descriptor, result ->
-            if (descriptor.name.startsWith("Gradle Test Executor")) {
+            if (descriptor.name.startsWith("Gradle Test Executor") &&
+                result.exceptions.isEmpty()) {
                 return@KotlinClosure2
             }
             if (result.resultType == TestResult.ResultType.FAILURE ||
