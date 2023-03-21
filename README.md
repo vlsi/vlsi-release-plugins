@@ -87,6 +87,12 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.87
+* gradle-extensions: requiredString, requiredBool, requiredInt, requiredLong property accessors
+* gradle-extensions: display TestNG initialization failures
+
+Thanks to [Endor H](https://github.com/endorh) for contributing.
+
 v1.86
 * checksum-dependency: use full fingerprint for PGP verification
 
