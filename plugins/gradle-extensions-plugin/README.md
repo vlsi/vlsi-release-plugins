@@ -135,6 +135,14 @@ fun string(name: String, default: String = "")
 fun int(name: String, default: Int = 0)
 
 fun long(name: String, default: Long = 0)
+
+fun requiredBool(name: String)
+
+fun requiredString(name: String)
+
+fun requiredInt(name: String)
+
+fun requiredLong(name: String)
 ```
 
 Miscellaneous extensions
