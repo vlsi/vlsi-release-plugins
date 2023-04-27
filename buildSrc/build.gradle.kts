@@ -24,14 +24,14 @@ plugins {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
     gradlePluginPortal()
 }
 
 val licenseHeader = file("$rootDir/../gradle/license-header.txt").readText()
 allprojects {
     repositories {
-        jcenter()
+        mavenCentral()
         gradlePluginPortal()
     }
     applyKotlinProjectConventions()
@@ -56,15 +56,11 @@ allprojects {
 fun Project.applyKotlinProjectConventions() {
     apply(plugin = "org.gradle.kotlin.kotlin-dsl")
 
-    plugins.withType<KotlinDslPlugin> {
-        configure<KotlinDslPluginOptions> {
-            experimentalWarning.set(false)
-        }
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
-
     tasks.withType<KotlinCompile> {
-        sourceCompatibility = "unused"
-        targetCompatibility = "unused"
         kotlinOptions {
             jvmTarget = "1.8"
         }

@@ -320,20 +320,11 @@ open class GatherLicenseTask @Inject constructor(
                 )
 
                 haveFilesToAnalyze = true
-                if (GradleVersion.current() < GradleVersion.version("5.6")) {
-                    @Suppress("DEPRECATION")
-                    workerExecutor.submit(FindLicense::class) {
-                        displayName = "Extract licenses for ${compId.displayName}"
-                        isolationMode = IsolationMode.NONE
-                        params(compId.displayName, art.file, artLicenseTexts)
-                    }
-                } else {
-                    @Suppress("UnstableApiUsage")
-                    workerExecutor.noIsolation().submit(FindLicenseWorkAction::class) {
-                        id.set(compId.displayName)
-                        file.set(art.file)
-                        outputDir.set(artLicenseTexts)
-                    }
+                @Suppress("UnstableApiUsage")
+                workerExecutor.noIsolation().submit(FindLicenseWorkAction::class) {
+                    id.set(compId.displayName)
+                    file.set(art.file)
+                    outputDir.set(artLicenseTexts)
                 }
             }
         }

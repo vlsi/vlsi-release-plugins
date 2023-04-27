@@ -23,6 +23,11 @@ dependencies {
     implementation("com.squareup:kotlinpoet:1.3.0")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 gradlePlugin {
     plugins {
         register("buildplugins.license-texts") {

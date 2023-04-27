@@ -202,6 +202,14 @@ object MetadataStore {
                                     is DisjunctionLicenseExpression -> "or" {
                                         licenses.forEach { it.exportLicense() }
                                     }
+                                    LicenseExpression.NOASSERTION -> {
+                                        "no-assertion"()
+                                    }
+                                    LicenseExpression.NONE -> {
+                                        "none"()
+                                    }
+                                    is SimpleLicenseExpression -> TODO("SimpleLicenseExpression: $this")
+                                    is LicenseExpressionSetExpression -> TODO("LicenseExpressionSetExpression: $this")
                                 }
                             }
 

@@ -61,6 +61,10 @@ tasks {
         }
     }
 
+    processResources {
+        dependsOn(copyLicenses)
+    }
+
     val allLicenseTextsDir = "$buildDir/license-texts"
     val copyTexts by registering(Sync::class) {
         into(allLicenseTextsDir)
@@ -87,7 +91,7 @@ tasks {
 
         classpath(sourceSets.main.map { it.runtimeClasspath })
         classpath(allLicenseTextsDir)
-        main = "com.github.vlsi.gradle.license.SpdxPredictorKt"
+        mainClass.set("com.github.vlsi.gradle.license.SpdxPredictorKt")
         args("$output/com/github/vlsi/gradle/license/api/models/tfidf_licenses.bin")
     }
 
