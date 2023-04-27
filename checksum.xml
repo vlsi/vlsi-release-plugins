@@ -18,6 +18,7 @@
     <trusted-key id='b801e2f8ef035068ec1139cc29579f18fa8fd93b' group='com.google.j2objc' />
     <trusted-key id='a9789342f598ad5b1175ef357eb97d110dfadd60' group='com.googlecode.concurrent-trees' />
     <trusted-key id='015479e1055341431b4545ab72475fd306b9cab7' group='com.googlecode.javaewah' />
+    <trusted-key id='1bd97a6a154e7810ee0bc832e2f38302c8075e3d' group='com.gradle.publish' />
     <trusted-key id='a2570288e10932263e8326cbaa49c633b4734832' group='com.pinterest' />
     <trusted-key id='a2570288e10932263e8326cbaa49c633b4734832' group='com.pinterest.ktlint' />
     <trusted-key id='1be2dd4b1fcf252fe4f0a1d103281aa0289ff53a' group='com.soywiz.korlibs.korte' />
@@ -67,9 +68,6 @@
   <dependencies>
     <dependency group='com.github.ben-manes' module='gradle-versions-plugin' version='0.21.0'>
       <sha512>88F475A29F4775BB825AD10BE07AA8DBC6E554561CE01193F75ED2EE5532F615C89192AE4ECB31B3B127C1832E4D7121A3823118B03E05E90295F8B42303618D</sha512>
-    </dependency>
-    <dependency group='com.gradle.publish' module='plugin-publish-plugin' version='1.1.0'>
-      <sha512>B74143EEB10F4EDC12B5E795C92CC25861D6BFBF66D5C218B174E5EC7D1715021B0005A0A696507D402629BFC66C0A6730D25529B39DD000F6A93080781986C9</sha512>
     </dependency>
     <dependency group='de.marcphilipp.gradle' module='nexus-publish-plugin' version='0.4.0'>
       <sha512>37EC6DFBDDD0458A2A341E371D038B3B0A25AB2F9006B295EBCF3BDE873A8D02C8CDAA6C69D875500F67593C618E8EF62C0269FB2F7F527A1367A7D6B8EA3CBE</sha512>

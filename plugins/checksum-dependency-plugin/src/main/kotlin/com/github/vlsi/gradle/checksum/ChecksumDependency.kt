@@ -38,6 +38,7 @@ import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.attributes.Attribute
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
@@ -137,6 +138,14 @@ class ChecksumDependency(
         logger.debug { "beforeResolve ${dependencies.path}@${dependencies.hashCode()}" }
         val dependencyFactory = settings.gradle.rootProject.dependencies
         val pgpConfiguration = dependencies.configurationContainer.detachedConfiguration()
+        pgpConfiguration.apply {
+            attributes {
+                for (attrKey in dependencies.attributes.keySet()) {
+                    attrKey as Attribute<Any>
+                    attribute(attrKey, dependencies.attributes.getAttribute(attrKey)!!)
+                }
+            }
+        }
         logger.debug {
             "afterResolve of $this, ${this.hashCode()}, will resolve signatures via" +
                     " $pgpConfiguration@${pgpConfiguration.hashCode()}"
@@ -304,7 +313,7 @@ class ChecksumDependency(
 
         for (unresolved in resolve.unresolvedModuleDependencies) {
             logger.lifecycle(
-                "Unable to resolve checksum $unresolved",
+                "Unable to resolve PGP signature for $unresolved",
                 unresolved.problem
             )
         }

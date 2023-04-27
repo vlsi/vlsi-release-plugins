@@ -91,6 +91,7 @@ v1.88
 * stage-vote-release: avoid failures when "init" does not exist
 * chore: fixed build warnings
 * checksum-dependency: infer artifact classifier from the file name
+* checksum-dependency: copy requested attributes to the configuration that resolves PGP signatures
 
 v1.87
 * gradle-extensions: requiredString, requiredBool, requiredInt, requiredLong property accessors
