@@ -145,7 +145,9 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
         configureNexusStaging(releaseExt)
 
-        tasks.named("init").hide()
+        plugins.withId("build-init") {
+            tasks.named("init").hide()
+        }
         hideMavenPublishTasks()
 
         // Tasks from NexusStagingPlugin
