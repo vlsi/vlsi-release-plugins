@@ -87,6 +87,11 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.88
+* stage-vote-release: avoid failures when "init" does not exist
+* chore: fixed build warnings
+* checksum-dependency: infer artifact classifier from the file name
+
 v1.87
 * gradle-extensions: requiredString, requiredBool, requiredInt, requiredLong property accessors
 * gradle-extensions: display TestNG initialization failures

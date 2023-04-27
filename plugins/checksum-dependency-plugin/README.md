@@ -500,6 +500,9 @@ Verification options
 
 Changelog
 ---------
+v1.88
+* Infer artifact classifier from the file name
+
 v1.86
 * Use full fingerprint for PGP verification
 

@@ -21,12 +21,27 @@ import org.gradle.api.artifacts.DependencyArtifact
 import org.gradle.api.artifacts.component.ComponentArtifactIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.internal.component.external.model.DefaultModuleComponentArtifactIdentifier
+import org.gradle.internal.component.external.model.ModuleComponentFileArtifactIdentifier
 
 private fun ComponentArtifactIdentifier.artifactOrSignatureId(artifact: Boolean): Id {
     val id = componentIdentifier as ModuleComponentIdentifier
     var classifier: String? = null
     var extension: String
-    if (this is DefaultModuleComponentArtifactIdentifier) {
+    if (this is ModuleComponentFileArtifactIdentifier) {
+        val prefix = id.module + "-" + id.version
+        if (!fileName.startsWith(prefix)) {
+            // The file name does not follow Maven conventions. Assume it is a default file
+            // In the worst case, we won't be able to find the signature, and we'll downgrade
+            // to checksums
+            extension = fileName.substringAfterLast('.')
+        } else {
+            val rest = fileName.removePrefix(prefix)
+            extension = rest.substringAfterLast('.')
+            if (rest.startsWith('-')) {
+                classifier = rest.substring(1, rest.length - extension.length - 1)
+            }
+        }
+    } else if (this is DefaultModuleComponentArtifactIdentifier) {
         classifier = name.classifier
         extension = name.extension ?: DependencyArtifact.DEFAULT_TYPE
     } else {
