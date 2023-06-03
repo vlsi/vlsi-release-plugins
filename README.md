@@ -87,6 +87,9 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.89
+* checksum-dependency: reduce the number of idle threads
+
 v1.88
 * stage-vote-release: avoid failures when "init" does not exist
 * chore: fixed build warnings

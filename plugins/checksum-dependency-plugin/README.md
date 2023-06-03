@@ -501,6 +501,9 @@ Verification options
 
 Changelog
 ---------
+v1.89
+* Reduce the number of idle threads
+
 v1.88
 * Infer artifact classifier from the file name
 * Copy requested attributes to the configuration that resolves PGP signatures

@@ -17,7 +17,9 @@
 package com.github.vlsi.gradle.checksum
 
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 class Executors(val cpu: ExecutorService, val io: ExecutorService) {
@@ -27,7 +29,11 @@ class Executors(val cpu: ExecutorService, val io: ExecutorService) {
 
 private fun pool(threads: Int, name: String): ExecutorService {
     val cnt = AtomicInteger()
-    return Executors.newFixedThreadPool(threads) {
+    return ThreadPoolExecutor(
+        0, threads,
+        20L, TimeUnit.SECONDS,
+        LinkedBlockingQueue()
+    ) { it: Runnable ->
         Thread(it).apply {
             this.name = name + cnt.getAndIncrement()
         }
