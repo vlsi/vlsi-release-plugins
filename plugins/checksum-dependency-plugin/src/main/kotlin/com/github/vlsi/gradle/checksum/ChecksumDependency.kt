@@ -139,6 +139,7 @@ class ChecksumDependency(
         val dependencyFactory = settings.gradle.rootProject.dependencies
         val pgpConfiguration = dependencies.configurationContainer.detachedConfiguration()
         pgpConfiguration.apply {
+            pgpConfiguration.isCanBeConsumed = false
             attributes {
                 for (attrKey in dependencies.attributes.keySet()) {
                     attrKey as Attribute<Any>
