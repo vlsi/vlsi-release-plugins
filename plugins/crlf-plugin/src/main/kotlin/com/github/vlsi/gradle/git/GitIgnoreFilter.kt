@@ -29,6 +29,7 @@ import org.eclipse.jgit.treewalk.TreeWalk
 import org.gradle.api.file.FileTreeElement
 import org.gradle.api.file.RelativePath
 import org.gradle.api.specs.Spec
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.lang.UnsupportedOperationException
 import java.nio.file.Path
@@ -92,6 +93,9 @@ class DirectorySet<E> {
 }
 
 abstract class GitHolder<T, V>(rootPath: Path) {
+    companion object {
+        val log = LoggerFactory.getLogger(GitHolder::class.java)
+    }
     private val rootDir = rootPath.toFile()
     private val rootAbsolutePath = rootDir.canonicalPath
 
@@ -125,6 +129,7 @@ abstract class GitHolder<T, V>(rootPath: Path) {
                 element.isDirectory
             } catch (e: UnsupportedOperationException) {
                 // If the element is not accessible, assume it is a directory
+                log.warn("File ${element.file} is not accessible, so can't tell if it should be ingored or not with .gitignore filters")
                 true
             }
         )
