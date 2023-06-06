@@ -30,6 +30,7 @@ import org.gradle.api.file.FileTreeElement
 import org.gradle.api.file.RelativePath
 import org.gradle.api.specs.Spec
 import java.io.File
+import java.lang.UnsupportedOperationException
 import java.nio.file.Path
 import java.util.*
 
@@ -118,7 +119,15 @@ abstract class GitHolder<T, V>(rootPath: Path) {
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun compute(element: FileTreeElement): V =
-        computeFile(element.file, element.isDirectory)
+        computeFile(
+            element.file,
+            try {
+                element.isDirectory
+            } catch (e: UnsupportedOperationException) {
+                // If the element is not accessible, assume it is a directory
+                true
+            }
+        )
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun compute(element: File): V =

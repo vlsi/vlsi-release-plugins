@@ -89,6 +89,7 @@ Change log
 ----------
 v1.89
 * checksum-dependency: reduce the number of idle threads
+* crlf: ignore inaccessible files/folders in gitignore filter
 
 v1.88
 * stage-vote-release: avoid failures when "init" does not exist
