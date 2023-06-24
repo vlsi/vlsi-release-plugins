@@ -87,6 +87,10 @@ This library is distributed under terms of Apache License 2.0
 
 Change log
 ----------
+v1.90
+* stage-vote-release: generate and publish checksums to SVN even if release artifact is UP-TO-DATE (regression since 1.75)
+* stage-vote-release: added previewSvnDist task to preview SVN dist contents without publishing it
+
 v1.89
 * checksum-dependency: reduce the number of idle threads
 * crlf: ignore inaccessible files/folders in gitignore filter

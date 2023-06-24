@@ -171,6 +171,19 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             files.from(releaseExt.checksums)
         }
 
+        tasks.register<Sync>("previewSvnDist") {
+            description = "Creates a preview of the artifacts that will be published to SVN dist repository"
+            group = RELEASE_GROUP
+            onlyIf { releaseExt.svnDistEnabled.get() }
+            into(layout.buildDirectory.dir("previewSvnDist"))
+            dependsOn(validateBeforeBuildingReleaseArtifacts)
+            from(releaseExt.archives)
+            from(releaseExt.checksums)
+            doLast {
+                logger.info("Generated SVN dist preview to $destinationDir")
+            }
+        }
+
         val publishSvnDist = tasks.register<PromoteSvnRelease>(PUBLISH_SVN_DIST_TASK_NAME) {
             description = "Publish release artifacts to SVN dist repository"
             group = RELEASE_GROUP

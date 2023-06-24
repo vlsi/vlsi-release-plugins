@@ -19,7 +19,6 @@ package com.github.vlsi.gradle.release
 import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.PREVIEW_SITE_CONFIGURATION_NAME
 import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.RELEASE_FILES_CONFIGURATION_NAME
 import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.RELEASE_SIGNATURES_CONFIGURATION_NAME
-import java.io.File
 import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -31,8 +30,8 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.project
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.the
-import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.plugins.signing.SigningExtension
 
 open class ReleaseArtifacts @Inject constructor(
@@ -64,34 +63,18 @@ open class ReleaseArtifacts @Inject constructor(
         project.artifacts {
             add(RELEASE_FILES_CONFIGURATION_NAME, taskProvider)
         }
-        val archiveFile = taskProvider.flatMap { it.archiveFile }
-        val sha512File = archiveFile.map { File(it.asFile.absolutePath + ".sha512") }
-        val archiveBuilt = taskProvider.map { it.state.run { executed && !skipped } }
-        val shaTask = project.tasks.register(taskProvider.name + "Sha512") {
-            onlyIf { archiveBuilt.get() }
-            inputs.file(archiveFile)
-            outputs.file(sha512File)
-            doLast {
-                ant.withGroovyBuilder {
-                    "checksum"(
-                        "file" to archiveFile.get(),
-                        "algorithm" to "SHA-512",
-                        "fileext" to ".sha512",
-                        // Make the files verifiable with shasum -c *.sha512
-                        "format" to "MD5SUM"
-                    )
-                }
+        val archiveBuilt = taskProvider.map {
+            it.state.run {
+                executed && (upToDate || skipMessage == null)
             }
         }
+        val shaTask = project.tasks.register<CreateChecksumTask>(taskProvider.name + "Sha512") {
+            onlyIf { archiveBuilt.get() }
+            archiveFile.set(taskProvider.flatMap { it.archiveFile })
+            mustRunAfter(taskProvider)
+        }
         project.artifacts {
-            add(RELEASE_SIGNATURES_CONFIGURATION_NAME, sha512File) {
-                // https://github.com/gradle/gradle/issues/16777
-                // The exact values do not seem to be really important, are they?
-                name = shaTask.name
-                classifier = ""
-                extension = "sha512"
-                // https://github.com/gradle/gradle/issues/10960
-                type = "sha512"
+            add(RELEASE_SIGNATURES_CONFIGURATION_NAME, shaTask.flatMap { it.checksumFile }) {
                 builtBy(shaTask)
             }
         }
