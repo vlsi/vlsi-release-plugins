@@ -23,5 +23,5 @@ dependencies {
     implementation("org.ajoberstar.grgit:grgit-gradle:4.1.1")
     implementation("org.ajoberstar.grgit:grgit-core:4.1.1")
     implementation("de.marcphilipp.gradle:nexus-publish-plugin:0.4.0")
-    implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.2")
+    implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
 }
