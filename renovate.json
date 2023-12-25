@@ -7,6 +7,10 @@
   "schedule": ["every 3 weeks on Monday"],
   "packageRules": [
     {
+      "matchPackagePrefixes": ["com.fasterxml.jackson.core"],
+      "groupName": "com.fasterxml.jackson.core"
+    },
+    {
       "matchPackagePrefixes": ["com.github.vlsi"],
       "groupName": "com.github.vlsi"
     }
