@@ -23,7 +23,7 @@ import javax.inject.Inject
 open class JandexExtension @Inject constructor(
     objects: ObjectFactory
 ) {
-    val toolVersion = objects.property<String>().convention("2.0.3.Final")
+    val toolVersion = objects.property<String>().convention("3.0.5")
     val maxErrors = objects.property<Int>().convention(1000)
     val jandexBuildAction = objects.property<JandexBuildAction>()
         .convention(JandexBuildAction.BUILD_AND_INCLUDE)

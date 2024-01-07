@@ -39,7 +39,7 @@ open class JandexPlugin : Plugin<Project> {
             project.extensions.create(JANDEX_TASK_NAME, JandexExtension::class.java)
         val jandexClasspath = configurations.create("jandexClasspath") {
             defaultDependencies {
-                add(project.dependencies.create("org.jboss:jandex:${jandexExtension.toolVersion.get()}"))
+                add(project.dependencies.create("io.smallrye:jandex:${jandexExtension.toolVersion.get()}"))
             }
         }
 
