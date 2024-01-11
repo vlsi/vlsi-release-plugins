@@ -16,5 +16,5 @@
  */
 
 dependencies {
-    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.3.202401111512-r")
 }
