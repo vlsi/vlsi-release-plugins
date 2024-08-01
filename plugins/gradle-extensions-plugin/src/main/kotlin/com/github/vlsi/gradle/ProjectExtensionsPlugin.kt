@@ -32,7 +32,7 @@ class ProjectExtensionsPlugin : Plugin<Project> {
         if (GitHubActionsLogger.isEnabled) {
             target.gradle.addListener(PrintGitHubActionsMarkersForFailingTasks)
         }
-        target.tasks.withType<Test>().configureEach {
+        target.tasks.withType<AbstractTestTask>().configureEach {
             testLogging {
                 // Empty enum throws "Collection is empty", so we use Iterable method
                 setEvents((events - TestLogEvent.FAILED) as Iterable<TestLogEvent>)
