@@ -57,7 +57,7 @@ private fun StyledTextBuilder.appendTestName(name: String) {
     }
 }
 
-fun Test.printTestResults(
+fun AbstractTestTask.printTestResults(
     slowTestLogThreshold: Long = project.props.long("slowTestLogThreshold", 2000L),
     slowSuiteLogThreshold: Long = project.props.long("slowSuiteLogThreshold", 0L),
     enableColor: Boolean = !project.props.bool("nocolor",
