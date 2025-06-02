@@ -17,8 +17,8 @@
 package com.github.vlsi.gradle.license
 
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.jsonMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import org.gradle.api.DefaultTask
@@ -51,8 +51,10 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
 
     @TaskAction
     fun run() {
-        val mapper = ObjectMapper().registerModule(KotlinModule())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        val mapper = jsonMapper {
+            addModules(kotlinModule())
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        }
 
         generate("SpdxLicense", "StandardLicense",
             mapper.readValue(File(licenses.get().asFile, "licenses.json"), LicensesDto::class.java)

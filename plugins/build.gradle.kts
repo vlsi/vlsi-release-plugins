@@ -49,12 +49,12 @@ subprojects {
 
     val pluginDisplayName = project.property("plugin.display.name") as String
 
-    configure<PluginBundleExtension> {
-        description = project.description
-        website = repoUrl
-        vcsUrl = repoUrl
-        tags = (project.property("plugin.tags") as String).split(Regex("\\s*,\\s*"))
-    }
+//    configure<PluginBundleExtension> {
+//        description = project.description
+//        website = repoUrl
+//        vcsUrl = repoUrl
+//        tags = (project.property("plugin.tags") as String).split(Regex("\\s*,\\s*"))
+//    }
 
     configure<GradlePluginDevelopmentExtension> {
         // gradlePlugin

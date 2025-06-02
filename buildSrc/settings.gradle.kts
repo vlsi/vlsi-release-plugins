@@ -29,7 +29,7 @@ include("licenseTexts")
 val upperCaseLetters = "\\p{Upper}".toRegex()
 
 fun String.toKebabCase() =
-    replace(upperCaseLetters) { "-${it.value.toLowerCase()}" }
+    replace(upperCaseLetters) { "-${it.value.lowercase()}" }
 
 fun buildFileNameFor(projectDirName: String) =
     "$projectDirName.gradle.kts"
@@ -40,58 +40,4 @@ for (project in rootProject.children) {
     project.buildFileName = buildFileNameFor(projectDirName)
     assert(project.projectDir.isDirectory)
     assert(project.buildFile.isFile)
-}
-
-buildscript {
-    fun String.v(): String = extra["$this.version"] as String
-
-    dependencies {
-        classpath("com.github.vlsi.gradle:checksum-dependency-plugin:${"com.github.vlsi.checksum-dependency".v()}") {
-            exclude("org.jetbrains.kotlin", "kotlin-stdlib")
-        }
-    }
-    repositories {
-        gradlePluginPortal()
-    }
-}
-
-// Note: we need to verify the checksum for checksum-dependency-plugin itself
-val expectedSha512 = mapOf(
-    "4E240B7811EF90C090E83A181DACE41DA487555E4136221861B0060F9AF6D8B316F2DD0472F747ADB98CA5372F46055456EF04BDC0C3992188AB13302922FCE9"
-            to "bcpg-jdk15on-1.70.jar",
-    "7DCCFC636EE4DF1487615818CFA99C69941081DF95E8EF1EAF4BCA165594DFF9547E3774FD70DE3418ABACE77D2C45889F70BCD2E6823F8539F359E68EAF36D1"
-            to "bcprov-jdk15on-1.70.jar",
-    "17DAAF511BE98F99007D7C6B3762C9F73ADD99EAB1D222985018B0258EFBE12841BBFB8F213A78AA5300F7A3618ACF252F2EEAD196DF3F8115B9F5ED888FE827"
-            to "okhttp-4.1.0.jar",
-    "93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7"
-            to "okio-2.2.2.jar",
-    "8279CE951A125BB629741909373473FC64C65C5CCCC4DCCC37278ABC136AAB8CDA4CDDC1F60F18940CA9854A1BF02ADC0003A25576AAF1FC6C8ED7609AEFDF8D"
-            to "gradle-multi-cache-1.0.jar",
-    settings.extra["com.github.vlsi.checksum-dependency.sha512"].toString()
-            to "checksum-dependency-plugin.jar"
-)
-
-fun File.sha512(): String {
-    val md = java.security.MessageDigest.getInstance("SHA-512")
-    forEachBlock { buffer, bytesRead ->
-        md.update(buffer, 0, bytesRead)
-    }
-    return BigInteger(1, md.digest()).toString(16).toUpperCase()
-}
-
-val violations =
-    buildscript.configurations["classpath"]
-        .resolve()
-        .sortedBy { it.name }
-        .associateWith { it.sha512() }
-        .filterNot { (_, sha512) -> expectedSha512.contains(sha512) }
-        .entries
-        .joinToString("\n  ") { (file, sha512) -> "SHA-512(${file.name}) = $sha512 ($file)" }
-
-// This enables to skip checksum-dependency which is helpful for checksum-dependency development
-if (!extra.has("noverify")) {
-    if (violations.isNotBlank()) {
-        throw GradleException("Buildscript classpath has non-whitelisted files:\n  $violations")
-    }
-    apply(plugin = "com.github.vlsi.checksum-dependency")
 }
