@@ -16,10 +16,12 @@
  */
 package com.github.vlsi.gradle.gettext
 
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.IgnoreEmptyDirectories
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -27,10 +29,9 @@ import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
-import java.io.File
 import javax.inject.Inject
 
-open class GettextTask @Inject constructor(
+abstract class GettextTask @Inject constructor(
     objects: ObjectFactory
 ) : BaseGettextEditTask(objects) {
     @Input
@@ -56,13 +57,17 @@ open class GettextTask @Inject constructor(
     val outputPot = objects.fileProperty()
             .convention(project.layout.buildDirectory.file("gettext/$name/messages.pot"))
 
+    @get:Internal
+    protected abstract val inputFilesList: RegularFileProperty
+
     init {
         executable.convention("xgettext")
+        inputFilesList.set(project.layout.buildDirectory.file("gettext/$name/input_files.txt"))
     }
 
     @TaskAction
     fun run() {
-        val inputFilesList = File(project.buildDir, "gettext/$name/input_files.txt")
+        val inputFilesList = this.inputFilesList.get().asFile
         val baseDir = project.projectDir
         inputFilesList.writer().buffered().use { f ->
             sourceFiles.files.forEach {

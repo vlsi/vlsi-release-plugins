@@ -28,8 +28,8 @@ dependencies {
 
 tasks {
     val saveLicenses by registering(EnumGeneratorTask::class) {
-        licenses.set(File(projectDir, "license-list-data/json"))
-        outputDir.set(File(buildDir, "generated-sources/licenses"))
+        licenses = layout.projectDirectory.dir("license-list-data/json")
+        outputDir = layout.buildDirectory.dir("generated-sources/licenses")
 
         sourceSets.main {
             java {
@@ -53,7 +53,7 @@ tasks {
 
     // For unit tests
     val copyLicenses by registering(Sync::class) {
-        val output = "$buildDir/licenses"
+        val output = layout.buildDirectory.dir("licenses")
         into(output)
         with(licenseTexts)
         sourceSets.main {
@@ -65,7 +65,7 @@ tasks {
         dependsOn(copyLicenses)
     }
 
-    val allLicenseTextsDir = "$buildDir/license-texts"
+    val allLicenseTextsDir = layout.buildDirectory.dir("license-texts")
     val copyTexts by registering(Sync::class) {
         into(allLicenseTextsDir)
         into("com/github/vlsi/gradle/license/api/text") {
@@ -82,7 +82,7 @@ tasks {
     }
 
     val generateStaticTfIdf by registering(JavaExec::class) {
-        val output = "$buildDir/tfidf"
+        val output = layout.buildDirectory.dir("tfidf")
         dependsOn(copyTexts)
         inputs.files(sourceSets.main.map { it.runtimeClasspath.filter { f -> f.name != "tfidf_licenses.bin" } })
         inputs.files(copyLicenses)
@@ -97,7 +97,7 @@ tasks {
 
     val copyTfidf by registering(Copy::class) {
         // This resource is generated after compile, so we copy it manually
-        into("$buildDir/resources/main")
+        into(layout.buildDirectory.dir("resources/main"))
         from(generateStaticTfIdf) {
             include("**/tfidf_licenses.bin")
         }

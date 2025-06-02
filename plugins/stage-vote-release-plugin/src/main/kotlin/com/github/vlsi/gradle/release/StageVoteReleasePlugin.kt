@@ -652,7 +652,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
             val releaseExt = project.the<ReleaseExtension>()
 
-            val voteMailFile = "$buildDir/$PREPARE_VOTE_TASK_NAME/mail.txt"
+            val voteMailFile = layout.buildDirectory.file("$PREPARE_VOTE_TASK_NAME/mail.txt")
             outputs.file(file(voteMailFile))
             doLast {
                 val nexusPublish = project.the<NexusPublishExtension>()

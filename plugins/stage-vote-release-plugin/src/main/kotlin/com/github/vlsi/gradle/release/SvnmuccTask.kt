@@ -24,6 +24,7 @@ import java.io.File
 import java.net.URI
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
@@ -80,6 +81,8 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
         return false
     }
 
+    protected val commandsFile = project.layout.buildDirectory.file("svnmucc/$name.txt")
+
     @TaskAction
     fun mucc(inputChanges: InputChanges) {
         logger.debug(
@@ -110,7 +113,7 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
             .map(SvnOperation::toSvn)
             .joinToString("\n")
 
-        val commandsFile = project.file("${project.buildDir}/svnmucc/$name.txt")
+        val commandsFile = this.commandsFile.get().asFile
         commandsFile.parentFile.mkdir()
         commandsFile.writeText(commands)
 

@@ -23,7 +23,7 @@ import org.gradle.api.Project
 class NexusRepositoryIdStore(private val project: Project) {
     private val savedIds = ConcurrentHashMap<String, String>()
 
-    private fun storeDir() = "${project.buildDir}/stagingRepositories"
+    private fun storeDir() = "${project.lay}/stagingRepositories"
 
     private fun filePath(repositoryName: String) = "${storeDir()}/$repositoryName.txt"
 

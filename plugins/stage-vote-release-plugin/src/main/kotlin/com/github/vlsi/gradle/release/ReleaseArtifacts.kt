@@ -48,7 +48,7 @@ open class ReleaseArtifacts @Inject constructor(
     fun previewSite(vararg dependencies: TaskProvider<*>, action: Action<CopySpec>) {
         project.artifacts {
             for (task in dependencies) {
-                add(PREVIEW_SITE_CONFIGURATION_NAME, project.buildDir.resolve(task.name + "_tmp")) {
+                add(PREVIEW_SITE_CONFIGURATION_NAME, project.layout.buildDirectory.dir(task.name + "_tmp")) {
                     builtBy(task)
                 }
             }
