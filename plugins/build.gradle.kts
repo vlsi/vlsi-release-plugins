@@ -16,11 +16,9 @@
  */
 
 import com.github.vlsi.gradle.buildtools.filterEolSimple
-import com.gradle.publish.PluginBundleExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("org.jetbrains.dokka") apply false
@@ -78,9 +76,6 @@ subprojects {
                     showStandardStreams = false // individual tests log a lot for now :(
                 }
                 maxParallelForks = 8
-            }
-            withType<KotlinCompile>().configureEach {
-                kotlinOptions.jvmTarget = "1.8"
             }
             withType<JavaCompile>().configureEach {
                 options.encoding = "UTF-8"
