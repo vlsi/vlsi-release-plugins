@@ -44,7 +44,7 @@ jobs:
         git clone --depth 100 https://github.com/apache/calcite-avatica.git ../calcite-avatica
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v3
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../calcite-avatica
@@ -52,7 +52,7 @@ jobs:
       env:
         ORG_GRADLE_PROJECT_checksumIgnore: true
     - name: 'Publish Release'
-      uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v3
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../calcite-avatica
@@ -90,7 +90,7 @@ jobs:
         git clone --depth 100 https://github.com/apache/calcite.git ../calcite
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v3
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../calcite
@@ -98,7 +98,7 @@ jobs:
       env:
         ORG_GRADLE_PROJECT_checksumIgnore: true
     - name: 'Publish Release'
-      uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v3
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../calcite
@@ -136,7 +136,7 @@ jobs:
         git clone --depth 100 https://github.com/apache/jmeter.git ../jmeter
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v3
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../jmeter
@@ -144,7 +144,7 @@ jobs:
       env:
         ORG_GRADLE_PROJECT_checksumIgnore: true
     - name: 'Publish Release'
-      uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v3
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../jmeter
@@ -182,7 +182,7 @@ jobs:
         git clone --depth 100 https://github.com/autostyle/autostyle.git ../autostyle
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v3
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../autostyle
@@ -190,7 +190,7 @@ jobs:
       env:
         ORG_GRADLE_PROJECT_checksumIgnore: true
     - name: 'Publish Release'
-      uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v3
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../autostyle
@@ -228,7 +228,7 @@ jobs:
         git clone --depth 100 https://github.com/pgjdbc/pgjdbc.git ../pgjdbc
         git rev-parse HEAD
     - name: 'Prepare Candidate'
-      uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v3
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../pgjdbc
@@ -236,7 +236,7 @@ jobs:
       env:
         ORG_GRADLE_PROJECT_checksumIgnore: true
     - name: 'Publish Release'
-      uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v3
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../pgjdbc
