@@ -17,15 +17,10 @@
 
 pluginManagement {
     plugins {
-        fun String.v() = extra["$this.version"].toString()
-        fun PluginDependenciesSpec.idv(id: String, key: String = id) = id(id) version key.v()
-
-        idv("com.github.autostyle")
-        idv("com.gradle.plugin-publish")
-        idv("org.jetbrains.gradle.plugin.idea-ext")
-        idv("com.github.ben-manes.versions")
-        idv("org.jetbrains.dokka")
-        idv("com.github.vlsi.stage-vote-release", "released")
+        id("com.github.autostyle") version "3.2"
+        id("com.gradle.plugin-publish") version "1.2.0"
+        id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.10"
+        id("org.jetbrains.dokka") version "1.4.32"
     }
 }
 

@@ -25,24 +25,12 @@ plugins {
     id("com.gradle.plugin-publish") apply false
     id("com.github.autostyle")
     id("org.jetbrains.gradle.plugin.idea-ext")
-    id("com.github.ben-manes.versions")
     id("org.jetbrains.dokka")
     `embedded-kotlin`
 }
 
 buildscript {
-    val publishToCentral = (findProperty("publishToCentral") as? String)
-        ?.ifBlank { "true" }?.toBoolean() ?: true
-    repositories {
-        if (publishToCentral) {
-            gradlePluginPortal()
-        }
-    }
     dependencies {
-        if (publishToCentral) {
-            val version = findProperty("released.version")
-            classpath("com.github.vlsi.stage-vote-release:com.github.vlsi.stage-vote-release.gradle.plugin:$version")
-        }
         classpath("org.ajoberstar.grgit:grgit-gradle:4.1.1")
     }
 }
@@ -54,8 +42,6 @@ val publishToCentral = (findProperty("publishToCentral") as? String)
     ?.ifBlank { "true" }?.toBoolean() ?: true
 
 if (publishToCentral) {
-    apply(plugin = "com.github.vlsi.stage-vote-release")
-    apply(from = "publish-central.gradle")
 }
 
 allprojects {
