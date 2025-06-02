@@ -1,4 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 /*
  * Copyright 2019 Vladimir Sitnikov <sitnikov.vladimir@gmail.com>
@@ -56,9 +58,9 @@ fun Project.applyKotlinProjectConventions() {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    tasks.withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "1.8"
+    tasks.withType<KotlinJvmCompile> {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_1_8
         }
     }
 }
