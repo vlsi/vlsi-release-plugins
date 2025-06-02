@@ -36,7 +36,7 @@ import java.time.Duration
  *
  * ```
  * git clone https://github.com/vlsi/asflike-release-environment.git
- * cd asflike-release-environment && docker-compose up
+ * cd asflike-release-environment && docker compose up
  * ```
  */
 open class ReleaseExtension @Inject constructor(

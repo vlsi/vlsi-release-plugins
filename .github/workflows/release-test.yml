@@ -37,8 +37,8 @@ jobs:
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
         cd ../asflike-release-environment
         cp .env_calcite-avatica .env
-        docker-compose build vcs
-        docker-compose up -d
+        docker compose build vcs
+        docker compose up -d
     - name: 'Clone Calcite Avatica'
       run: |
         git clone --depth 100 https://github.com/apache/calcite-avatica.git ../calcite-avatica
@@ -83,8 +83,8 @@ jobs:
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
         cd ../asflike-release-environment
         cp .env_calcite .env
-        docker-compose build vcs
-        docker-compose up -d
+        docker compose build vcs
+        docker compose up -d
     - name: 'Clone Calcite'
       run: |
         git clone --depth 100 https://github.com/apache/calcite.git ../calcite
@@ -129,8 +129,8 @@ jobs:
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
         cd ../asflike-release-environment
         cp .env_jmeter .env
-        docker-compose build vcs
-        docker-compose up -d
+        docker compose build vcs
+        docker compose up -d
     - name: 'Clone JMeter'
       run: |
         git clone --depth 100 https://github.com/apache/jmeter.git ../jmeter
@@ -175,8 +175,8 @@ jobs:
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
         cd ../asflike-release-environment
         cp .env_autostyle .env
-        docker-compose build vcs
-        docker-compose up -d
+        docker compose build vcs
+        docker compose up -d
     - name: 'Clone Autostyle'
       run: |
         git clone --depth 100 https://github.com/autostyle/autostyle.git ../autostyle
@@ -221,8 +221,8 @@ jobs:
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
         cd ../asflike-release-environment
         cp .env_pgjdbc .env
-        docker-compose build vcs
-        docker-compose up -d
+        docker compose build vcs
+        docker compose up -d
     - name: 'Clone pgjdbc'
       run: |
         git clone --depth 100 https://github.com/pgjdbc/pgjdbc.git ../pgjdbc
