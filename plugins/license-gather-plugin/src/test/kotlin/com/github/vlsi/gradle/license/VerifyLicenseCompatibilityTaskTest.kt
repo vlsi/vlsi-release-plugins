@@ -74,7 +74,6 @@ class VerifyLicenseCompatibilityTaskTest {
 
             repositories {
                 mavenCentral()
-                jcenter()
             }
 
             dependencies {

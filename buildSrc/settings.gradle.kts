@@ -24,6 +24,12 @@ pluginManagement {
     }
 }
 
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+}
+
 include("licenseTexts")
 
 val upperCaseLetters = "\\p{Upper}".toRegex()

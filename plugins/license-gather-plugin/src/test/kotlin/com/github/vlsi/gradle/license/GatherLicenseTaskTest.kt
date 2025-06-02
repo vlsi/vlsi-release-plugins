@@ -73,7 +73,6 @@ class GatherLicenseTaskTest {
 
             repositories {
                 mavenCentral()
-                jcenter()
             }
 
             dependencies {

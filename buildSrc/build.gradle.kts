@@ -30,10 +30,6 @@ repositories {
 
 val licenseHeader = file("$rootDir/../gradle/license-header.txt").readText()
 allprojects {
-    repositories {
-        mavenCentral()
-        gradlePluginPortal()
-    }
     applyKotlinProjectConventions()
 
     apply(plugin = "com.github.autostyle")

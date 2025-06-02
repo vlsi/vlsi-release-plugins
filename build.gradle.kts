@@ -60,10 +60,6 @@ allprojects {
     group = "com.github.vlsi.gradle"
     version = project.findProperty("project.version") as? String ?: rootProject.version
 
-    repositories {
-        mavenCentral()
-    }
-
     tasks.withType<GenerateModuleMetadata> {
         enabled = false
     }
