@@ -16,7 +16,6 @@
  */
 package com.github.vlsi.gradle
 
-import org.gradle.api.JavaVersion
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -27,23 +26,10 @@ class ErrorReportingTest : BaseGradleTest() {
         @JvmStatic
         private fun gradleVersionAndSettings(): Iterable<Arguments> {
             return mutableListOf<Arguments>().apply {
-                if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
-                    add(Arguments.of("4.9"))
-                }
-                if (JavaVersion.current() <= JavaVersion.VERSION_12) {
-                    addAll(
-                        listOf(
-                            Arguments.of("5.6.2"),
-                            Arguments.of("4.10.2")
-                        )
-                    )
-                }
-                if (JavaVersion.current() < JavaVersion.VERSION_17) {
-                    add(Arguments.of("6.0"))
-                    add(Arguments.of("6.8"))
-                    add(Arguments.of("7.6.1"))
-                }
-                add(Arguments.of("8.0.2"))
+                add(Arguments.of("7.0"))
+                add(Arguments.of("7.5"))
+                add(Arguments.of("8.0"))
+                add(Arguments.of("8.14.1"))
             }
         }
     }

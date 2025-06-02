@@ -38,11 +38,10 @@ class ChecksumFileTest : BaseGradleTest() {
                 return listOf(Arguments.arguments("8.1.1", ConfigurationCache.OFF))
             }
             return mutableListOf<Arguments>().apply {
-                add(Arguments.arguments("6.0", ConfigurationCache.OFF))
-                add(Arguments.arguments("6.5", ConfigurationCache.OFF))
                 add(Arguments.arguments("7.0", ConfigurationCache.OFF))
-                add(Arguments.arguments("7.4.2", ConfigurationCache.OFF))
+                add(Arguments.arguments("7.5", ConfigurationCache.OFF))
                 add(Arguments.arguments("8.1.1", ConfigurationCache.OFF))
+                add(Arguments.arguments("8.14.1", ConfigurationCache.OFF))
             }
         }
     }

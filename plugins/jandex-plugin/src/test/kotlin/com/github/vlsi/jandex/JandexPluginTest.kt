@@ -36,11 +36,9 @@ class JandexPluginTest : BaseGradleTest() {
         private fun gradleVersionAndSettings(): Iterable<Arguments> {
             if (!isCI) {
                 // Use only the minimum supported Gradle version to make the test faster
-                return listOf(arguments("6.0", ConfigurationCache.OFF))
+                return listOf(arguments("7.0", ConfigurationCache.ON))
             }
             return mutableListOf<Arguments>().apply {
-                add(arguments("6.0", ConfigurationCache.OFF))
-                add(arguments("6.5", ConfigurationCache.OFF))
                 add(arguments("7.0", ConfigurationCache.ON))
                 add(arguments("7.4.2", ConfigurationCache.ON))
                 // Configuration cache supports custom caches since 7.5 only: https://github.com/gradle/gradle/issues/14874

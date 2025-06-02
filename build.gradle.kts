@@ -17,7 +17,9 @@
 import org.gradle.plugins.ide.idea.model.IdeaProject
 import org.jetbrains.gradle.ext.CopyrightConfiguration
 import org.jetbrains.gradle.ext.ProjectSettings
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     id("com.gradle.plugin-publish") apply false
@@ -67,13 +69,17 @@ allprojects {
     plugins.withId("java") {
         configure<JavaPluginExtension> {
             withSourcesJar()
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
+        }
+        tasks.withType<JavaCompile>().configureEach {
+            options.release.set(8)
         }
     }
-    tasks.withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "1.8"
+    tasks.withType<KotlinJvmCompile>().configureEach {
+        compilerOptions {
+            freeCompilerArgs.add("-Xjdk-release=8")
+            @Suppress("DEPRECATION")
+            apiVersion.set(KotlinVersion.KOTLIN_1_4)
+            jvmTarget = JvmTarget.JVM_1_8
         }
     }
 }
@@ -113,8 +119,35 @@ allprojects {
         // Ensure builds are reproducible
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
-        dirMode = "775".toInt(8)
-        fileMode = "664".toInt(8)
+        dirPermissions {
+            user {
+                read = true
+                write = true
+                execute = true
+            }
+            group {
+                read = true
+                write = true
+                execute = true
+            }
+            other {
+                read = true
+                execute = true
+            }
+        }
+        filePermissions {
+            user {
+                read = true
+                write = true
+            }
+            group {
+                read = true
+                write = true
+            }
+            other {
+                read = true
+            }
+        }
     }
 }
 
