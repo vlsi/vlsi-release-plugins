@@ -29,12 +29,6 @@ plugins {
     `embedded-kotlin`
 }
 
-buildscript {
-    dependencies {
-        classpath("org.ajoberstar.grgit:grgit-gradle:4.1.1")
-    }
-}
-
 description = "A set of plugins to simplify Gradle release tasks"
 val repoUrl = "https://github.com/vlsi/vlsi-release-plugins"
 
