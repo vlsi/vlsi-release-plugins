@@ -161,18 +161,21 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
                     )
                     .addFunction(
                         FunSpec.builder("fromId")
+                            .returns(className)
                             .addParameter("id", String::class)
                             .addStatement("return idToInstance.getValue(id)")
                             .build()
                     )
                     .addFunction(
                         FunSpec.builder("fromIdOrNull")
+                            .returns(className.copy(nullable = true))
                             .addParameter("id", String::class)
                             .addStatement("return idToInstance[id]")
                             .build()
                     )
                     .addFunction(
                         FunSpec.builder("fromUri")
+                            .returns(className)
                             .addParameter("uri", URI::class)
                             .addStatement(
                                 "return fromUriOrNull(uri) ?: throw %T(%P)",
@@ -183,6 +186,7 @@ open class EnumGeneratorTask @Inject constructor(objectFactory: ObjectFactory) :
                     )
                     .addFunction(
                         FunSpec.builder("fromUriOrNull")
+                            .returns(className.copy(nullable = true))
                             .addParameter("uri", URI::class)
                             .addStatement("return uriToInstance[uri.toHttps()]")
                             .build()
