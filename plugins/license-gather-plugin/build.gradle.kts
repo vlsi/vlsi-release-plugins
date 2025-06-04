@@ -92,7 +92,11 @@ tasks {
         classpath(sourceSets.main.map { it.runtimeClasspath })
         classpath(allLicenseTextsDir)
         mainClass.set("com.github.vlsi.gradle.license.SpdxPredictorKt")
-        args("$output/com/github/vlsi/gradle/license/api/models/tfidf_licenses.bin")
+        argumentProviders += CommandLineArgumentProvider {
+            listOf(
+                output.get().file("com/github/vlsi/gradle/license/api/models/tfidf_licenses.bin").asFile.absolutePath
+            )
+        }
     }
 
     val copyTfidf by registering(Copy::class) {
