@@ -20,7 +20,7 @@ pluginManagement {
         id("com.github.autostyle") version "4.0"
         id("com.gradle.plugin-publish") version "1.2.0"
         id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.10"
-        id("org.jetbrains.dokka") version "1.9.20"
+        id("org.jetbrains.dokka") version "2.0.0"
     }
 }
 
