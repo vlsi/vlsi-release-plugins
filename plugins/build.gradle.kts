@@ -41,7 +41,7 @@ subprojects {
     apply(plugin = "org.gradle.maven-publish")
 
     dependencies {
-        "testImplementation"("org.junit.jupiter:junit-jupiter:5.4.2")
+        "testImplementation"("org.junit.jupiter:junit-jupiter:5.13.1")
         "testImplementation"(project(":testkit"))
     }
 

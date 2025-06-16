@@ -20,6 +20,6 @@ plugins {
 }
 
 dependencies {
-    api("org.junit.jupiter:junit-jupiter:5.4.2")
+    api("org.junit.jupiter:junit-jupiter:5.13.1")
     api(gradleTestKit())
 }
