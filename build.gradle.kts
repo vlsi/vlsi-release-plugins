@@ -17,119 +17,29 @@
 import org.gradle.plugins.ide.idea.model.IdeaProject
 import org.jetbrains.gradle.ext.CopyrightConfiguration
 import org.jetbrains.gradle.ext.ProjectSettings
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
-    id("com.gradle.plugin-publish") apply false
-    id("com.github.autostyle")
     id("org.jetbrains.gradle.plugin.idea-ext")
-    id("org.jetbrains.dokka")
-    `embedded-kotlin`
 }
 
 description = "A set of plugins to simplify Gradle release tasks"
-val repoUrl = "https://github.com/vlsi/vlsi-release-plugins"
+val repoUrl = property("repoUrl")
 
 val publishToCentral = (findProperty("publishToCentral") as? String)
     ?.ifBlank { "true" }?.toBoolean() ?: true
 
-if (publishToCentral) {
-}
+val release = providers.gradleProperty("release").getOrElse("false").toBoolean()
+val buildVersion = providers.gradleProperty("current.version").get() + if (release) "" else "-SNAPSHOT"
+
+println("Building $buildVersion")
+version = buildVersion
 
 allprojects {
     group = "com.github.vlsi.gradle"
-    version = project.findProperty("current.version") as? String ?: rootProject.version
-
-    tasks.withType<GenerateModuleMetadata> {
-        enabled = false
-    }
-
-    plugins.withId("java") {
-        configure<JavaPluginExtension> {
-            withSourcesJar()
-        }
-        tasks.withType<JavaCompile>().configureEach {
-            options.release.set(8)
-        }
-    }
-    tasks.withType<KotlinJvmCompile>().configureEach {
-        compilerOptions {
-            freeCompilerArgs.add("-Xjdk-release=8")
-            @Suppress("DEPRECATION")
-            apiVersion.set(KotlinVersion.KOTLIN_1_4)
-            jvmTarget = JvmTarget.JVM_1_8
-        }
-    }
+    version = buildVersion
 }
 
 val licenseHeader = file("gradle/license-header.txt").readText()
-allprojects {
-    if (project.path != ":plugins:license-gather-plugin") {
-        apply(plugin = "com.github.autostyle")
-        autostyle {
-            kotlinGradle {
-                ktlint {
-                    userData(mapOf("disabled_rules" to "no-wildcard-imports,import-ordering"))
-                }
-                trimTrailingWhitespace()
-                endWithNewline()
-            }
-        }
-        plugins.withId("org.jetbrains.kotlin.jvm") {
-            autostyle {
-                kotlin {
-                    licenseHeader(licenseHeader)
-                    trimTrailingWhitespace()
-                    // Generated build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
-                    // has wrong indentation, and it is not clear how to exclude it
-                    ktlint {
-                        userData(mapOf("disabled_rules" to "no-wildcard-imports,import-ordering"))
-                    }
-                    // It prints errors regarding build/generated-sources/licenses/com/github/vlsi/gradle/license/api/License.kt
-                    // so comment it for now :(
-                    endWithNewline()
-                }
-            }
-        }
-    }
-
-    tasks.withType<AbstractArchiveTask>().configureEach {
-        // Ensure builds are reproducible
-        isPreserveFileTimestamps = false
-        isReproducibleFileOrder = true
-        dirPermissions {
-            user {
-                read = true
-                write = true
-                execute = true
-            }
-            group {
-                read = true
-                write = true
-                execute = true
-            }
-            other {
-                read = true
-                execute = true
-            }
-        }
-        filePermissions {
-            user {
-                read = true
-                write = true
-            }
-            group {
-                read = true
-                write = true
-            }
-            other {
-                read = true
-            }
-        }
-    }
-}
 
 fun IdeaProject.settings(configuration: ProjectSettings.() -> kotlin.Unit) =
     (this as ExtensionAware).configure(configuration)

@@ -16,12 +16,6 @@
  */
 
 plugins {
-    id("build.kotlin-library")
-    id("build.test-junit5")
-}
-
-dependencies {
-    api(gradleTestKit())
-    api(platform("org.junit:junit-bom:5.13.1"))
-    implementation("org.junit.jupiter:junit-jupiter")
+    id("build.kotlin-conventions")
+    id("org.gradle.kotlin.kotlin-dsl")
 }

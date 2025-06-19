@@ -15,6 +15,11 @@
  *
  */
 
+plugins {
+    id("build.kotlin-dsl-published-gradle-plugin")
+    id("build.test-junit5")
+}
+
 dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.3.202401111512-r")
 }
