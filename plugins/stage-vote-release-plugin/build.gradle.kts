@@ -15,6 +15,11 @@
  *
  */
 
+plugins {
+    id("build.kotlin-dsl-published-gradle-plugin")
+    id("build.test-junit5")
+}
+
 dependencies {
     implementation(project(":plugins:crlf-plugin"))
     implementation(project(":plugins:license-gather-plugin"))
