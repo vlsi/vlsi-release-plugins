@@ -12,30 +12,25 @@ on:
 
 jobs:
   build:
-    strategy:
-      fail-fast: true
-      matrix:
-        java-version:
-          - 8
-          - 11
-        gradle-version: [wrapper]
-    name: 'Test, Java ${{ matrix.java-version }}'
+    name: Test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 50
         submodules: true
-    - name: 'Set up JDK ${{ matrix.java-version }}'
+    - name: Set up Java
       uses: actions/setup-java@v4
       with:
-        java-version: ${{ matrix.java-version }}
+        java-version: |
+          8
+          21
         distribution: 'zulu'
-    - name: 'Test'
+    - name: Test
       uses: burrunan/gradle-cache-action@v3
       with:
-        job-id: jdk${{ matrix.java-version }}
-        gradle-version: ${{ matrix.gradle-version }}
+        job-id: jdk21
+        gradle-version: wrapper
         arguments: |
           --no-parallel --no-daemon --scan
           build
