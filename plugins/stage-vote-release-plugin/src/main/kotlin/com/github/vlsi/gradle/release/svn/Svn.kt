@@ -19,8 +19,8 @@ package com.github.vlsi.gradle.release.svn
 import com.github.vlsi.gradle.license.attr
 import com.github.vlsi.gradle.license.get
 import com.github.vlsi.gradle.license.getList
-import groovy.util.XmlSlurper
-import groovy.util.slurpersupport.GPathResult
+import groovy.xml.XmlSlurper
+import groovy.xml.slurpersupport.GPathResult
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.time.OffsetDateTime

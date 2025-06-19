@@ -26,7 +26,7 @@ import com.github.vlsi.gradle.license.api.LicenseExpressionParser
 import com.github.vlsi.gradle.license.api.OsgiBundleLicenseParser
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.text
-import groovy.util.slurpersupport.GPathResult
+import groovy.xml.slurpersupport.GPathResult
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -53,8 +53,6 @@ import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.setProperty
 import org.gradle.kotlin.dsl.submit
-import org.gradle.util.GradleVersion
-import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import java.util.*

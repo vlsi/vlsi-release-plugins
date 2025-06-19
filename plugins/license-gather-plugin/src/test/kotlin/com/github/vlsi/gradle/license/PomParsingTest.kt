@@ -17,7 +17,7 @@
 
 package com.github.vlsi.gradle.license
 
-import groovy.util.XmlSlurper
+import groovy.xml.XmlSlurper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.StringReader
