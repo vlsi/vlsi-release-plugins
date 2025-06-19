@@ -22,8 +22,8 @@ import com.github.vlsi.gradle.license.api.License
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.LicenseExpressionNormalizer
 import com.github.vlsi.gradle.license.api.SimpleLicense
-import groovy.util.XmlSlurper
-import groovy.util.slurpersupport.GPathResult
+import groovy.xml.XmlSlurper
+import groovy.xml.slurpersupport.GPathResult
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.GradleException
 import org.gradle.api.Project

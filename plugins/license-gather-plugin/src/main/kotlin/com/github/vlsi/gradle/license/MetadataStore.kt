@@ -35,8 +35,8 @@ import com.github.vlsi.gradle.license.api.StandardLicense
 import com.github.vlsi.gradle.license.api.StandardLicenseException
 import com.github.vlsi.gradle.license.api.WithException
 import com.github.vlsi.gradle.license.api.orLater
-import groovy.util.XmlSlurper
-import groovy.util.slurpersupport.GPathResult
+import groovy.xml.XmlSlurper
+import groovy.xml.slurpersupport.GPathResult
 import groovy.xml.MarkupBuilder
 import org.gradle.api.GradleException
 import org.gradle.kotlin.dsl.withGroovyBuilder
