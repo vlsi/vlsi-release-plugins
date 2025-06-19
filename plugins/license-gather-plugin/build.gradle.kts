@@ -20,10 +20,13 @@ import com.github.vlsi.gradle.license.EnumGeneratorTask
 
 plugins {
     buildplugins.`license-texts`
+    id("build.kotlin-dsl-published-gradle-plugin")
+    id("build.test-junit5")
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    // kotlinx-coroutines-core 1.10+ results in internal kotlinc error
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 }
 
 tasks {

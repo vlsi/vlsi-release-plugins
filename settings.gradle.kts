@@ -17,16 +17,13 @@
 
 pluginManagement {
     plugins {
-        id("com.github.autostyle") version "4.0"
-        id("com.gradle.plugin-publish") version "1.2.0"
         id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.10"
-        id("org.jetbrains.dokka") version "1.9.20"
     }
 }
 
 dependencyResolutionManagement {
     repositories {
-        mavenCentral()
+        gradlePluginPortal()
     }
 }
 

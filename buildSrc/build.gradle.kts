@@ -1,5 +1,5 @@
+import org.gradle.kotlin.dsl.support.expectedKotlinDslPluginsVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 /*
@@ -20,8 +20,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
  */
 
 plugins {
-    `java`
-    `kotlin-dsl` apply false
+    id("java")
+    `kotlin-dsl`
     id("com.github.autostyle")
 }
 
@@ -55,17 +55,28 @@ fun Project.applyKotlinProjectConventions() {
     apply(plugin = "org.gradle.kotlin.kotlin-dsl")
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }
     }
-    tasks.withType<KotlinJvmCompile> {
+    tasks.withType<JavaCompile>().configureEach {
+        options.release.set(11)
+    }
+    tasks.withType<KotlinJvmCompile>().configureEach {
         compilerOptions {
-            jvmTarget = JvmTarget.JVM_1_8
+            jvmTarget = JvmTarget.JVM_11
+            freeCompilerArgs.add("-Xjdk-release=11")
         }
     }
 }
 
 dependencies {
+    api("com.github.autostyle:com.github.autostyle.gradle.plugin:4.0")
+    api("com.gradle.plugin-publish:com.gradle.plugin-publish.gradle.plugin:1.3.1")
+    api("org.gradle.kotlin.kotlin-dsl:org.gradle.kotlin.kotlin-dsl.gradle.plugin:$expectedKotlinDslPluginsVersion")
+    api("org.jetbrains.dokka-javadoc:org.jetbrains.dokka-javadoc.gradle.plugin:2.0.0")
+    api("com.gradleup.nmcp:com.gradleup.nmcp.gradle.plugin:0.1.5")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
     subprojects.forEach {
         runtimeOnly(project(it.path))
     }
