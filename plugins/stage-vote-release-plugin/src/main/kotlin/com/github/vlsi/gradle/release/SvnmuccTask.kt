@@ -26,6 +26,7 @@ import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
@@ -81,6 +82,7 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
         return false
     }
 
+    @Internal
     protected val commandsFile = project.layout.buildDirectory.file("svnmucc/$name.txt")
 
     @TaskAction

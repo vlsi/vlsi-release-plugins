@@ -18,27 +18,14 @@ package com.github.vlsi.gradle
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 class ErrorReportingTest : BaseGradleTest() {
-    companion object {
-        @JvmStatic
-        private fun gradleVersionAndSettings(): Iterable<Arguments> {
-            return mutableListOf<Arguments>().apply {
-                add(Arguments.of("7.0"))
-                add(Arguments.of("7.5"))
-                add(Arguments.of("8.0"))
-                add(Arguments.of("8.14.1"))
-            }
-        }
-    }
-
 //    @ParameterizedTest
-//    @MethodSource("gradleVersionAndSettings")
+//    @MethodSource("defaultGradleVersionAndSettings")
     // @ValueSource(strings=["6.1.1"])
-    fun `stacktrace is printed`(gradleVersion: String) {
-        createSettings()
+    fun `stacktrace is printed`(testCase: TestCase) {
+        createSettings(testCase)
 
         projectDir.resolve("build.gradle").write("""
              plugins { id('com.github.vlsi.gradle-extensions') }
@@ -52,7 +39,7 @@ class ErrorReportingTest : BaseGradleTest() {
         )
 
         val result =
-            prepare(gradleVersion, "hi", "-q")
+            prepare(testCase, "hi", "-q")
                 .buildAndFail()
 
         val output = result.output
@@ -67,9 +54,9 @@ class ErrorReportingTest : BaseGradleTest() {
     }
 
     @ParameterizedTest
-    @MethodSource("gradleVersionAndSettings")
-    fun `testng init failure test`(gradleVersion: String) {
-        createSettings()
+    @MethodSource("defaultGradleVersionAndSettings")
+    fun `testng init failure test`(testCase: TestCase) {
+        createSettings(testCase)
 
         projectDir.resolve("build.gradle").write(
             /* language=groovy */
@@ -112,7 +99,7 @@ class ErrorReportingTest : BaseGradleTest() {
         )
 
         val result =
-            prepare(gradleVersion, "test", "-q")
+            prepare(testCase, "test", "-q")
                 .buildAndFail()
 
         val output = result.output

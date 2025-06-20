@@ -17,6 +17,7 @@
 
 package com.github.vlsi.gradle.license
 
+import com.github.vlsi.gradle.BaseGradleTest
 import org.gradle.api.JavaVersion
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -27,36 +28,11 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.nio.file.Path
 
-class VerifyLicenseCompatibilityTaskTest {
-    companion object {
-        @JvmStatic
-        private fun gradleVersionAndSettings(): Iterable<Arguments> {
-            return mutableListOf<Arguments>().apply {
-                if (JavaVersion.current() <= JavaVersion.VERSION_14) {
-                    add(Arguments.of("6.0", "// no extra settings"))
-                    add(Arguments.of("6.1.1", "// no extra settings"))
-                }
-                add(Arguments.of("7.3", "// no extra settings"))
-            }
-        }
-    }
-
-    private val gradleRunner = GradleRunner.create().withPluginClasspath()
-
-    @TempDir
-    lateinit var projectDir: Path
-
-    fun Path.write(text: String) = this.toFile().writeText(text)
-
+class VerifyLicenseCompatibilityTaskTest: BaseGradleTest() {
     @ParameterizedTest
-    @MethodSource("gradleVersionAndSettings")
-    fun `licenseGathering works`(gradleVersion: String, extraSettings: String) {
-        projectDir.resolve("settings.gradle").write(
-            """
-            rootProject.name = 'sample'
-            $extraSettings
-        """
-        )
+    @MethodSource("disabledConfigurationCacheGradleVersionAndSettings")
+    fun `licenseGathering works`(testCase: TestCase) {
+        createSettings(testCase)
         projectDir.resolve("build.gradle").write(
             /* language=groovy */ """
             import com.github.vlsi.gradle.license.GatherLicenseTask
@@ -112,7 +88,8 @@ class VerifyLicenseCompatibilityTaskTest {
         )
 
         val result =
-            runGradleBuild(gradleVersion, "verifyLicenses", "--print", "--quiet", "--stacktrace")
+            prepare(testCase, "verifyLicenses", "--print", "--quiet", "--stacktrace")
+                .build()
         Assertions.assertEquals(
             """
             ALLOW
@@ -202,16 +179,5 @@ class VerifyLicenseCompatibilityTaskTest {
             """.trimIndent().normalizeEol() + "\n",
             result.output.normalizeEol().replace("texts\\", "texts/")
         )
-    }
-
-    private fun String.normalizeEol() = replace(Regex("\r\n?"), "\n")
-
-    private fun runGradleBuild(gradleVersion: String, vararg arguments: String): BuildResult {
-        return gradleRunner
-            .withGradleVersion(gradleVersion)
-            .withProjectDir(projectDir.toFile())
-            .withArguments(*arguments)
-            .forwardOutput()
-            .build()
     }
 }
