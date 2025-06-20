@@ -36,7 +36,7 @@ import java.io.File
 import java.nio.charset.Charset
 import javax.inject.Inject
 
-open class MsgFmtTask @Inject constructor(
+abstract class MsgFmtTask @Inject constructor(
     objects: ObjectFactory
 ) : BaseGettextTask(objects) {
     @InputFiles
@@ -102,7 +102,7 @@ open class MsgFmtTask @Inject constructor(
             logger.debug("Processing {} with {} {}", po.file, cmd, arg)
             project.delete(tmpDir)
             tmpDir.mkdirs()
-            project.exec {
+            execOperations.exec {
                 executable = cmd
                 if (format.get() == OutputFormat.JAVA) {
                     args("--java2")

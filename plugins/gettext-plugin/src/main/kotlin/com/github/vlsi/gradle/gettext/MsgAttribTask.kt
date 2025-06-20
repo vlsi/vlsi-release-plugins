@@ -31,7 +31,7 @@ import org.gradle.work.InputChanges
 import java.io.File
 import javax.inject.Inject
 
-open class MsgAttribTask @Inject constructor(
+abstract class MsgAttribTask @Inject constructor(
     objects: ObjectFactory
 ) : BaseGettextEditTask(objects) {
     @InputFiles
@@ -67,7 +67,7 @@ open class MsgAttribTask @Inject constructor(
                 continue
             }
             logger.debug("Processing {} with {} {}", po.file, cmd, arg)
-            project.exec {
+            execOperations.exec {
                 executable = cmd
                 args("--output-file=${outFile.absolutePath}")
                 args(arg)

@@ -32,6 +32,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.logging.Logger
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.publish.maven.tasks.GenerateMavenPom
@@ -55,12 +56,16 @@ import org.gradle.kotlin.dsl.withType
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
+import org.gradle.process.ExecOperations
 import java.io.File
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
-class StageVoteReleasePlugin @Inject constructor(private val instantiator: Instantiator) :
+class StageVoteReleasePlugin @Inject constructor(
+    private val instantiator: Instantiator,
+    private val execOperations: ExecOperations,
+) :
     Plugin<Project> {
     companion object {
         @Deprecated(replaceWith = ReplaceWith("StageVoteReleasePlugin.RELEASE_PARAMS_EXTENSION_NAME"), message = "There are multiple extensions, so prefer clarified name")
@@ -653,6 +658,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
             val releaseExt = project.the<ReleaseExtension>()
 
             val voteMailFile = layout.buildDirectory.file("$PREPARE_VOTE_TASK_NAME/mail.txt")
+            val projectDir = layout.projectDirectory
             outputs.file(file(voteMailFile))
             doLast {
                 val nexusPublish = project.the<NexusPublishExtension>()
@@ -670,7 +676,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                     .let { it.replacePath(it.path + "/" + svnDist.stageFolder.get()) }
 
                 val (stagedFiles, checksums) = if (releaseExt.svnDistEnabled.get()) {
-                    fetchSvnArtifacts(project, svnStagingUri, svnDist)
+                    fetchSvnArtifacts(project, execOperations, logger, projectDir.asFile, svnStagingUri, svnDist)
                 } else {
                     Pair(listOf(), mapOf())
                 }
@@ -708,10 +714,13 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
 
     private fun fetchSvnArtifacts(
         project: Project,
+        execOperations: ExecOperations,
+        logger: Logger,
+        projectDir: File,
         svnStagingUri: URI,
         svnDist: SvnDistConfig
     ): Pair<List<SvnEntry>, Map<String, String>> {
-        val svn = Svn(project, svnStagingUri).apply {
+        val svn = Svn(execOperations, logger, projectDir, svnStagingUri).apply {
             username = svnDist.credentials.username(project)
             password = svnDist.credentials.password(project)
         }

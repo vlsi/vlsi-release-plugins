@@ -76,7 +76,7 @@ abstract class GettextTask @Inject constructor(
         }
 
         val cmd = executable.get()
-        project.exec {
+        execOperations.exec {
             executable = cmd
             for (keyword in keywords.get()) {
                 args("-k$keyword")
