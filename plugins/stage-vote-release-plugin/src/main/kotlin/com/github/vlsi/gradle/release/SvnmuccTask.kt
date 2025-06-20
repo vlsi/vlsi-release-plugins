@@ -16,33 +16,41 @@
  */
 package com.github.vlsi.gradle.release
 
-import com.github.vlsi.gradle.properties.dsl.stringProperty
 import com.github.vlsi.gradle.properties.dsl.toBool
+import com.github.vlsi.gradle.release.svn.Svn
 import com.github.vlsi.gradle.release.svn.SvnCredentials
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URI
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
+import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
 import org.gradle.work.InputChanges
 
 abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
     @Input
     val repository = project.objects.property<URI>()
         .convention(project.provider {
             project.the<ReleaseExtension>().svnDist.url.get()
         })
 
+    @InputDirectory
+    protected val projectDir = project.layout.projectDirectory
+
     abstract fun operations(inputChanges: InputChanges): List<SvnOperation>
     abstract fun message(): String
 
+    // TODO: remove project access at execution time
     protected fun SvnCredentials.withCredentials() {
         project.the<ReleaseExtension>().svnDist.credentials {
             this@withCredentials.username = username(project)
@@ -50,6 +58,7 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
         }
     }
 
+    // TODO: remove project access at execution time
     protected fun ExecSpec.svnCredentials() {
         project.the<ReleaseExtension>().svnDist.credentials {
             username(project)?.let { args("--username", it) }
@@ -60,30 +69,37 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
     fun exists(path: String): Boolean {
         val os = ByteArrayOutputStream()
         val absolutePath = "${repository.get()}/$path"
-        val result = project.exec {
-            workingDir = project.projectDir
+        val result = execOperations.exec {
+            workingDir = projectDir.asFile
             commandLine("svn", "ls", "--depth", "empty", absolutePath)
             svnCredentials()
             isIgnoreExitValue = true
             errorOutput = os
         }
         if (result.exitValue == 0) {
-            project.logger.debug("Directory {} exists in SVN", absolutePath)
+            logger.debug("Directory {} exists in SVN", absolutePath)
             return true
         }
 
         val message = os.toString() // Default encoding is expected
         if (message.contains("E200009")) {
             // E200009: Could not list all targets because some targets don't exist
-            project.logger.debug("Directory {} does not exist in SVN", absolutePath)
+            logger.debug("Directory {} does not exist in SVN", absolutePath)
         } else {
-            project.logger.warn("Unable to check existence of {}. Error: {}", absolutePath, message)
+            logger.warn("Unable to check existence of {}. Error: {}", absolutePath, message)
         }
         return false
     }
 
     @Internal
     protected val commandsFile = project.layout.buildDirectory.file("svnmucc/$name.txt")
+
+    @Input
+    protected val asfDryRun = project.objects.property<Boolean>()
+        .convention(project.providers.gradleProperty("asfDryRun").map { it.toBool() })
+
+    protected fun svnClient(uri: URI) =
+        Svn(execOperations, logger, projectDir.asFile, uri)
 
     @TaskAction
     fun mucc(inputChanges: InputChanges) {
@@ -120,7 +136,7 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
         commandsFile.writeText(commands)
 
         val commitMessage = message()
-        if (project.stringProperty("asfDryRun").toBool()) {
+        if (asfDryRun.get()) {
             logger.lifecycle(
                 "Dry run svnmucc. root={}, message={}, commands:\n{}",
                 repository.get(),
@@ -139,8 +155,8 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
             commitMessage,
             commands
         )
-        project.exec {
-            workingDir = project.projectDir
+        execOperations.exec {
+            workingDir = projectDir.asFile
             commandLine("svnmucc", "--non-interactive", "--root-url", repository.get())
             svnCredentials()
             args("--extra-args", commandsFile)

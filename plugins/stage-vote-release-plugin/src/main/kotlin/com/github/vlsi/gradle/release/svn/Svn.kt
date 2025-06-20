@@ -26,8 +26,11 @@ import java.net.URI
 import java.time.OffsetDateTime
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.logging.Logger
+import org.gradle.process.ExecOperations
+import java.io.File
 
-class Svn(val project: Project, val uri: URI) : SvnCredentials {
+class Svn(val execOperations: ExecOperations, val logger: Logger, val projectDir: File, val uri: URI) : SvnCredentials {
     override var username: String? = null
     override var password: String? = null
 
@@ -64,12 +67,12 @@ class Svn(val project: Project, val uri: URI) : SvnCredentials {
         val file = opts.file
 
         val revisionSuffix = opts.revision?.let { "@$it" } ?: ""
-        project.logger.lifecycle("Fetching {}/{}{}", uri, file, revisionSuffix)
+        logger.lifecycle("Fetching {}/{}{}", uri, file, revisionSuffix)
 
         val stdout = ByteArrayOutputStream()
         val stderr = ByteArrayOutputStream()
-        val result = project.exec {
-            workingDir = project.projectDir
+        val result = execOperations.exec {
+            workingDir = projectDir
             commandLine("svn", "cat")
             opts.username?.let { args("--username", it) }
             opts.password?.let { args("--password", it) }
@@ -97,12 +100,12 @@ class Svn(val project: Project, val uri: URI) : SvnCredentials {
         } else {
             "contents"
         }
-        project.logger.lifecycle("Listing SVN {} at {}{}", contents, uri, revisionSuffix)
+        logger.lifecycle("Listing SVN {} at {}{}", contents, uri, revisionSuffix)
 
         val stdout = ByteArrayOutputStream()
         val stderr = ByteArrayOutputStream()
-        val result = project.exec {
-            workingDir = project.projectDir
+        val result = execOperations.exec {
+            workingDir = projectDir
             commandLine("svn", "ls", "--xml", "--depth", opts.depth.name.toLowerCase())
             for (folder in opts.folders) {
                 args("$uri/$folder/")

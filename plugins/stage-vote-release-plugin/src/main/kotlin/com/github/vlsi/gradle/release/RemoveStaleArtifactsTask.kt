@@ -68,7 +68,7 @@ abstract class RemoveStaleArtifactsTask @Inject constructor(
 
     override fun operations(inputChanges: InputChanges): List<SvnOperation> {
         val svnUri = repository.get()
-        val entries = Svn(project, svnUri).ls {
+        val entries = svnClient(svnUri).ls {
             withCredentials()
             folders.addAll(foldersToList.get())
         }
