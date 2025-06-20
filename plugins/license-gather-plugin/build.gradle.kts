@@ -64,6 +64,11 @@ tasks {
         }
     }
 
+    sourcesJar {
+        // TODO: review if the dependency is required
+        dependsOn(copyLicenses)
+    }
+
     processResources {
         dependsOn(copyLicenses)
     }
@@ -77,6 +82,11 @@ tasks {
                 exclude("deprecated*.txt")
             }
         }
+    }
+
+    sourcesJar {
+        // TODO: review if the dependency is required
+        dependsOn(saveLicenses)
     }
 
     compileKotlin {
@@ -108,6 +118,11 @@ tasks {
         from(generateStaticTfIdf) {
             include("**/tfidf_licenses.bin")
         }
+    }
+
+    pluginUnderTestMetadata {
+        // TODO: review if the dependency is required
+        dependsOn(copyTfidf)
     }
 
     jar {

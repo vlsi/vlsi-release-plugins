@@ -28,28 +28,10 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 class ChecksumFileTest : BaseGradleTest() {
-    companion object {
-        val isCI = System.getenv().containsKey("CI") || System.getProperties().containsKey("CI")
-
-        @JvmStatic
-        private fun gradleVersionAndSettings(): Iterable<Arguments> {
-            if (!isCI) {
-                // Use only the minimum supported Gradle version to make the test faster
-                return listOf(Arguments.arguments("8.1.1", ConfigurationCache.OFF))
-            }
-            return mutableListOf<Arguments>().apply {
-                add(Arguments.arguments("7.0", ConfigurationCache.OFF))
-                add(Arguments.arguments("7.5", ConfigurationCache.OFF))
-                add(Arguments.arguments("8.1.1", ConfigurationCache.OFF))
-                add(Arguments.arguments("8.14.1", ConfigurationCache.OFF))
-            }
-        }
-    }
-
     @ParameterizedTest
-    @MethodSource("gradleVersionAndSettings")
-    fun previewSvnDist(gradleVersion: String, configurationCache: ConfigurationCache) {
-        enableConfigurationCache(gradleVersion, configurationCache)
+    @MethodSource("disabledConfigurationCacheGradleVersionAndSettings")
+    fun previewSvnDist(testCase: TestCase) {
+        createSettings(testCase)
         projectDir.resolve("src/main/java/acme").toFile().mkdirs()
         projectDir.resolve("src/main/java/acme/Main.java").write(
             /* language=Java */
@@ -99,7 +81,7 @@ class ChecksumFileTest : BaseGradleTest() {
             }
             """.trimIndent()
         )
-        prepare(gradleVersion, "previewSvnDist", "-i", "-Prc=1").build().let { result ->
+        prepare(testCase, "previewSvnDist", "-i", "-Prc=1").build().let { result ->
             if (isCI) {
                 println(result.output)
             }
@@ -107,7 +89,7 @@ class ChecksumFileTest : BaseGradleTest() {
             assertChecksumFilePresent("First execution")
         }
 
-        prepare(gradleVersion, "previewSvnDist", "-i", "-Prc=1").build().let { result ->
+        prepare(testCase, "previewSvnDist", "-i", "-Prc=1").build().let { result ->
             if (isCI) {
                 println(result.output)
             }
@@ -119,7 +101,7 @@ class ChecksumFileTest : BaseGradleTest() {
         }
 
         prepare(
-            gradleVersion,
+            testCase,
             "cleanJarSha512",
             "previewSvnDist",
             "-x",

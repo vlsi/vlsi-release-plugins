@@ -28,29 +28,10 @@ import org.junit.jupiter.params.provider.MethodSource
 
 @Execution(ExecutionMode.SAME_THREAD)
 class JandexPluginTest : BaseGradleTest() {
-
-    companion object {
-        val isCI = System.getenv().containsKey("CI") || System.getProperties().containsKey("CI")
-
-        @JvmStatic
-        private fun gradleVersionAndSettings(): Iterable<Arguments> {
-            if (!isCI) {
-                // Use only the minimum supported Gradle version to make the test faster
-                return listOf(arguments("7.0", ConfigurationCache.ON))
-            }
-            return mutableListOf<Arguments>().apply {
-                add(arguments("7.0", ConfigurationCache.ON))
-                add(arguments("7.4.2", ConfigurationCache.ON))
-                // Configuration cache supports custom caches since 7.5 only: https://github.com/gradle/gradle/issues/14874
-                add(arguments("7.5.1", ConfigurationCache.ON))
-            }
-        }
-    }
-
     @ParameterizedTest
-    @MethodSource("gradleVersionAndSettings")
-    fun jandexBuildWorks(gradleVersion: String, configurationCache: ConfigurationCache) {
-        enableConfigurationCache(gradleVersion, configurationCache)
+    @MethodSource("defaultGradleVersionAndSettings")
+    fun jandexBuildWorks(testCase: TestCase) {
+        createSettings(testCase)
         projectDir.resolve("src/main/java/acme").toFile().mkdirs()
         projectDir.resolve("src/test/java/acme").toFile().mkdirs()
         projectDir.resolve("src/main/java/acme/Main.java").write(
@@ -83,7 +64,7 @@ class JandexPluginTest : BaseGradleTest() {
             }
         """.trimIndent()
         )
-        val result = prepare(gradleVersion, "check", "jar", "-i").build()
+        val result = prepare(testCase, "check", "jar", "-i").build()
         if (isCI) {
             println(result.output)
         }
@@ -94,9 +75,9 @@ class JandexPluginTest : BaseGradleTest() {
             "first execution => no cache available,"
         }
         // Once more, with configuration cache
-        if (configurationCache == ConfigurationCache.ON) {
-            prepare(gradleVersion, "clean").build()
-            val result3 = prepare(gradleVersion, "check", "jar", "-i").build()
+        if (testCase.configurationCache == ConfigurationCache.ON) {
+            prepare(testCase, "clean").build()
+            val result3 = prepare(testCase, "check", "jar", "-i").build()
             if (isCI) {
                 println(result3.output)
             }

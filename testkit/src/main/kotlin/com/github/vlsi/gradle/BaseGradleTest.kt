@@ -16,15 +16,78 @@
  */
 package com.github.vlsi.gradle
 
+import org.gradle.api.JavaVersion
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.arguments
 import java.nio.file.Path
 
 open class BaseGradleTest {
     enum class ConfigurationCache {
         ON, OFF
+    }
+    data class TestCase(
+        val gradleVersion: GradleVersion,
+        val configurationCache: ConfigurationCache
+    )
+
+    companion object {
+        val isCI = System.getenv().containsKey("CI") || System.getProperties().containsKey("CI")
+
+        fun Iterable<Arguments>.filterGradleVersion(
+            predicate: (GradleVersion) -> Boolean
+        ): Iterable<Arguments> = filter {
+            predicate((it.get()[0] as TestCase).gradleVersion)
+        }
+
+        @JvmStatic
+        fun disabledConfigurationCacheGradleVersionAndSettings(): Iterable<Arguments> =
+            defaultGradleVersionAndSettings().map {
+                arguments((it.get()[0] as TestCase)
+                    .copy(configurationCache = ConfigurationCache.OFF))
+            }
+
+        @JvmStatic
+        fun defaultGradleVersionAndSettings(): Iterable<Arguments> {
+            if (!isCI) {
+                // Test as a single configuration only for faster local feedback
+                return listOf(arguments(TestCase(GradleVersion.version("8.10.2"), ConfigurationCache.ON)))
+            }
+            return mutableListOf<Arguments>().apply {
+                if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
+                    add(arguments(TestCase(GradleVersion.version("4.1"), ConfigurationCache.OFF)))
+                    add(arguments(TestCase(GradleVersion.version("4.4.1"), ConfigurationCache.OFF)))
+                    add(arguments(TestCase(GradleVersion.version("4.10.2"), ConfigurationCache.OFF)))
+                }
+                // Java 11 requires Gradle 5.0+
+                if (JavaVersion.current() <= JavaVersion.VERSION_11) {
+                    add(arguments(TestCase(GradleVersion.version("5.6.2"), ConfigurationCache.OFF)))
+                    add(arguments(TestCase(GradleVersion.version("5.4.1"), ConfigurationCache.OFF)))
+                    add(arguments(TestCase(GradleVersion.version("6.0"), ConfigurationCache.OFF)))
+                    add(arguments(TestCase(GradleVersion.version("6.5"), ConfigurationCache.OFF)))
+                    add(arguments(TestCase(GradleVersion.version("7.0"), ConfigurationCache.OFF)))
+                }
+                // Java 17 requires Gradle 7.3+
+                if (JavaVersion.current() <= JavaVersion.VERSION_17) {
+                    add(arguments(TestCase(GradleVersion.version("7.3.3"), ConfigurationCache.OFF)))
+                    add(arguments(TestCase(GradleVersion.version("7.4.2"), ConfigurationCache.OFF)))
+                    // Configuration cache supports custom caches since 7.5 only: https://github.com/gradle/gradle/issues/14874
+                    add(arguments(TestCase(GradleVersion.version("7.5"), ConfigurationCache.ON)))
+                    add(arguments(TestCase(GradleVersion.version("7.6.3"), ConfigurationCache.ON)))
+                    add(arguments(TestCase(GradleVersion.version("8.0.2"), ConfigurationCache.ON)))
+                    add(arguments(TestCase(GradleVersion.version("8.1"), ConfigurationCache.ON)))
+                }
+                // Java 21 requires Gradle 8.5+
+                if (JavaVersion.current() <= JavaVersion.VERSION_21) {
+                    add(arguments(TestCase(GradleVersion.version("8.14.2"), ConfigurationCache.ON)))
+                    add(arguments(TestCase(GradleVersion.version("8.10.2"), ConfigurationCache.ON)))
+                    add(arguments(TestCase(GradleVersion.version("8.5"), ConfigurationCache.ON)))
+                }
+            }
+        }
     }
 
     protected val gradleRunner = GradleRunner.create().withPluginClasspath()
@@ -37,7 +100,7 @@ open class BaseGradleTest {
 
     protected fun String.normalizeEol() = replace(Regex("[\r\n]+"), "\n")
 
-    protected fun createSettings(extra: String = "") {
+    protected fun createSettings(testCase: TestCase, extra: String = "") {
         projectDir.resolve("settings.gradle").write(
             """
                 rootProject.name = 'sample'
@@ -45,32 +108,42 @@ open class BaseGradleTest {
                 $extra
             """
         )
+        enableConfigurationCache(testCase)
     }
 
-    protected fun prepare(gradleVersion: String, vararg arguments: String) =
+    protected fun prepare(testCase: TestCase, vararg arguments: String) =
         gradleRunner
-            .withGradleVersion(gradleVersion)
+            .withGradleVersion(testCase.gradleVersion.version)
             .withProjectDir(projectDir.toFile())
             .withArguments(*arguments)
             .forwardOutput()
 
-    protected fun enableConfigurationCache(
-        gradleVersion: String,
-        configurationCache: ConfigurationCache
+    private fun enableConfigurationCache(
+        testCase: TestCase
     ) {
-        if (configurationCache != ConfigurationCache.ON) {
+        if (testCase.configurationCache != ConfigurationCache.ON) {
             return
         }
-        if (GradleVersion.version(gradleVersion) < GradleVersion.version("7.0")) {
-            Assertions.fail<Unit>("Gradle version $gradleVersion does not support configuration cache")
+        if (testCase.gradleVersion < GradleVersion.version("7.0")) {
+            Assertions.fail<Unit>("Gradle version ${testCase.gradleVersion} does not support configuration cache")
         }
-        // Gradle 6.5 expects values ON, OFF, WARN, so we add the option for 7.0 only
         projectDir.resolve("gradle.properties").toFile().appendText(
-            """
+            if (testCase.gradleVersion >= GradleVersion.version("8.1")) {
+                // https://docs.gradle.org/8.1/userguide/upgrading_version_8.html#configuration_caching_options_renamed
+                /* language=properties */
+                """
 
-            org.gradle.unsafe.configuration-cache=true
-            org.gradle.unsafe.configuration-cache-problems=fail
-            """.trimIndent()
+                org.gradle.configuration-cache=true
+                org.gradle.configuration-cache.problems=fail
+                """.trimIndent()
+            } else {
+                /* language=properties */
+                """
+
+                org.gradle.unsafe.configuration-cache=true
+                org.gradle.unsafe.configuration-cache-problems=fail
+                """.trimIndent()
+            }
         )
     }
 }
