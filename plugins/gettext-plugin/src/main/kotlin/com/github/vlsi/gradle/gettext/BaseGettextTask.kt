@@ -20,11 +20,15 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.kotlin.dsl.property
+import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
-open class BaseGettextTask @Inject constructor(
+abstract class BaseGettextTask @Inject constructor(
     objects: ObjectFactory
 ) : DefaultTask() {
     @Input
     val executable = objects.property<String>()
+
+    @get:Inject
+    protected abstract val execOperations: ExecOperations
 }
