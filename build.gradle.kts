@@ -40,7 +40,7 @@ if (publishToCentral) {
 
 allprojects {
     group = "com.github.vlsi.gradle"
-    version = project.findProperty("project.version") as? String ?: rootProject.version
+    version = project.findProperty("current.version") as? String ?: rootProject.version
 
     tasks.withType<GenerateModuleMetadata> {
         enabled = false
