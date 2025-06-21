@@ -63,9 +63,9 @@ class BatchBuilder<Request, Response, ResultType> {
             }
             results.map {
                 try {
-                    Result.success<ResultType>(it.await())
+                    Result.success(it.await())
                 } catch (e: Exception) {
-                    Result.failure<ResultType>(e)
+                    Result.failure(e)
                 }
             }
         }

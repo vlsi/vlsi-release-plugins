@@ -17,6 +17,7 @@
 
 package com.github.vlsi.gradle.license
 
+import com.github.vlsi.gradle.BaseGradleTest
 import org.gradle.api.JavaVersion
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -27,37 +28,13 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.nio.file.Path
 
-class GatherLicenseTaskTest {
-    companion object {
-        @JvmStatic
-        private fun gradleVersionAndSettings(): Iterable<Arguments> {
-            return mutableListOf<Arguments>().apply {
-                if (JavaVersion.current() <= JavaVersion.VERSION_14) {
-                    add(Arguments.of("6.0", "// no extra settings"))
-                    add(Arguments.of("6.1.1", "// no extra settings"))
-                }
-                add(Arguments.of("7.2", "// no extra settings"))
-            }
-        }
-    }
-
-    private val gradleRunner = GradleRunner.create().withPluginClasspath()
-
-    @TempDir
-    lateinit var projectDir: Path
-
-    fun Path.write(text: String) = this.toFile().writeText(text)
-
+class GatherLicenseTaskTest: BaseGradleTest() {
     @ParameterizedTest
-    @MethodSource("gradleVersionAndSettings")
-    fun `licenseGathering works`(gradleVersion: String, extraSettings: String) {
-        projectDir.resolve("settings.gradle").write(
-            """
-            rootProject.name = 'sample'
-            $extraSettings
-        """
-        )
+    @MethodSource("disabledConfigurationCacheGradleVersionAndSettings")
+    fun `licenseGathering works`(testCase: TestCase) {
+        createSettings(testCase)
         projectDir.resolve("build.gradle").write(
+            /* language=gradle */
             """
             import com.github.vlsi.gradle.license.GatherLicenseTask
             import com.github.vlsi.gradle.license.api.License
@@ -94,8 +71,11 @@ class GatherLicenseTaskTest {
         """
         )
 
-        val result = runGradleBuild(gradleVersion, "generateLicense", "--quiet", "--stacktrace")
+        val result =
+            prepare(testCase, "generateLicense", "--quiet", "--stacktrace")
+                .build()
         Assertions.assertEquals(
+            /* language=xml */
             """
             <license-list version='1'>
               <components>
@@ -368,16 +348,5 @@ class GatherLicenseTaskTest {
             """.trimIndent().normalizeEol() + "\n",
             result.output.normalizeEol()
         )
-    }
-
-    private fun String.normalizeEol() = replace(Regex("[\r\n]+"), "\n")
-
-    private fun runGradleBuild(gradleVersion: String, vararg arguments: String): BuildResult {
-        return gradleRunner
-            .withGradleVersion(gradleVersion)
-            .withProjectDir(projectDir.toFile())
-            .withArguments(*arguments)
-            .forwardOutput()
-            .build()
     }
 }

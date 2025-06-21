@@ -32,7 +32,7 @@ import org.gradle.work.InputChanges
 import java.io.File
 import javax.inject.Inject
 
-open class MsgMergeTask @Inject constructor(
+abstract class MsgMergeTask @Inject constructor(
     objects: ObjectFactory
 ) : BaseGettextEditTask(objects) {
     @InputFiles
@@ -72,7 +72,7 @@ open class MsgMergeTask @Inject constructor(
                 continue
             }
             logger.debug("Processing {} with {} {}", po.file, cmd, arg)
-            project.exec {
+            execOperations.exec {
                 executable = cmd
                 args("--output-file=${outFile.absolutePath}")
                 args("--quiet")

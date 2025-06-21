@@ -24,7 +24,7 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
-open class BaseGettextEditTask @Inject constructor(
+abstract class BaseGettextEditTask @Inject constructor(
     objects: ObjectFactory
 ) : BaseGettextTask(objects) {
     @Input

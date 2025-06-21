@@ -17,8 +17,8 @@
 package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.release.svn.LsDepth
-import com.github.vlsi.gradle.release.svn.Svn
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.InputChanges
@@ -31,6 +31,8 @@ abstract class PromoteSvnRelease : SvnmuccTask() {
     @Input
     val useCpWorkaround = project.objects.property<Boolean>().convention(true)
 
+    private val ext = project.the<ReleaseExtension>()
+
     override fun message() =
         project.the<ReleaseExtension>().run {
             "Promoting ${componentName.get()} ${rcTag.get()} -> ${releaseTag.get()} to release area"
@@ -38,14 +40,13 @@ abstract class PromoteSvnRelease : SvnmuccTask() {
 
     override fun operations(inputChanges: InputChanges): List<SvnOperation> {
         return mutableListOf<SvnOperation>().apply {
-            val ext = project.the<ReleaseExtension>()
             val svnDist = ext.svnDist
             val stageFolder = svnDist.stageFolder.get()
             val releaseFolder = svnDist.releaseFolder.get()
 
             val subfolders = svnDist.releaseSubfolder.get()
 
-            val entries = Svn(project, repository.get()).ls {
+            val entries = svnClient(repository.get()).ls {
                 withCredentials()
                 folders.add(stageFolder)
                 depth = LsDepth.INFINITY

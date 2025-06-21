@@ -20,10 +20,13 @@ import com.github.vlsi.gradle.license.EnumGeneratorTask
 
 plugins {
     buildplugins.`license-texts`
+    id("build.kotlin-dsl-published-gradle-plugin")
+    id("build.test-junit5")
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    // kotlinx-coroutines-core 1.10+ results in internal kotlinc error
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 }
 
 tasks {
@@ -61,6 +64,11 @@ tasks {
         }
     }
 
+    sourcesJar {
+        // TODO: review if the dependency is required
+        dependsOn(copyLicenses)
+    }
+
     processResources {
         dependsOn(copyLicenses)
     }
@@ -74,6 +82,11 @@ tasks {
                 exclude("deprecated*.txt")
             }
         }
+    }
+
+    sourcesJar {
+        // TODO: review if the dependency is required
+        dependsOn(saveLicenses)
     }
 
     compileKotlin {
@@ -105,6 +118,11 @@ tasks {
         from(generateStaticTfIdf) {
             include("**/tfidf_licenses.bin")
         }
+    }
+
+    pluginUnderTestMetadata {
+        // TODO: review if the dependency is required
+        dependsOn(copyTfidf)
     }
 
     jar {

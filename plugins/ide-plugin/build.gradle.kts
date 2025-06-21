@@ -15,6 +15,10 @@
  *
  */
 
+plugins {
+    id("build.kotlin-dsl-published-gradle-plugin")
+}
+
 dependencies {
     constraints {
         api("com.google.guava:guava:33.4.8-jre") {
