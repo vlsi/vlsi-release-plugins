@@ -675,7 +675,7 @@ class StageVoteReleasePlugin @Inject constructor(private val instantiator: Insta
                     Pair(listOf(), mapOf())
                 }
 
-                val svnStagingRevision = stagedFiles.map { it.commit.revision }.max() ?: 0
+                val svnStagingRevision = stagedFiles.map { it.commit.revision }.maxOrNull() ?: 0
 
                 val releaseParams = ReleaseParams(
                     tlp = releaseExt.tlp.get(),

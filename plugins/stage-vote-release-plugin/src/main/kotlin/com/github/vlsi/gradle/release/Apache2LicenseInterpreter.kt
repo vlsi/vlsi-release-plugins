@@ -41,9 +41,9 @@ class Apache2LicenseInterpreter {
         return when (e) {
             is DisjunctionLicenseExpression ->
                 // A or X => A
-                e.unordered.map { eval(it) }.min()
+                e.unordered.map { eval(it) }.minOrNull()
             is ConjunctionLicenseExpression ->
-                e.unordered.map { eval(it) }.max()
+                e.unordered.map { eval(it) }.maxOrNull()
             else -> null
         } ?: AsfLicenseCategory.UNKNOWN
     }
