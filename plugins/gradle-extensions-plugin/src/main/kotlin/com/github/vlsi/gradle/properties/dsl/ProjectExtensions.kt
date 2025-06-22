@@ -129,4 +129,4 @@ fun Project.lastEditYear(path: String = "$rootDir/NOTICE"): Int =
         .asSequence()
         .flatMap { yearRegexp.findAll(it) }
         .map { it.value.toInt() }
-        .max() ?: throw IllegalStateException("Unable to identify copyright year from $path")
+        .maxOrNull() ?: throw IllegalStateException("Unable to identify copyright year from $path")
