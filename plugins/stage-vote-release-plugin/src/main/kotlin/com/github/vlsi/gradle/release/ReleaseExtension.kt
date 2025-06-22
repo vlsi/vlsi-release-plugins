@@ -25,6 +25,8 @@ import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.logging.Logger
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
@@ -40,10 +42,12 @@ import java.time.Duration
  * ```
  */
 open class ReleaseExtension @Inject constructor(
+    logger: Logger,
     private val project: Project,
+    layout: ProjectLayout,
     objects: ObjectFactory
 ) {
-    internal val repositoryIdStore = NexusRepositoryIdStore(project)
+    internal val repositoryIdStore = NexusRepositoryIdStore(logger, layout)
 
     val validateSvnCredentials =
         project.validate { svnDist.credentials }.toMutableList()

@@ -16,23 +16,24 @@
  */
 package com.github.vlsi.gradle.release
 
-import java.io.File
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.logging.Logger
 import java.util.concurrent.ConcurrentHashMap
-import org.gradle.api.Project
 
-class NexusRepositoryIdStore(private val project: Project) {
+class NexusRepositoryIdStore(
+    private val logger: Logger,
+    layout: ProjectLayout
+) {
     private val savedIds = ConcurrentHashMap<String, String>()
 
-    private fun storeDir() = "${project.buildDir}/stagingRepositories"
-
-    private fun filePath(repositoryName: String) = "${storeDir()}/$repositoryName.txt"
+    private val storeDir = layout.buildDirectory.dir("stagingRepositories")
 
     operator fun get(name: String) = savedIds[name]
 
     operator fun set(name: String, id: String) {
         if (savedIds.putIfAbsent(name, id) == null) {
-            project.logger.lifecycle("Initialized stagingRepositoryId {} for repository {}", id, name)
-            val file = project.file(filePath(name))
+            logger.lifecycle("Initialized stagingRepositoryId {} for repository {}", id, name)
+            val file = storeDir.get().file("$name.txt").asFile
             file.parentFile.mkdirs()
             file.writeText(id)
         }
@@ -41,10 +42,10 @@ class NexusRepositoryIdStore(private val project: Project) {
     fun getOrLoad(name: String) = savedIds[name] ?: load(name)
 
     fun load(name: String) =
-        File(storeDir() + "/$name.txt").readText().also { set(name, it) }
+        storeDir.get().file("$name.txt").asFile.readText().also { set(name, it) }
 
     fun load() {
-        for (f in project.file(storeDir()).listFiles { f -> f.name.endsWith("*.txt") }
+        for (f in storeDir.get().asFile.listFiles { f -> f.name.endsWith("*.txt") }
             ?: arrayOf()) {
             savedIds[f.name.removeSuffix(".txt")] = f.readText()
         }

@@ -134,7 +134,7 @@ class StageVoteReleasePlugin @Inject constructor(
         val releaseSignaturesConfiguration = configurations[RELEASE_SIGNATURES_CONFIGURATION_NAME]
 
         // Save stagingRepoId. We don't know which
-        val releaseExt = extensions.create<ReleaseExtension>(RELEASE_PARAMS_EXTENSION_NAME, project)
+        val releaseExt = extensions.create<ReleaseExtension>(RELEASE_PARAMS_EXTENSION_NAME, logger, project)
 
         configureSigning(releaseExt)
 
