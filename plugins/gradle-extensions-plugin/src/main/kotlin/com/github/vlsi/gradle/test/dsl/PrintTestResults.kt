@@ -25,7 +25,7 @@ import com.github.vlsi.gradle.styledtext.Style
 import com.github.vlsi.gradle.styledtext.Style.Companion.UNCHANGED
 import com.github.vlsi.gradle.styledtext.StyledTextBuilder
 import com.github.vlsi.gradle.styledtext.withStyle
-import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.TestDescriptor
 import org.gradle.api.tasks.testing.TestResult
 import org.gradle.kotlin.dsl.KotlinClosure2
