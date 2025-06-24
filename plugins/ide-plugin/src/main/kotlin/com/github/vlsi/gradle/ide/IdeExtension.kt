@@ -28,6 +28,7 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.plugins.ide.eclipse.model.EclipseModel
 import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.gradle.util.GradleVersion
 import org.jetbrains.gradle.ext.ProjectSettings
 import java.io.File
 import java.net.URI
@@ -107,7 +108,12 @@ open class IdeExtension(private val project: Project) {
         project.configure<IdeaModel> {
             module.generatedSourceDirs.add(generationOutput)
             if (sourceSet.name.contains("test", ignoreCase = true)) {
-                module.testSourceDirs.add(generationOutput)
+                if (GradleVersion.current() >= GradleVersion.version("7.4")) {
+                    module.testSources.from(generationOutput)
+                } else {
+                    @Suppress("DEPRECATION")
+                    module.testSourceDirs.add(generationOutput)
+                }
             }
         }
 
