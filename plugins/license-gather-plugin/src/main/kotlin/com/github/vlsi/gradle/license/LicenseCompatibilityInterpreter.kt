@@ -74,9 +74,7 @@ internal class LicenseCompatibilityInterpreter(
         resolvedCases[licenseExpression]?.let { return it.asResolved(licenseExpression) }
 
         // Expand the license (e.g. expand OR_LATER into OR ... OR)
-        val e = licenseEquivalence.expand(licenseExpression)
-
-        return when (e) {
+        return when (val e = licenseEquivalence.expand(licenseExpression)) {
             is DisjunctionLicenseExpression ->
                 // A or X => A
                 e.unordered.takeIf { it.isNotEmpty() }?.map { eval(it) }?.reduce { a, b ->

@@ -55,7 +55,7 @@ class LicenseEquivalence(
             }
         }
         val result = seq.toSet()
-        return if (result.isEmpty()) null else result
+        return result.ifEmpty { null }
     }
 
     fun expand(licenseExpression: LicenseExpression): LicenseExpression {

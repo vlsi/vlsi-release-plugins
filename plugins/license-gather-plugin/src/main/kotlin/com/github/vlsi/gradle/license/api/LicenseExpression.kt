@@ -160,7 +160,7 @@ fun LicenseExpression.weight(): Int =
         is JustLicense -> 1
         is OrLaterLicense -> 2
         is WithException -> license.weight() + 1
-        is ConjunctionLicenseExpression -> licenses.map { it.weight() + 1 }.maxOrNull() ?: 1
-        is DisjunctionLicenseExpression -> licenses.map { it.weight() + 1 }.maxOrNull() ?: 1
+        is ConjunctionLicenseExpression -> licenses.maxOfOrNull { it.weight() + 1 } ?: 1
+        is DisjunctionLicenseExpression -> licenses.maxOfOrNull { it.weight() + 1 } ?: 1
         else -> TODO("Unexpected expression: ${this::class.simpleName}: $this")
     }

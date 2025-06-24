@@ -22,11 +22,8 @@ import com.github.vlsi.gradle.license.api.License
 import com.github.vlsi.gradle.license.api.LicenseEquivalence
 import com.github.vlsi.gradle.license.api.LicenseExpression
 import com.github.vlsi.gradle.license.api.LicenseExpressionSet
-import com.github.vlsi.gradle.license.api.LicenseExpressionSetOperation
 import com.github.vlsi.gradle.license.api.SpdxLicense
 import com.github.vlsi.gradle.license.api.SpdxLicenseException
-import com.github.vlsi.gradle.license.api.orLater
-import com.github.vlsi.gradle.license.api.with
 
 /**
  * See https://apache.org/legal/resolved.html
