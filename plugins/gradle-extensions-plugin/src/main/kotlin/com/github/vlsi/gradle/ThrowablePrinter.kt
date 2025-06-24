@@ -29,6 +29,7 @@ import org.gradle.internal.UncheckedException
 import org.gradle.internal.exceptions.LocationAwareException
 import org.gradle.internal.exceptions.MultiCauseException
 import org.gradle.internal.serialize.PlaceholderException
+import org.gradle.tooling.Failure
 import java.sql.SQLException
 import java.util.*
 
@@ -169,6 +170,19 @@ class ThrowablePrinter {
         val causeTitle: String,
         val causedBy: List<StackTraceElement>?
     )
+
+    fun print(failure: Failure, out: Appendable, baseIndent: String = indent): Appendable {
+        out.append(baseIndent).append(failure.message)
+        if (failure.causes.isEmpty()) {
+            return out
+        }
+        for (cause in failure.causes) {
+            out.appendPlatformLine().append(baseIndent).append("Caused by:")
+            out.appendPlatformLine()
+            print(cause, out, "$baseIndent    ")
+        }
+        return out
+    }
 
     fun print(root: Throwable, out: Appendable, baseIndent: String = indent): Appendable {
         val dejaVu = Collections.newSetFromMap<Throwable>(IdentityHashMap())

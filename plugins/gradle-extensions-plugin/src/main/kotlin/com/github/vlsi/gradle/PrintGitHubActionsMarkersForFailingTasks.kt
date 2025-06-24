@@ -17,28 +17,41 @@
 package com.github.vlsi.gradle
 
 import com.github.vlsi.gradle.github.GitHubActionsLogger
-import org.gradle.api.Task
-import org.gradle.api.execution.TaskExecutionListener
-import org.gradle.api.tasks.TaskState
+import com.github.vlsi.gradle.styledtext.StyledTextBuilder
+import org.gradle.api.provider.Property
+import org.gradle.api.services.BuildService
+import org.gradle.api.services.BuildServiceParameters
+import org.gradle.tooling.events.FinishEvent
+import org.gradle.tooling.events.OperationCompletionListener
+import org.gradle.tooling.events.task.TaskFailureResult
+import org.gradle.tooling.events.task.TaskFinishEvent
 
-object PrintGitHubActionsMarkersForFailingTasks : TaskExecutionListener {
-    override fun beforeExecute(task: Task) = Unit
+abstract class PrintGitHubActionsMarkersForFailingTasksParameters: BuildServiceParameters {
+    abstract val fullTrace: Property<Boolean>
+}
 
-    override fun afterExecute(task: Task, state: TaskState) {
-        state.failure?.let { throwable ->
-            val sb = task.project.createStyledBuilder().apply {
-                // GitHub "annotations" do not support coloring
-                enableStyle = false
-            }
-            val printer = task.project.createThrowablePrinter().apply {
+abstract class PrintGitHubActionsMarkersForFailingTasks : BuildService<PrintGitHubActionsMarkersForFailingTasksParameters>,
+    OperationCompletionListener {
+    override fun onFinish(event: FinishEvent) {
+        if (event !is TaskFinishEvent) {
+            return
+        }
+        val result = event.result
+        if (result !is TaskFailureResult) {
+            return
+        }
+        result.failures.forEach { failure ->
+            // GitHub "annotations" do not support coloring
+            val sb = StyledTextBuilder(enableStyle = false)
+            val printer = createThrowablePrinter(fullTrace = parameters.fullTrace.get()).apply {
                 indent = ""
             }
-            printer.print(throwable, sb)
+            printer.print(failure, sb)
             println(
                 """
-                ${GitHubActionsLogger.startGroup("${task.path} failure marker")}
+                ${GitHubActionsLogger.startGroup("${event.descriptor.taskPath} failure marker")}
                 ${GitHubActionsLogger.error(
-                    task.toString(),
+                    event.descriptor.name.toString(),
                     line = null,
                     col = null,
                     message = sb.toString()

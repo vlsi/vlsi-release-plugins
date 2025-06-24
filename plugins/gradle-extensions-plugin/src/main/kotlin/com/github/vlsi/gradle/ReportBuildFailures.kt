@@ -22,16 +22,15 @@ import com.github.vlsi.gradle.styledtext.StyledTextBuilder
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 
-object ReportBuildFailures : BuildAdapter() {
+class ReportBuildFailures(
+    val enableStyle: Boolean,
+    val fullTrace: Boolean,
+) : BuildAdapter() {
     override fun buildFinished(result: BuildResult) {
         val failure = result.failure ?: return
         val gradle = result.gradle
-        val (sb, throwablePrinter) = if (gradle == null) {
-            StyledTextBuilder() to ThrowablePrinter()
-        } else {
-            gradle.rootProject.createStyledBuilder() to
-            gradle.rootProject.createThrowablePrinter()
-        }
+        val sb = StyledTextBuilder(enableStyle = enableStyle)
+        val throwablePrinter = createThrowablePrinter(fullTrace = fullTrace)
         throwablePrinter.indent = "    "
         sb.appendPlatformLine()
         sb.append(result.action).append(" ")

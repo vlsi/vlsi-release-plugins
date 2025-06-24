@@ -18,19 +18,57 @@ package com.github.vlsi.gradle
 
 import com.github.vlsi.gradle.github.GitHubActionsLogger
 import com.github.vlsi.gradle.properties.dsl.props
-import com.github.vlsi.gradle.styledtext.StyledTextBuilder
 import com.github.vlsi.gradle.test.dsl.printTestResults
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.configuration.BuildFeatures
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.build.event.BuildEventsListenerRegistry
+import org.gradle.kotlin.dsl.registerIfAbsent
+import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.kotlin.dsl.withType
+import org.gradle.util.GradleVersion
 
 class ProjectExtensionsPlugin : Plugin<Project> {
+    private val Gradle.configurationCacheEnabled: Boolean
+        get() {
+            if (GradleVersion.current() >= GradleVersion.version("8.5")) {
+                return serviceOf<BuildFeatures>().configurationCache.active.get()
+            }
+            return try {
+                startParameter.javaClass.getMethod("isConfigurationCache").invoke(startParameter) as Boolean
+            } catch (e: Exception) {
+                false
+            }
+        }
+
     override fun apply(target: Project) {
-        target.gradle.addBuildListener(ReportBuildFailures)
+        val enableStyle = !target.props.bool(
+            "nocolor",
+            default = System.getProperty("os.name").contains("windows", ignoreCase = true)
+        )
+        val fullTrace = target.props.bool("fulltrace")
+        if (!target.gradle.configurationCacheEnabled) {
+            target.gradle.addBuildListener(
+                ReportBuildFailures(
+                    enableStyle = enableStyle,
+                    fullTrace = fullTrace
+                )
+            )
+        }
         if (GitHubActionsLogger.isEnabled) {
-            target.gradle.addListener(PrintGitHubActionsMarkersForFailingTasks)
+            val gitHubMarkers = target.gradle.sharedServices.registerIfAbsent(
+                "PrintGitHubActionsMarkersForFailingTasks",
+                PrintGitHubActionsMarkersForFailingTasks::class
+            ) {
+                parameters {
+                    this.fullTrace.set(fullTrace)
+                }
+            }
+            target.gradle.serviceOf<BuildEventsListenerRegistry>()
+                .onTaskCompletion(gitHubMarkers)
         }
         target.tasks.withType<AbstractTestTask>().configureEach {
             testLogging {
@@ -45,13 +83,8 @@ class ProjectExtensionsPlugin : Plugin<Project> {
     }
 }
 
-internal fun Project.createStyledBuilder() = StyledTextBuilder().apply {
-    enableStyle = !project.props.bool("nocolor",
-        default = System.getProperty("os.name").contains("windows", ignoreCase = true))
-}
-
-internal fun Project.createThrowablePrinter() = ThrowablePrinter().apply {
-    if (project.props.bool("fulltrace")) {
+internal fun createThrowablePrinter(fullTrace: Boolean) = ThrowablePrinter().apply {
+    if (fullTrace) {
         classExcludes.clear()
         hideThrowables.clear()
         hideStacktraces.clear()

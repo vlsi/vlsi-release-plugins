@@ -64,6 +64,7 @@ fun AbstractTestTask.printTestResults(
         default = System.getProperty("os.name").contains("windows", ignoreCase = true)),
     showStacktrace: Boolean = true
 ) {
+    val fullTrace = project.props.bool("fulltrace")
     // https://github.com/junit-team/junit5/issues/2041
     // Gradle does not print parameterized test names yet :(
     // Hopefully it will be fixed in Gradle 6.1
@@ -102,7 +103,7 @@ fun AbstractTestTask.printTestResults(
                 .withStyle(if (durationMillis >= slowTestLogThreshold) Style.BOLD else UNCHANGED)
             sb.append(resultType).append(" ").append(duration)
             sb.append(", ").appendTestName(displayName)
-            val throwablePrinter = project.createThrowablePrinter().apply {
+            val throwablePrinter = createThrowablePrinter(fullTrace = fullTrace).apply {
                 indent = "    "
                 test.className?.let { className ->
                     frameStyles += {
@@ -169,7 +170,7 @@ fun AbstractTestTask.printTestResults(
                 sb.appendTestName(displayName)
             }
             if (showStacktrace && result.exceptions.isNotEmpty()) {
-                val throwablePrinter = project.createThrowablePrinter().apply {
+                val throwablePrinter = createThrowablePrinter(fullTrace = fullTrace).apply {
                     indent = "    "
                 }
                 result.exceptions.forEach {
