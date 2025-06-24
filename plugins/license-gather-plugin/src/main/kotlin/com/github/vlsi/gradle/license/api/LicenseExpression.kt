@@ -54,8 +54,14 @@ sealed class LicenseExpression : LicenseExpressionSet, java.io.Serializable {
         }
     }
 
-    object NONE : LicenseExpression()
-    object NOASSERTION : LicenseExpression()
+    object NONE : LicenseExpression() {
+        private fun readResolve(): Any =
+            NONE
+    }
+    object NOASSERTION : LicenseExpression() {
+        private fun readResolve(): Any =
+            NONE
+    }
 }
 
 private fun List<URI>.asString() =
