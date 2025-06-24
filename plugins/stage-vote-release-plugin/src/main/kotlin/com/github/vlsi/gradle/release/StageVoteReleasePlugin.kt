@@ -500,6 +500,7 @@ class StageVoteReleasePlugin @Inject constructor(
                 dependsOn(validateBeforeBuildingReleaseArtifacts)
             }
 
+        val previewSiteDir = layout.buildDirectory.file(project.providers.provider { releaseExt.sitePreview.name })
         val syncPreviewSiteRepo = tasks.register("syncPreviewSiteRepo", Sync::class) {
             onlyIf { releaseExt.sitePreviewEnabled.get() }
             dependsOn(preparePreviewSiteRepo)
@@ -509,7 +510,7 @@ class StageVoteReleasePlugin @Inject constructor(
                 include("**/.git/**")
             }
 
-            into(File(buildDir, releaseExt.sitePreview.name))
+            into(previewSiteDir)
             // Just reuse .gitattributes for text/binary and crlf/lf attributes
             from("${rootProject.rootDir}/.gitattributes")
             with(releaseExt.previewSiteSpec)
