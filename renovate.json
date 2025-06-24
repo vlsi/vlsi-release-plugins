@@ -1,30 +1,42 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
-  "labels": ["dependencies"],
-  "schedule": ["every 3 weeks on Monday"],
+  "labels": [
+    "dependencies"
+  ],
+  "schedule": [
+    "every 3 weeks on Monday"
+  ],
   "packageRules": [
     {
-      "matchPackagePrefixes": ["com.fasterxml.jackson.core"],
-      "groupName": "com.fasterxml.jackson.core"
+      "groupName": "com.fasterxml.jackson.core",
+      "matchPackageNames": [
+        "com.fasterxml.jackson.core{/,}**"
+      ]
     },
     {
-      "matchPackagePrefixes": ["com.github.vlsi"],
-      "groupName": "com.github.vlsi"
+      "groupName": "com.github.vlsi",
+      "matchPackageNames": [
+        "com.github.vlsi{/,}**"
+      ]
     },
     {
-      "matchPackagePrefixes": ["org.ajoberstar.grgit"],
       "groupName": "org.ajoberstar.grgit",
       "description": "TODO: grgit 5.0 requires Java 11",
-      "allowedVersions": "< 5.0"
+      "allowedVersions": "< 5.0",
+      "matchPackageNames": [
+        "org.ajoberstar.grgit{/,}**"
+      ]
     },
     {
-      "matchPackagePrefixes": ["org.eclipse.jgit"],
       "groupName": "org.eclipse.jgit",
       "description": "TODO: jgit 6.0 requires Java 11",
-      "allowedVersions": "< 6.0"
+      "allowedVersions": "< 6.0",
+      "matchPackageNames": [
+        "org.eclipse.jgit{/,}**"
+      ]
     }
   ]
 }
