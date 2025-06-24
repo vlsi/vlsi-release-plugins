@@ -20,6 +20,7 @@ plugins {
     id("build.kotlin-conventions")
     id("build.dokka-javadoc")
     id("build.publish-to-central")
+    id("com.gradle.plugin-publish")
 }
 
 val pluginDisplayName = project.property("plugin.display.name") as String
