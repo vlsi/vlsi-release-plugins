@@ -22,6 +22,6 @@ plugins {
 
 dependencies {
     api(gradleTestKit())
-    api(platform("org.junit:junit-bom:5.13.1"))
+    api(platform("org.junit:junit-bom:5.13.3"))
     implementation("org.junit.jupiter:junit-jupiter")
 }
