@@ -25,5 +25,5 @@ dependencies {
             because("org.jetbrains.gradle.plugin ships with an old version of Guava, see https://youtrack.jetbrains.com/issue/IDEA-374565")
         }
     }
-    implementation("org.jetbrains.gradle.plugin.idea-ext:org.jetbrains.gradle.plugin.idea-ext.gradle.plugin:1.2")
+    implementation("org.jetbrains.gradle.plugin.idea-ext:org.jetbrains.gradle.plugin.idea-ext.gradle.plugin:1.3")
 }
