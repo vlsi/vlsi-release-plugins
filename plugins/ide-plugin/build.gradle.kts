@@ -21,7 +21,7 @@ plugins {
 
 dependencies {
     constraints {
-        api("com.google.guava:guava:33.4.8-jre") {
+        api("com.google.guava:guava:33.5.0-jre") {
             because("org.jetbrains.gradle.plugin ships with an old version of Guava, see https://youtrack.jetbrains.com/issue/IDEA-374565")
         }
     }
