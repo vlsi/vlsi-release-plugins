@@ -23,7 +23,7 @@ plugins {
 dependencies {
     constraints {
         api("commons-beanutils:commons-beanutils:1.11.0")
-        api("commons-codec:commons-codec:1.18.0")
+        api("commons-codec:commons-codec:1.20.0")
         api("commons-collections:commons-collections:3.2.2")
         api("net.sourceforge.nekohtml:nekohtml:1.9.22")
         api("org.apache.httpcomponents:httpclient:4.5.14")
