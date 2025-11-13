@@ -22,7 +22,7 @@ jobs:
     name: 'Calcite Avatica ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 50
         submodules: true
@@ -68,7 +68,7 @@ jobs:
     name: 'Calcite ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 50
         submodules: true
@@ -114,7 +114,7 @@ jobs:
     name: 'JMeter ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 50
         submodules: true
@@ -160,7 +160,7 @@ jobs:
     name: 'Autostyle ${{ matrix.gradle-version }}'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 50
         submodules: true
