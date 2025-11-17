@@ -17,8 +17,10 @@
 import org.gradle.plugins.ide.idea.model.IdeaProject
 import org.jetbrains.gradle.ext.CopyrightConfiguration
 import org.jetbrains.gradle.ext.ProjectSettings
+import java.time.Duration
 
 plugins {
+    id("com.gradleup.nmcp.aggregation")
     id("org.jetbrains.gradle.plugin.idea-ext")
 }
 
@@ -37,6 +39,18 @@ version = buildVersion
 allprojects {
     group = "com.github.vlsi.gradle"
     version = buildVersion
+}
+
+nmcpAggregation {
+    val centralPortalPublishingType = providers.gradleProperty("centralPortalPublishingType").orElse("AUTOMATIC")
+    val centralPortalPublishingTimeout = providers.gradleProperty("centralPortalPublishingTimeout").map { it.toLong() }.orElse(60)
+
+    centralPortal {
+        username = providers.environmentVariable("CENTRAL_PORTAL_USERNAME")
+        password = providers.environmentVariable("CENTRAL_PORTAL_PASSWORD")
+        publishingType = centralPortalPublishingType
+        validationTimeout = centralPortalPublishingTimeout.map { Duration.ofMinutes(it) }
+    }
 }
 
 val licenseHeader = file("gradle/license-header.txt").readText()

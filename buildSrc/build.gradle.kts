@@ -75,7 +75,7 @@ dependencies {
     api("com.gradle.plugin-publish:com.gradle.plugin-publish.gradle.plugin:1.3.1")
     api("org.gradle.kotlin.kotlin-dsl:org.gradle.kotlin.kotlin-dsl.gradle.plugin:$expectedKotlinDslPluginsVersion")
     api("org.jetbrains.dokka-javadoc:org.jetbrains.dokka-javadoc.gradle.plugin:2.0.0")
-    api("com.gradleup.nmcp:com.gradleup.nmcp.gradle.plugin:0.1.5")
+    api("com.gradleup.nmcp:com.gradleup.nmcp.gradle.plugin:1.3.0")
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
     subprojects.forEach {
         runtimeOnly(project(it.path))
