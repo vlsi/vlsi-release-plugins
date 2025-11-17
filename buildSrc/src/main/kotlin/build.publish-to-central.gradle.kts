@@ -32,8 +32,6 @@ java {
 
 val release = providers.gradleProperty("release").getOrElse("false").toBoolean()
 val useInMemoryPgpKeys = providers.gradleProperty("useInMemoryPgpKeys").getOrElse("true").toBoolean()
-val centralPortalPublishingType = providers.gradleProperty("centralPortalPublishingType").orElse("AUTOMATIC")
-val centralPortalPublishingTimeout = providers.gradleProperty("centralPortalPublishingTimeout").map { it.toLong() }
 
 if (!release) {
     publishing {
@@ -60,14 +58,6 @@ if (!release) {
                 pgpPrivateKey,
                 pgpPassphrase
             )
-        }
-    }
-    nmcp {
-        centralPortal {
-            username = providers.environmentVariable("CENTRAL_PORTAL_USERNAME")
-            password = providers.environmentVariable("CENTRAL_PORTAL_PASSWORD")
-            publishingType = centralPortalPublishingType.get()
-            verificationTimeout = Duration.ofMinutes(centralPortalPublishingTimeout.get())
         }
     }
 }
