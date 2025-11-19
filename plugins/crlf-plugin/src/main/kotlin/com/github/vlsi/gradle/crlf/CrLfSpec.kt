@@ -112,7 +112,9 @@ private fun CopySpec.filterBinary(action: FileCopyDetails.() -> Unit) {
 private fun FileCopyDetails.filterEol(props: GitProperties, textEol: LineEndings) {
     val attributes = props.attrs.compute(this)
     if (attributes.isSet("executable")) {
-        mode = "755".toInt(8)
+        permissions {
+            unix("755")
+        }
     }
     val streamType = textEol.toStreamType(attributes)
     filterEol(streamType)
