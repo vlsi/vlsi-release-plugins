@@ -54,7 +54,9 @@ fun CopySpec.includeShell(
     }
     from(src) {
         filter(LineEndings.LF)
-        fileMode = "755".toInt(8)
+        filePermissions {
+            unix("755")
+        }
         include(*scriptName)
         include(scriptName.map { "$it.sh" })
         action?.invoke(this)

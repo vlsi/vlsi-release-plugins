@@ -47,7 +47,13 @@ private fun filterCrLf(reader: Reader, detectBinary: Boolean) =
     AutoCRLFInputStream(reader.decode(), detectBinary).encode()
 
 private fun filterLf(reader: Reader, detectBinary: Boolean) =
-    AutoLFInputStream(reader.decode(), detectBinary).encode()
+    AutoLFInputStream.create(
+        reader.decode(),
+        *when (detectBinary) {
+            true -> arrayOf(AutoLFInputStream.StreamFlag.DETECT_BINARY)
+            else -> arrayOf()
+        }
+    ).encode()
 
 class FilterAutoCrlf(reader: Reader) : FilterReader(filterCrLf(reader, detectBinary = true))
 class FilterAutoLf(reader: Reader) : FilterReader(filterLf(reader, detectBinary = true))
