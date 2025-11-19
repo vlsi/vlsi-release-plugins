@@ -20,9 +20,11 @@ import com.github.vlsi.gradle.styledtext.StandardColor
 import com.github.vlsi.gradle.styledtext.Style
 import com.github.vlsi.gradle.styledtext.StyledTextBuilder
 import org.gradle.api.GradleException
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.UncheckedIOException
 import org.gradle.api.internal.tasks.TaskDependencyResolveException
 import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.execution.MultipleBuildFailures
 import org.gradle.execution.TaskSelectionException
 import org.gradle.execution.commandline.TaskConfigurationException
 import org.gradle.internal.UncheckedException
@@ -125,6 +127,14 @@ class ThrowablePrinter {
                 },
                 {
                     it.message?.startsWith("The following files have format violations") == true
+                },
+                {
+                    it is MultipleBuildFailures
+                },
+                {
+                    it is InvalidUserDataException &&
+                            it.message?.startsWith("Cannot perform signing task") == true &&
+                            it.message?.endsWith("because it has no configured signatory") == true
                 },
                 {
                     it.javaClass.name == "org.opentest4j.MultipleFailuresError"

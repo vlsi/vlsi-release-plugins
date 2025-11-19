@@ -26,6 +26,8 @@ import org.gradle.api.invocation.Gradle
 import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.build.event.BuildEventsListenerRegistry
+import org.gradle.kotlin.dsl.always
+import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.registerIfAbsent
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.kotlin.dsl.withType
@@ -50,16 +52,23 @@ class ProjectExtensionsPlugin : Plugin<Project> {
             default = System.getProperty("os.name").contains("windows", ignoreCase = true)
         )
         val fullTrace = target.props.bool("fulltrace")
-        if (!target.gradle.configurationCacheEnabled) {
-            target.gradle.addBuildListener(
-                ReportBuildFailures(
-                    enableStyle = enableStyle,
-                    fullTrace = fullTrace
-                )
+        val buildServiceId = "BuildFailurePrintService.sharedService"
+        val sharedServices = target.gradle.sharedServices
+        if (sharedServices.registrations.findByName(buildServiceId) == null) {
+            sharedServices.registerIfAbsent(
+                buildServiceId,
+                BuildFailurePrintService::class,
             )
+            if (GradleVersion.current() >= GradleVersion.version("8.1")) {
+                reportBuildFailure(target, enableStyle, fullTrace)
+            } else if (!target.gradle.configurationCacheEnabled) {
+                target.gradle.addBuildListener(
+                    ReportBuildFailures(enableStyle, fullTrace)
+                )
+            }
         }
         if (GitHubActionsLogger.isEnabled) {
-            val gitHubMarkers = target.gradle.sharedServices.registerIfAbsent(
+            val gitHubMarkers = sharedServices.registerIfAbsent(
                 "PrintGitHubActionsMarkersForFailingTasks",
                 PrintGitHubActionsMarkersForFailingTasks::class
             ) {
@@ -79,6 +88,17 @@ class ProjectExtensionsPlugin : Plugin<Project> {
                 showStackTraces = false
             }
             printTestResults()
+        }
+    }
+
+    private fun reportBuildFailure(target: Project, enableStyle: Boolean, fullTrace: Boolean) {
+        val flowScopeServices = target.objects.newInstance<FlowScopedServices>()
+        flowScopeServices.flowScope.always(BuildFailurePrintFlowAction::class) {
+            parameters {
+                this.enableStyle.set(enableStyle)
+                this.fullTrace.set(fullTrace)
+                this.buildWorkResult.set(flowScopeServices.flowProviders.buildWorkResult)
+            }
         }
     }
 }
