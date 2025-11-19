@@ -21,33 +21,46 @@ import com.github.vlsi.gradle.styledtext.Style
 import com.github.vlsi.gradle.styledtext.StyledTextBuilder
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
+import java.util.concurrent.atomic.AtomicBoolean
 
 class ReportBuildFailures(
-    val enableStyle: Boolean,
-    val fullTrace: Boolean,
-) : BuildAdapter() {
+    private val enableStyle: Boolean,
+    private val fullTrace: Boolean
+): BuildAdapter() {
+    companion object {
+        private val buildCompleted = AtomicBoolean()
+    }
     override fun buildFinished(result: BuildResult) {
-        val failure = result.failure ?: return
-        val gradle = result.gradle
-        val sb = StyledTextBuilder(enableStyle = enableStyle)
-        val throwablePrinter = createThrowablePrinter(fullTrace = fullTrace)
-        throwablePrinter.indent = "    "
-        sb.appendPlatformLine()
-        sb.append(result.action).append(" ")
-        sb.withStyle(Style.BOLD) {
-            append(gradle?.rootProject?.name ?: "unknown rootProject")
-            sb.append(" ")
-            sb.withStyle(
-                StandardColor.RED.foreground) {
-                append("FAILURE")
-            }
+        if (!buildCompleted.compareAndSet(false, true)) {
+            return
         }
-        // Sometimes the message interferes with Gradle's progress bar.
-        // So we print extra spaces so the garbage after "reason" is wiped out.
-        sb.appendPlatformLine(" reason:                                ")
-        throwablePrinter.print(failure, sb)
-        if (throwablePrinter.interestingCases > 0 || throwablePrinter.classExcludes.isEmpty()) {
-            println(sb.toString())
+        printBuildFailures(
+            result.failure ?: return,
+            action = result.action,
+            enableStyle = enableStyle,
+            fullTrace = fullTrace
+        )
+    }
+}
+
+fun printBuildFailures(failure: Throwable, action: String = "Build", enableStyle: Boolean, fullTrace: Boolean) {
+    val sb = StyledTextBuilder(enableStyle = enableStyle)
+    val throwablePrinter = createThrowablePrinter(fullTrace = fullTrace)
+    throwablePrinter.indent = "    "
+    sb.appendPlatformLine()
+    sb.append(action).append(" ")
+    sb.withStyle(Style.BOLD) {
+        sb.append(" ")
+        sb.withStyle(
+            StandardColor.RED.foreground) {
+            append("FAILURE")
         }
+    }
+    // Sometimes the message interferes with Gradle's progress bar.
+    // So we print extra spaces so the garbage after "reason" is wiped out.
+    sb.appendPlatformLine(" reason:                                ")
+    throwablePrinter.print(failure, sb)
+    if (throwablePrinter.interestingCases > 0 || throwablePrinter.classExcludes.isEmpty()) {
+        println(sb.toString())
     }
 }
