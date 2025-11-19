@@ -58,7 +58,9 @@ class ProjectExtensionsPlugin : Plugin<Project> {
             sharedServices.registerIfAbsent(
                 buildServiceId,
                 BuildFailurePrintService::class,
-            )
+            ) {
+                // Older Gradle versions always need configuration action parameter
+            }
             if (GradleVersion.current() >= GradleVersion.version("8.1")) {
                 reportBuildFailure(target, enableStyle, fullTrace)
             } else if (!target.gradle.configurationCacheEnabled) {
@@ -94,11 +96,9 @@ class ProjectExtensionsPlugin : Plugin<Project> {
     private fun reportBuildFailure(target: Project, enableStyle: Boolean, fullTrace: Boolean) {
         val flowScopeServices = target.objects.newInstance<FlowScopedServices>()
         flowScopeServices.flowScope.always(BuildFailurePrintFlowAction::class) {
-            parameters {
-                this.enableStyle.set(enableStyle)
-                this.fullTrace.set(fullTrace)
-                this.buildWorkResult.set(flowScopeServices.flowProviders.buildWorkResult)
-            }
+            parameters.enableStyle.set(enableStyle)
+            parameters.fullTrace.set(fullTrace)
+            parameters.buildWorkResult.set(flowScopeServices.flowProviders.buildWorkResult)
         }
     }
 }
