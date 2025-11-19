@@ -17,7 +17,7 @@
 
 pluginManagement {
     plugins {
-        id("com.github.autostyle") version "4.0"
+        id("com.github.autostyle") version "4.0.1"
     }
 }
 
