@@ -44,7 +44,7 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
             project.the<ReleaseExtension>().svnDist.url.get()
         })
 
-    @InputDirectory
+    @Internal
     protected val projectDir = project.layout.projectDirectory
 
     abstract fun operations(inputChanges: InputChanges): List<SvnOperation>
