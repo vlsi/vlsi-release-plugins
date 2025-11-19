@@ -96,7 +96,11 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
 
     @Input
     protected val asfDryRun = project.objects.property<Boolean>()
-        .convention(project.providers.gradleProperty("asfDryRun").map { it.toBool() })
+        .convention(
+            project.providers.gradleProperty("asfDryRun")
+                .map { it.toBool() }
+                .orElse(false)
+        )
 
     protected fun svnClient(uri: URI) =
         Svn(execOperations, logger, projectDir.asFile, uri)
