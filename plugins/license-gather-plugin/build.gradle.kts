@@ -33,6 +33,8 @@ tasks {
     val saveLicenses by registering(EnumGeneratorTask::class) {
         licenses = layout.projectDirectory.dir("license-list-data/json")
         outputDir = layout.buildDirectory.dir("generated-sources/licenses")
+        //  Gradle detected a problem with the following location: '.../vlsi-release-plugins/plugins/license-gather-plugin/build/generated-sources/licenses'.
+        mustRunAfter("dokkaGeneratePublicationJavadoc")
 
         sourceSets.main {
             java {
