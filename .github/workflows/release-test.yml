@@ -13,6 +13,10 @@ on:
 
 # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners
 
+env:
+  # Disable Docker download progress
+  BUILDKIT_PROGRESS: plain
+
 jobs:
   release-avatica:
     strategy:
@@ -31,6 +35,11 @@ jobs:
       with:
         java-version: 21
         distribution: 'zulu'
+    - name: Install SVN
+      # language=bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y subversion
     - name: 'Start release environment'
       # language=bash
       run: |
@@ -79,6 +88,11 @@ jobs:
       with:
         java-version: 21
         distribution: 'zulu'
+    - name: Install SVN
+      # language=bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y subversion
     - name: 'Start release environment'
       # language=bash
       run: |
@@ -127,6 +141,11 @@ jobs:
       with:
         java-version: 21
         distribution: 'zulu'
+    - name: Install SVN
+      # language=bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y subversion
     - name: 'Start release environment'
       # language=bash
       run: |
