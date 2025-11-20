@@ -69,7 +69,7 @@ class TfIdfBuilder<Document> {
                 .associateTo(mutableMapOf()) { (index, term) ->
                     index to termCount.getValue(term) * idf.getValue(term)
                 }
-            val k = 1 / sqrt(terms.values.sumByDouble { it * it })
+            val k = 1 / sqrt(terms.values.sumOf { it * it })
             terms.replaceAll { _, value -> value * k }
             docVec[document] = terms
         }
@@ -236,7 +236,7 @@ class Tokenizer {
     fun getTokens(input: String): List<Term> {
         val text = input
             .replace(SPDX_TAG, " ")
-            .toLowerCase()
+            .lowercase()
             .replace(COPYRIGHT, "copyright ")
 
         val words = WHITESPACE.split(text)
@@ -276,7 +276,7 @@ class Predictor<Document>(
                     )
                 }
 
-        val norm = 1 / sqrt(testVec.values.sumByDouble { it * it })
+        val norm = 1 / sqrt(testVec.values.sumOf { it * it })
         testVec.replaceAll { _, value -> value * norm }
 
         return docVec.mapValues { (_, docTerms) -> cross(testVec, docTerms) }

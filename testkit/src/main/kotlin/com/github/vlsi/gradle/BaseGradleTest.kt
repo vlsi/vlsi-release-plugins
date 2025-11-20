@@ -57,18 +57,9 @@ open class BaseGradleTest {
                 return listOf(arguments(TestCase(GradleVersion.version("8.10.2"), ConfigurationCache.ON)))
             }
             return mutableListOf<Arguments>().apply {
-                if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
-                    add(arguments(TestCase(GradleVersion.version("4.1"), ConfigurationCache.OFF)))
-                    add(arguments(TestCase(GradleVersion.version("4.4.1"), ConfigurationCache.OFF)))
-                    add(arguments(TestCase(GradleVersion.version("4.10.2"), ConfigurationCache.OFF)))
-                }
                 // Java 11 requires Gradle 5.0+
                 if (JavaVersion.current() <= JavaVersion.VERSION_11) {
-                    add(arguments(TestCase(GradleVersion.version("5.6.2"), ConfigurationCache.OFF)))
-                    add(arguments(TestCase(GradleVersion.version("5.4.1"), ConfigurationCache.OFF)))
-                    add(arguments(TestCase(GradleVersion.version("6.0"), ConfigurationCache.OFF)))
-                    add(arguments(TestCase(GradleVersion.version("6.5"), ConfigurationCache.OFF)))
-                    add(arguments(TestCase(GradleVersion.version("7.0"), ConfigurationCache.OFF)))
+                    add(arguments(TestCase(GradleVersion.version("7.2"), ConfigurationCache.OFF)))
                 }
                 // Java 17 requires Gradle 7.3+
                 if (JavaVersion.current() <= JavaVersion.VERSION_17) {

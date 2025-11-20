@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.time.OffsetDateTime
 import org.gradle.api.GradleException
-import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.process.ExecOperations
 import java.io.File
@@ -46,7 +45,7 @@ class Svn(val execOperations: ExecOperations, val logger: Logger, val projectDir
     //     </entry>
     // ...
     private fun GPathResult.toSvnEntry(path: String) = SvnEntry(
-        kind = attr("kind").let { EntryKind.valueOf(it.toUpperCase()) },
+        kind = attr("kind").let { EntryKind.valueOf(it.uppercase()) },
         path = path,
         name = get("name").text(),
         size = get("size").text().ifBlank { null }?.toLong(),
@@ -106,7 +105,7 @@ class Svn(val execOperations: ExecOperations, val logger: Logger, val projectDir
         val stderr = ByteArrayOutputStream()
         val result = execOperations.exec {
             workingDir = projectDir
-            commandLine("svn", "ls", "--xml", "--depth", opts.depth.name.toLowerCase())
+            commandLine("svn", "ls", "--xml", "--depth", opts.depth.name.lowercase())
             for (folder in opts.folders) {
                 args("$uri/$folder/")
             }

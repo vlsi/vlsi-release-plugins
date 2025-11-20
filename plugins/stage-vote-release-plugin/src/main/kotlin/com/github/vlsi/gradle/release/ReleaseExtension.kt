@@ -32,6 +32,7 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.kotlin.dsl.*
 import java.time.Duration
+import java.util.Locale
 
 /**
  * Setting up local release environment:
@@ -296,7 +297,7 @@ open class GitConfig @Inject constructor(
     val pushRepositoryProvider = objects.property<GitPushRepositoryProvider>()
         .convention(ext.prefixForProperties.map { prefix ->
             project.stringProperty("$prefix.git.pushRepositoryProvider")
-                ?.let { GitPushRepositoryProvider.valueOf(it.toUpperCase()) }
+                ?.let { GitPushRepositoryProvider.valueOf(it.uppercase()) }
                 ?: GitPushRepositoryProvider.GITHUB
         })
 
@@ -313,7 +314,9 @@ open class GitConfig @Inject constructor(
 
     val branch = objects.property<String>()
 
-    val credentials = objects.newInstance<Credentials>("Git" + name.capitalize(), ext)
+    val credentials = objects.newInstance<Credentials>("Git" + name.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+    }, ext)
 
     override fun toString() = "${urls.get().pushUrl}, branch: ${branch.get()}"
 }
@@ -349,7 +352,7 @@ open class Credentials @Inject constructor(
 private val kebabDelimeters = Regex("""(\p{Lower})\s*(\p{Upper})""")
 private fun String.toKebabCase() =
     replace(kebabDelimeters) { "${it.groupValues[1]}-${it.groupValues[2]}" }
-        .toLowerCase()
+        .lowercase()
 
 class ReleaseArtifact(
     val name: String,
@@ -375,7 +378,7 @@ class ReleaseParams(
         get() = gitSha.subSequence(0, 10)
 
     val tlpUrl
-        get() = tlp.toLowerCase()
+        get() = tlp.lowercase()
 }
 
 internal fun Project.validate(credentials: () -> Credentials) = listOf(

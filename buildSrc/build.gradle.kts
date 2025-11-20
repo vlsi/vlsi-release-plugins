@@ -1,5 +1,6 @@
 import org.gradle.kotlin.dsl.support.expectedKotlinDslPluginsVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 /*
@@ -62,8 +63,13 @@ fun Project.applyKotlinProjectConventions() {
     tasks.withType<JavaCompile>().configureEach {
         options.release.set(11)
     }
-    tasks.withType<KotlinJvmCompile>().configureEach {
+    kotlin {
+        @Suppress("DEPRECATION")
+        val targetKotlinVersion = KotlinVersion.KOTLIN_1_5
+
         compilerOptions {
+            apiVersion.set(targetKotlinVersion)
+            languageVersion.set(targetKotlinVersion)
             jvmTarget = JvmTarget.JVM_11
             freeCompilerArgs.add("-Xjdk-release=11")
         }

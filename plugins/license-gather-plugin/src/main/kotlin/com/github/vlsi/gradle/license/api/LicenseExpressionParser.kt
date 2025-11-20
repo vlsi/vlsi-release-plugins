@@ -57,7 +57,7 @@ class LicenseExpressionParser(private val titleParser: LicenseParser = DefaultLi
             .map {
                 Token(
                     position = it.range, value = it.value,
-                    type = when (it.value.toUpperCase()) {
+                    type = when (it.value.uppercase()) {
                         "(" -> TokenType.LBRACE
                         ")" -> TokenType.RBRACE
                         "+" -> TokenType.PLUS

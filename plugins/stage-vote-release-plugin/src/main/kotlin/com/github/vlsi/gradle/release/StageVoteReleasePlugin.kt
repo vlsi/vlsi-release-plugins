@@ -62,6 +62,7 @@ import java.io.File
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.time.Duration
+import java.util.Locale
 import javax.inject.Inject
 
 class StageVoteReleasePlugin @Inject constructor(
@@ -155,8 +156,16 @@ class StageVoteReleasePlugin @Inject constructor(
         hideMavenPublishTasks()
 
         // Tasks from NexusStagingPlugin
-        val closeRepository = tasks.named("close${REPOSITORY_NAME.capitalize()}StagingRepository")
-        val releaseRepository = tasks.named("release${REPOSITORY_NAME.capitalize()}StagingRepository")
+        val closeRepository = tasks.named("close${
+            REPOSITORY_NAME.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+            }
+        }StagingRepository")
+        val releaseRepository = tasks.named("release${
+            REPOSITORY_NAME.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+            }
+        }StagingRepository")
 
         val pushRcTag = createPushRcTag(releaseExt, validateRcIndexSpecified, validateBeforeBuildingReleaseArtifacts, closeRepository)
         val pushReleaseTag = createPushReleaseTag(releaseExt, validateRcIndexSpecified, releaseRepository)
@@ -204,7 +213,11 @@ class StageVoteReleasePlugin @Inject constructor(
         }
         closeRepository.hide()
         releaseRepository.hide()
-        tasks.named("closeAndRelease${REPOSITORY_NAME.capitalize()}StagingRepository").hide()
+        tasks.named("closeAndRelease${
+            REPOSITORY_NAME.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+            }
+        }StagingRepository").hide()
 
         releaseRepository {
             // Note: publishSvnDist might fail, and it is easier to rollback than "rollback Nexus"
@@ -231,7 +244,11 @@ class StageVoteReleasePlugin @Inject constructor(
         allprojects {
             plugins.withType<MavenPublishPlugin> {
                 stageDist {
-                    dependsOn(tasks.named("publishAllPublicationsTo${REPOSITORY_NAME.capitalize()}Repository"))
+                    dependsOn(tasks.named("publishAllPublicationsTo${
+                        REPOSITORY_NAME.replaceFirstChar {
+                            if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+                        }
+                    }Repository"))
                 }
             }
         }
@@ -400,7 +417,11 @@ class StageVoteReleasePlugin @Inject constructor(
                     tasks.withType<PublishToMavenRepository>().hide()
                     tasks.withType<PublishToMavenLocal>().hide()
                     tasks.withType<GenerateModuleMetadata>().hide()
-                    tasks.named("publishAllPublicationsTo${REPOSITORY_NAME.capitalize()}Repository").hide()
+                    tasks.named("publishAllPublicationsTo${
+                        REPOSITORY_NAME.replaceFirstChar {
+                            if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+                        }
+                    }Repository").hide()
                     val generatePomTasks = tasks.withType<GenerateMavenPom>()
                     generatePomTasks.hide()
                     tasks.register("generatePom") {
@@ -577,16 +598,28 @@ class StageVoteReleasePlugin @Inject constructor(
                 }
             })
 
-            tasks.named<ReleaseNexusStagingRepository>("release${REPOSITORY_NAME.capitalize()}StagingRepository") {
+            tasks.named<ReleaseNexusStagingRepository>("release${
+                REPOSITORY_NAME.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+                }
+            }StagingRepository") {
                 stagingRepositoryId.set(project.provider { releaseExt.repositoryIdStore.getOrLoad(REPOSITORY_NAME) })
             }
-            tasks.named<InitializeNexusStagingRepository>("initialize${repo.name.capitalize()}StagingRepository") {
+            tasks.named<InitializeNexusStagingRepository>("initialize${
+                repo.name.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+                }
+            }StagingRepository") {
                 dependsOn(validateBeforeBuildingReleaseArtifacts)
                 dependsOn(validateNexusCredentials)
                 doLast {
                     val repoName = repository.get().name
                     val closeRepoTask =
-                        rootProject.tasks.named<CloseNexusStagingRepository>("close${repoName.capitalize()}StagingRepository")
+                        rootProject.tasks.named<CloseNexusStagingRepository>("close${
+                            repoName.replaceFirstChar {
+                                if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+                            }
+                        }StagingRepository")
                     val stagingRepositoryId =
                         closeRepoTask.get().stagingRepositoryId.get()
                     releaseExt.repositoryIdStore[repoName] = stagingRepositoryId
