@@ -17,6 +17,7 @@
 package com.github.vlsi.gradle.gettext
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.kotlin.dsl.property
@@ -31,4 +32,7 @@ abstract class BaseGettextTask @Inject constructor(
 
     @get:Inject
     protected abstract val execOperations: ExecOperations
+
+    @get:Inject
+    protected abstract val fileSystemOperations: FileSystemOperations
 }

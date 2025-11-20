@@ -68,7 +68,9 @@ abstract class MsgMergeTask @Inject constructor(
             val outFile = File(outDir, po.file.name)
             if (po.changeType == ChangeType.REMOVED) {
                 logger.debug("Removing output {}", outFile)
-                project.delete(outFile)
+                fileSystemOperations.delete {
+                    delete(outFile)
+                }
                 continue
             }
             logger.debug("Processing {} with {} {}", po.file, cmd, arg)

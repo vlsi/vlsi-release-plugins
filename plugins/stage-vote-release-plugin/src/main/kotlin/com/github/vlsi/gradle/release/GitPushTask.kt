@@ -22,14 +22,15 @@ import com.github.vlsi.gradle.release.jgit.dsl.updateRemoteParams
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.transport.RefSpec
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
 
-open class GitPushTask : DefaultGitTask() {
-    @Input
-    val refSpecs = project.objects.listProperty<RefSpec>()
+abstract class GitPushTask : DefaultGitTask() {
+    @get:Input
+    abstract val refSpecs : ListProperty<RefSpec>
 
     fun tag(tagName: String) {
         val ref = Constants.R_TAGS + tagName

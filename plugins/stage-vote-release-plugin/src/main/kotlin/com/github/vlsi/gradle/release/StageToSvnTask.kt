@@ -16,6 +16,8 @@
  */
 package com.github.vlsi.gradle.release
 
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
@@ -24,23 +26,23 @@ import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 
 abstract class StageToSvnTask() : SvnmuccTask() {
-    @Incremental
-    @InputFiles
-    @PathSensitive(PathSensitivity.NAME_ONLY)
-    val files = project.files()
+    @get:Incremental
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    abstract val files : ConfigurableFileCollection
 
-    @Input
-    val folder = project.objects.property<String>()
-        .convention(project.the<ReleaseExtension>().svnDist.stageFolder)
+    @get:Input
+    abstract val folder: Property<String>
 
     init {
         dependsOn(files)
         // The task produces no outputs => we specify it as "always stale"
         outputs.upToDateWhen { false }
+        folder.convention(releaseExtension.svnDist.stageFolder)
     }
 
     override fun message() =
-        project.the<ReleaseExtension>().run {
+        releaseExtension.run {
             "Uploading release candidate ${componentName.get()} ${rcTag.get()} to dev area"
         }
 

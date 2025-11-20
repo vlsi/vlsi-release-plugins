@@ -32,7 +32,7 @@ abstract class RemoveStaleArtifactsTask @Inject constructor(
     @get:Input
     val foldersToList = objects.listProperty<String>()
         .convention(project.provider {
-            project.the<ReleaseExtension>().let {
+            releaseExtension.let {
                 val tlpUrl = it.tlpUrl.get()
                 it.svnDist.releaseSubfolder.get()
                     .values
@@ -48,15 +48,9 @@ abstract class RemoveStaleArtifactsTask @Inject constructor(
     @Internal
     val staleRemovalFilters = objects.newInstance<StaleRemovalFilters>()
         .apply {
-            includes.addAll(project.provider {
-                project.the<ReleaseExtension>().svnDist.staleRemovalFilters.includes.get()
-            })
-            excludes.addAll(project.provider {
-                project.the<ReleaseExtension>().svnDist.staleRemovalFilters.excludes.get()
-            })
-            validates.addAll(project.provider {
-                project.the<ReleaseExtension>().svnDist.staleRemovalFilters.validates.get()
-            })
+            includes.addAll(releaseExtension.svnDist.staleRemovalFilters.includes)
+            excludes.addAll(releaseExtension.svnDist.staleRemovalFilters.excludes)
+            validates.addAll(releaseExtension.svnDist.staleRemovalFilters.validates)
         }
 
     init {

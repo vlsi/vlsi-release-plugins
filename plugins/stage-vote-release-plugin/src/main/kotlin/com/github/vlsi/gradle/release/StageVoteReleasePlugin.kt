@@ -170,7 +170,7 @@ class StageVoteReleasePlugin @Inject constructor(
         val pushRcTag = createPushRcTag(releaseExt, validateRcIndexSpecified, validateBeforeBuildingReleaseArtifacts, closeRepository)
         val pushReleaseTag = createPushReleaseTag(releaseExt, validateRcIndexSpecified, releaseRepository)
 
-        val pushPreviewSite = addPreviewSiteTasks(validateBeforeBuildingReleaseArtifacts)
+        val pushPreviewSite = addPreviewSiteTasks(releaseExt, validateBeforeBuildingReleaseArtifacts)
 
         val stageSvnDist = tasks.register<StageToSvnTask>(STAGE_SVN_DIST_TASK_NAME) {
             description = "Stage release artifacts to SVN dist repository"
@@ -280,7 +280,7 @@ class StageVoteReleasePlugin @Inject constructor(
 
         // prepareVote depends on all the publish tasks
         // prepareVote depends on publish SVN
-        val generateVote = generateVoteText()
+        val generateVote = generateVoteText(releaseExt)
         generateVote {
             mustRunAfter(pushPreviewSite, stageDist)
             dependsOn(validateRcIndexSpecified)
@@ -308,6 +308,7 @@ class StageVoteReleasePlugin @Inject constructor(
         }
 
         // Validations should be performed before tasks start execution
+        val grgit = project.property("grgit") as Grgit
         project.gradle.taskGraph.whenReady {
             val validations = mutableListOf<Runnable>()
             if (hasTask(validateRcIndexSpecified.get())) {
@@ -322,7 +323,6 @@ class StageVoteReleasePlugin @Inject constructor(
                     // Tag won't be created as a part of the release
                     validations += Runnable {
                         if (releaseExt.release.get()) {
-                            val grgit = project.property("grgit") as Grgit
                             val repository = grgit.repository.jgit.repository
                             val tagName = releaseExt.rcTag.get()
                             repository.exactRef(Constants.R_TAGS + tagName)?.commitId
@@ -518,9 +518,9 @@ class StageVoteReleasePlugin @Inject constructor(
     }
 
     private fun Project.addPreviewSiteTasks(
-        validateBeforeBuildingReleaseArtifacts: TaskProvider<*>
+        releaseExt: ReleaseExtension,
+        validateBeforeBuildingReleaseArtifacts: TaskProvider<*>,
     ): TaskProvider<GitCommitAndPush> {
-        val releaseExt = project.the<ReleaseExtension>()
         val preparePreviewSiteRepo =
             tasks.register("preparePreviewSiteRepo", GitPrepareRepo::class) {
                 onlyIf { releaseExt.sitePreviewEnabled.get() }
@@ -628,26 +628,24 @@ class StageVoteReleasePlugin @Inject constructor(
         }
     }
 
-    private fun Project.generateVoteText() =
+    private fun Project.generateVoteText(releaseExt: ReleaseExtension) =
         tasks.register(GENERATE_VOTE_TEXT_TASK_NAME) {
             // Note: task is not incremental, and we enforce Gradle to re-execute it
             // Otherwise we would have to duplicate ReleaseParams logic as "inputs"
             outputs.upToDateWhen { false }
 
-            val releaseExt = project.the<ReleaseExtension>()
-
             val voteMailFile = layout.buildDirectory.file("$PREPARE_VOTE_TASK_NAME/mail.txt")
             val projectDir = layout.projectDirectory
             outputs.file(file(voteMailFile))
+            val nexusPublish = project.the<NexusPublishExtension>()
+            val grgit = project.property("grgit") as Grgit
+
             doLast {
-                val nexusPublish = project.the<NexusPublishExtension>()
                 val nexusRepoName = REPOSITORY_NAME
                 val repositoryId = releaseExt.repositoryIdStore[nexusRepoName]
 
                 val repoUri = nexusPublish.repositories[nexusRepoName].nexusUrl.get()
                     .replacePath("/content/repositories/$repositoryId")
-
-                val grgit = project.property("grgit") as Grgit
 
                 val svnDist = releaseExt.svnDist
 

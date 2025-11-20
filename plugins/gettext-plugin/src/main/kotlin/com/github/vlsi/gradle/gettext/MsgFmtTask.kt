@@ -37,7 +37,7 @@ import java.nio.charset.Charset
 import javax.inject.Inject
 
 abstract class MsgFmtTask @Inject constructor(
-    objects: ObjectFactory
+    objects: ObjectFactory,
 ) : BaseGettextTask(objects) {
     @InputFiles
     @Incremental
@@ -96,11 +96,15 @@ abstract class MsgFmtTask @Inject constructor(
             val outFile = File(outDir, outputName)
             if (po.changeType == ChangeType.REMOVED) {
                 logger.debug("Removing output {}", outFile)
-                project.delete(outFile)
+                fileSystemOperations.delete {
+                    delete(outFile)
+                }
                 continue
             }
             logger.debug("Processing {} with {} {}", po.file, cmd, arg)
-            project.delete(tmpDir)
+            fileSystemOperations.delete {
+                delete(tmpDir)
+            }
             tmpDir.mkdirs()
             execOperations.exec {
                 executable = cmd

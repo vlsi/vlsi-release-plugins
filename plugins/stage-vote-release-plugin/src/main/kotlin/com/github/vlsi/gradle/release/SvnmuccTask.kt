@@ -24,8 +24,10 @@ import java.io.File
 import java.net.URI
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
@@ -38,21 +40,31 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
     @get:Inject
     abstract val execOperations: ExecOperations
 
+    @get:Inject
+    protected abstract val objects: ObjectFactory
+
+    @get:Inject
+    protected abstract val providers: ProviderFactory
+
+    @get:Inject
+    protected abstract val layout: ProjectLayout
+
+    @get:Internal
+    protected val releaseExtension = project.the<ReleaseExtension>()
+
     @Input
-    val repository = project.objects.property<URI>()
-        .convention(project.provider {
-            project.the<ReleaseExtension>().svnDist.url.get()
-        })
+    val repository = objects.property<URI>()
+        .convention(releaseExtension.svnDist.url)
 
     @Internal
-    protected val projectDir = project.layout.projectDirectory
+    protected val projectDir = layout.projectDirectory
 
     abstract fun operations(inputChanges: InputChanges): List<SvnOperation>
     abstract fun message(): String
 
     // TODO: remove project access at execution time
     protected fun SvnCredentials.withCredentials() {
-        project.the<ReleaseExtension>().svnDist.credentials {
+        releaseExtension.svnDist.credentials {
             this@withCredentials.username = username(project)
             this@withCredentials.password = password(project)
         }
@@ -60,7 +72,7 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
 
     // TODO: remove project access at execution time
     protected fun ExecSpec.svnCredentials() {
-        project.the<ReleaseExtension>().svnDist.credentials {
+        releaseExtension.svnDist.credentials {
             username(project)?.let { args("--username", it) }
             password(project)?.let { args("--password", it) }
         }
@@ -92,12 +104,12 @@ abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
     }
 
     @Internal
-    protected val commandsFile = project.layout.buildDirectory.file("svnmucc/$name.txt")
+    protected val commandsFile = layout.buildDirectory.file("svnmucc/$name.txt")
 
     @Input
-    protected val asfDryRun = project.objects.property<Boolean>()
+    protected val asfDryRun = objects.property<Boolean>()
         .convention(
-            project.providers.gradleProperty("asfDryRun")
+            providers.gradleProperty("asfDryRun")
                 .map { it.toBool() }
                 .orElse(false)
         )
