@@ -53,6 +53,16 @@ nmcpAggregation {
     }
 }
 
+dependencies {
+    nmcpAggregation(project(":plugins:crlf-plugin"))
+    nmcpAggregation(project(":plugins:gettext-plugin"))
+    nmcpAggregation(project(":plugins:gradle-extensions-plugin"))
+    nmcpAggregation(project(":plugins:ide-plugin"))
+    nmcpAggregation(project(":plugins:jandex-plugin"))
+    nmcpAggregation(project(":plugins:license-gather-plugin"))
+    nmcpAggregation(project(":plugins:stage-vote-release-plugin"))
+}
+
 val licenseHeader = file("gradle/license-header.txt").readText()
 
 fun IdeaProject.settings(configuration: ProjectSettings.() -> kotlin.Unit) =
