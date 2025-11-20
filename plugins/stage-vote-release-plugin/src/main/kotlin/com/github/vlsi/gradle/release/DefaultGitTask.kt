@@ -20,28 +20,42 @@ import com.github.vlsi.gradle.release.jgit.dsl.useRun
 import org.ajoberstar.grgit.Grgit
 import org.eclipse.jgit.api.Git
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
-import org.gradle.kotlin.dsl.property
+import javax.inject.Inject
 
 abstract class DefaultGitTask : DefaultTask() {
-    @Internal
-    val repository = project.objects.property<GitConfig>()
+    @get:Inject
+    protected abstract val layout: ProjectLayout
 
-    @Internal
-    val repositoryLocation = project.objects.directoryProperty()
-        .convention(project.layout.buildDirectory.dir(repository.map { it.name }))
+    @get:Internal
+    abstract val repository: Property<GitConfig>
+
+    @get:Internal
+    abstract val repositoryLocation: DirectoryProperty
+
+    @get:Internal
+    abstract val rootDir: DirectoryProperty
+
+    @get:Internal
+    protected val grgit = project.property("grgit") as Grgit
 
     init {
         // Never up to date
         outputs.upToDateWhen { false }
+        repositoryLocation.convention(
+            layout.buildDirectory.dir(repository.map { it.name })
+        )
+        rootDir.set(project.rootProject.layout.projectDirectory)
     }
 
     protected fun <R> jgit(action: Git.() -> R): R {
         val location = repositoryLocation.get().asFile
-        if (location != project.rootDir) {
+        if (location != rootDir.get().asFile) {
             return Git.open(location).useRun(action)
         }
-        val grgit = project.property("grgit") as Grgit
         return grgit.repository.jgit.use(action)
     }
 }

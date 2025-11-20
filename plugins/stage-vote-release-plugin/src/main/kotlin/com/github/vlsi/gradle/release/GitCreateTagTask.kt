@@ -18,18 +18,19 @@ package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.release.jgit.dsl.tag
 import org.eclipse.jgit.lib.Constants
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 
-open class GitCreateTagTask : DefaultGitTask() {
-    @Input
-    val tag = project.objects.property<String>()
+abstract class GitCreateTagTask : DefaultGitTask() {
+    @get:Input
+    abstract val tag : Property<String>
 
-    @Input
-    @Optional
-    val taggedRef = project.objects.property<String>()
+    @get:Input
+    @get:Optional
+    abstract val taggedRef : Property<String>
 
     init {
         onlyIf {

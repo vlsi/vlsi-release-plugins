@@ -56,11 +56,12 @@ open class ReleaseExtension @Inject constructor(
     val validateNexusCredentials =
         project.validate { nexus.credentials }.toMutableList()
 
+    protected val grgit = project.property("grgit") as Grgit
+
     val validateBeforeBuildingReleaseArtifacts = mutableListOf(Runnable {
         if (allowUncommittedChanges.get()) {
             return@Runnable
         }
-        val grgit = project.property("grgit") as Grgit
         val jgit = grgit.repository.jgit
         jgit.status().call().apply {
             if (!hasUncommittedChanges()) {
@@ -323,7 +324,7 @@ open class GitConfig @Inject constructor(
 
 open class Credentials @Inject constructor(
     val name: String,
-    private val ext: ReleaseExtension,
+    ext: ReleaseExtension,
     objects: ObjectFactory
 ) {
     operator fun invoke(action: Credentials.() -> Unit) = apply { action() }
@@ -344,7 +345,7 @@ open class Credentials @Inject constructor(
     fun password(project: Project, required: Boolean = false): String? {
         val property = password.get()
         val value = project.stringProperty(property, required)
-        project.logger.debug("Using password from property {}", property, value?.let { "***" })
+        project.logger.debug("Using password from property {}", property)
         return value
     }
 }

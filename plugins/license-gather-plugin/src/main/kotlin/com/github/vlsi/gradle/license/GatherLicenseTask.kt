@@ -34,6 +34,8 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ComponentIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
+import org.gradle.api.file.FileSystemOperations
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
@@ -97,8 +99,10 @@ enum class ErrorLanguage {
     KOTLIN, GROOVY, ENGLISH
 }
 
-open class GatherLicenseTask @Inject constructor(
-    objectFactory: ObjectFactory,
+abstract class GatherLicenseTask @Inject constructor(
+    layout: ProjectLayout,
+    private val objectFactory: ObjectFactory,
+    private val fileSystemOperations: FileSystemOperations,
     private val workerExecutor: WorkerExecutor
 ) : DefaultTask() {
     init {
@@ -169,14 +173,14 @@ open class GatherLicenseTask @Inject constructor(
 
     @OutputDirectory
     val licenseDir = objectFactory.directoryProperty().convention(
-        project.layout.buildDirectory.dir("licenses/$name")
+        layout.buildDirectory.dir("licenses/$name")
     )
 
     @InputFiles
     @Optional
     @PathSensitive(PathSensitivity.RELATIVE)
     val extraLicenseDir = objectFactory.directoryProperty().convention(
-        project.layout.projectDirectory.dir("licenses")
+        layout.projectDirectory.dir("licenses")
     )
 
     // Used in test
@@ -445,7 +449,9 @@ open class GatherLicenseTask @Inject constructor(
         val outDir = outDirectoryName + if (outDirectoryName.endsWith(".jar")) ".contents" else ""
         val artLicenseTexts = File(licenseTextDir, outDir)
         if (artLicenseTexts.isDirectory) {
-            project.delete(artLicenseTexts)
+            fileSystemOperations.delete {
+                delete(artLicenseTexts)
+            }
         }
         val licenseOverride = licenseOverrides[compId]
 
@@ -470,7 +476,7 @@ open class GatherLicenseTask @Inject constructor(
             }
 
         if (licenseFiles != null) {
-            project.copy {
+            fileSystemOperations.copy {
                 into(artLicenseTexts)
                 from(licenseFiles)
             }
@@ -582,7 +588,7 @@ open class GatherLicenseTask @Inject constructor(
                 continue
             }
             val bestLicenses =
-                project.fileTree(licenseDir) {
+                objectFactory.fileTree().from(licenseDir).matching {
                     include("**")
                 }.flatMap { f ->
                     // For each file take best 5 predictions

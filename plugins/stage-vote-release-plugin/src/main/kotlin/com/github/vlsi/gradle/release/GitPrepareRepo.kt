@@ -23,7 +23,7 @@ import org.eclipse.jgit.util.FileUtils
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
-open class GitPrepareRepo : DefaultGitTask() {
+abstract class GitPrepareRepo : DefaultGitTask() {
     // Tell Gradle the directory is output, so it does not clean it on Gradle upgrades
     @OutputDirectory
     val outputDir = repositoryLocation

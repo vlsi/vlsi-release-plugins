@@ -17,30 +17,27 @@
 package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.release.svn.LsDepth
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Internal
-import org.gradle.kotlin.dsl.property
-import org.gradle.kotlin.dsl.the
 import org.gradle.work.InputChanges
 
 abstract class PromoteSvnRelease : SvnmuccTask() {
+    @get:Input
+    abstract val useCpWorkaround : Property<Boolean>
+
     init {
         outputs.upToDateWhen { false }
+        useCpWorkaround.convention(true)
     }
 
-    @Input
-    val useCpWorkaround = project.objects.property<Boolean>().convention(true)
-
-    private val ext = project.the<ReleaseExtension>()
-
     override fun message() =
-        project.the<ReleaseExtension>().run {
+        releaseExtension.run {
             "Promoting ${componentName.get()} ${rcTag.get()} -> ${releaseTag.get()} to release area"
         }
 
     override fun operations(inputChanges: InputChanges): List<SvnOperation> {
         return mutableListOf<SvnOperation>().apply {
-            val svnDist = ext.svnDist
+            val svnDist = releaseExtension.svnDist
             val stageFolder = svnDist.stageFolder.get()
             val releaseFolder = svnDist.releaseFolder.get()
 

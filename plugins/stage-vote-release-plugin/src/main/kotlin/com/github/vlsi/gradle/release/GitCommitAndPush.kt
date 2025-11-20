@@ -18,13 +18,14 @@ package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.release.jgit.dsl.*
 import org.eclipse.jgit.api.errors.EmptyCommitException
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 
-open class GitCommitAndPush : DefaultGitTask() {
-    @Input
-    val commitMessage = project.objects.property<String>()
+abstract class GitCommitAndPush : DefaultGitTask() {
+    @get:Input
+    abstract val commitMessage: Property<String>
 
     @TaskAction
     fun execute() {

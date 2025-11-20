@@ -16,6 +16,8 @@
  */
 package com.github.vlsi.gradle.gettext
 
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.IgnoreEmptyDirectories
@@ -32,6 +34,7 @@ import org.gradle.kotlin.dsl.setProperty
 import javax.inject.Inject
 
 abstract class GettextTask @Inject constructor(
+    layout: ProjectLayout,
     objects: ObjectFactory
 ) : BaseGettextEditTask(objects) {
     @Input
@@ -55,20 +58,24 @@ abstract class GettextTask @Inject constructor(
 
     @OutputFile
     val outputPot = objects.fileProperty()
-            .convention(project.layout.buildDirectory.file("gettext/$name/messages.pot"))
+            .convention(layout.buildDirectory.file("gettext/$name/messages.pot"))
 
     @get:Internal
     protected abstract val inputFilesList: RegularFileProperty
 
+    @get:Internal
+    protected abstract val projectDir: DirectoryProperty
+
     init {
         executable.convention("xgettext")
-        inputFilesList.set(project.layout.buildDirectory.file("gettext/$name/input_files.txt"))
+        inputFilesList.set(layout.buildDirectory.file("gettext/$name/input_files.txt"))
+        projectDir.set(layout.projectDirectory)
     }
 
     @TaskAction
     fun run() {
         val inputFilesList = this.inputFilesList.get().asFile
-        val baseDir = project.projectDir
+        val baseDir = projectDir.get().asFile
         inputFilesList.writer().buffered().use { f ->
             sourceFiles.files.forEach {
                 f.append(it.relativeTo(baseDir).path).append(System.lineSeparator())

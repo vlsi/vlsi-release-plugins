@@ -16,6 +16,7 @@
  */
 package com.github.vlsi.gradle.gettext
 
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.FileType
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
@@ -63,7 +64,9 @@ abstract class MsgAttribTask @Inject constructor(
             val outFile = File(outDir, po.file.name)
             if (po.changeType == ChangeType.REMOVED) {
                 logger.debug("Removing output {}", outFile)
-                project.delete(outFile)
+                fileSystemOperations.delete {
+                    delete(outFile)
+                }
                 continue
             }
             logger.debug("Processing {} with {} {}", po.file, cmd, arg)
