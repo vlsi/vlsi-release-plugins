@@ -32,6 +32,7 @@ jobs:
         java-version: 21
         distribution: 'zulu'
     - name: 'Start release environment'
+      # language=bash
       run: |
         gpg --import .github/workflows/test-key.asc
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
@@ -40,6 +41,7 @@ jobs:
         docker compose build svn git
         docker compose up -d
     - name: 'Clone Calcite Avatica'
+      # language=bash
       run: |
         git clone --depth 100 https://github.com/apache/calcite-avatica.git ../calcite-avatica
         git rev-parse HEAD
@@ -78,6 +80,7 @@ jobs:
         java-version: 21
         distribution: 'zulu'
     - name: 'Start release environment'
+      # language=bash
       run: |
         gpg --import .github/workflows/test-key.asc
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
@@ -86,6 +89,7 @@ jobs:
         docker compose build svn git
         docker compose up -d
     - name: 'Clone Calcite'
+      # language=bash
       run: |
         git clone --depth 100 https://github.com/apache/calcite.git ../calcite
         git rev-parse HEAD
@@ -124,6 +128,7 @@ jobs:
         java-version: 21
         distribution: 'zulu'
     - name: 'Start release environment'
+      # language=bash
       run: |
         gpg --import .github/workflows/test-key.asc
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
@@ -132,6 +137,7 @@ jobs:
         docker compose build svn git
         docker compose up -d
     - name: 'Clone JMeter'
+      # language=bash
       run: |
         git clone --depth 100 https://github.com/apache/jmeter.git ../jmeter
         git rev-parse HEAD
