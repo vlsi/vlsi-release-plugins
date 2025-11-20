@@ -55,7 +55,7 @@ abstract class BaseGettextEditTask @Inject constructor(
             searchBytes.withIndex().all { (j, v) -> v == potBytes[i + j] }
         } ?: return
         val headerEnd =
-                (headerStart..potBytes.size).find { potBytes[it] == '"'.toByte() } ?: return
+                (headerStart..potBytes.size).find { potBytes[it] == '"'.code.toByte() } ?: return
 
         outputStream().use {
             it.write(potBytes, 0, headerStart)

@@ -17,7 +17,6 @@
 
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     id("build.java-conventions")
@@ -25,12 +24,16 @@ plugins {
     kotlin("jvm")
 }
 
-tasks.withType<KotlinJvmCompile>().configureEach {
+kotlin {
+    @Suppress("DEPRECATION")
+    val targetKotlinVersion = KotlinVersion.KOTLIN_1_5
+
+    coreLibrariesVersion = "1.5.31"
     compilerOptions {
-        freeCompilerArgs.add("-Xjdk-release=8")
-        @Suppress("DEPRECATION")
-        apiVersion.set(KotlinVersion.KOTLIN_1_4)
         jvmTarget = JvmTarget.JVM_1_8
+        freeCompilerArgs.add("-Xjdk-release=8")
+        apiVersion.set(targetKotlinVersion)
+        languageVersion.set(targetKotlinVersion)
     }
 }
 

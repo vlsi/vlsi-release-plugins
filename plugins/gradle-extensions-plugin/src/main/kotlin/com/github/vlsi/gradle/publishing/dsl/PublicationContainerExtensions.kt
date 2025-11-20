@@ -21,11 +21,16 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.named
+import java.util.Locale
 
 fun Project.extraMavenPublications() = extraMavenPublications("Maven", name)
 
 fun Project.extraMavenPublications(configurationName: String, publicationName: String) {
-    val configuration = configurations.create("extra${configurationName.capitalize()}Publications") {
+    val configuration = configurations.create("extra${
+        configurationName.replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+        }
+    }Publications") {
         isVisible = false
         isCanBeResolved = false
         isCanBeConsumed = false
