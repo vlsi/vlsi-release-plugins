@@ -37,7 +37,7 @@ jobs:
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
         cd ../asflike-release-environment
         cp .env_calcite-avatica .env
-        docker compose build vcs
+        docker compose build svn git
         docker compose up -d
     - name: 'Clone Calcite Avatica'
       run: |
@@ -83,7 +83,7 @@ jobs:
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
         cd ../asflike-release-environment
         cp .env_calcite .env
-        docker compose build vcs
+        docker compose build svn git
         docker compose up -d
     - name: 'Clone Calcite'
       run: |
@@ -129,7 +129,7 @@ jobs:
         git clone --depth 100 https://github.com/vlsi/asflike-release-environment.git ../asflike-release-environment
         cd ../asflike-release-environment
         cp .env_jmeter .env
-        docker compose build vcs
+        docker compose build svn git
         docker compose up -d
     - name: 'Clone JMeter'
       run: |
@@ -140,7 +140,7 @@ jobs:
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../jmeter
-        arguments: --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -PasfTestGitSitePreviewUsername=test -PasfTestGitSitePreviewPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
+        arguments: --dependency-verification off --no-parallel --no-daemon prepareVote -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test -PasfTestGitSitePreviewUsername=test -PasfTestGitSitePreviewPassword=test -Psigning.gnupg.keyName=289023DE2663BD17 -PuseGpgCmd -Psigning.gnupg.useLegacyGpg=true
       env:
         ORG_GRADLE_PROJECT_checksumIgnore: true
     - name: 'Publish Release'
@@ -148,6 +148,6 @@ jobs:
       with:
         gradle-version: ${{ matrix.gradle-version }}
         build-root-directory: ../jmeter
-        arguments: --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
+        arguments: --dependency-verification off --no-parallel --no-daemon publishDist -Prc=1 -PlocalReleasePlugins -PasfTestNexusUsername=test -PasfTestNexusPassword=test -PasfTestGitSourceUsername=test -PasfTestGitSourcePassword=test -PasfTestSvnUsername=test -PasfTestSvnPassword=test
       env:
         ORG_GRADLE_PROJECT_checksumIgnore: true
