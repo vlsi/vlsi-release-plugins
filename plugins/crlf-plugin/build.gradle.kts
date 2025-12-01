@@ -21,5 +21,5 @@ plugins {
 }
 
 dependencies {
-    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.3.202401111512-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r")
 }
