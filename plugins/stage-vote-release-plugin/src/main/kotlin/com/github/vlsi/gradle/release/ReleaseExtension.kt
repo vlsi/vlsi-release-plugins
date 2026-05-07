@@ -56,13 +56,13 @@ open class ReleaseExtension @Inject constructor(
     val validateNexusCredentials =
         project.validate { nexus.credentials }.toMutableList()
 
-    protected val grgit = project.property("grgit") as Grgit
+    protected val grgit: Grgit? get() = project.findProperty("grgit") as Grgit?
 
     val validateBeforeBuildingReleaseArtifacts = mutableListOf(Runnable {
         if (allowUncommittedChanges.get()) {
             return@Runnable
         }
-        val jgit = grgit.repository.jgit
+        val jgit = grgit?.repository?.jgit ?: return@Runnable
         jgit.status().call().apply {
             if (!hasUncommittedChanges()) {
                 return@Runnable

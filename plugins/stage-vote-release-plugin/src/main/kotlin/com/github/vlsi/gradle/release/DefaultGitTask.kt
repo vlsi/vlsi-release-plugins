@@ -20,6 +20,7 @@ import com.github.vlsi.gradle.release.jgit.dsl.useRun
 import org.ajoberstar.grgit.Grgit
 import org.eclipse.jgit.api.Git
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Property
@@ -40,7 +41,11 @@ abstract class DefaultGitTask : DefaultTask() {
     abstract val rootDir: DirectoryProperty
 
     @get:Internal
-    protected val grgit = project.property("grgit") as Grgit
+    protected val grgit: Grgit
+        get() = project.findProperty("grgit") as Grgit?
+            ?: throw GradleException(
+                "Task '$name' requires a Git repository, but the project is not under Git version control"
+            )
 
     init {
         // Never up to date

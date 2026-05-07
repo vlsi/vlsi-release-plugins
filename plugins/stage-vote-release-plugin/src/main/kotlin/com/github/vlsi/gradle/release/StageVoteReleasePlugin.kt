@@ -308,7 +308,6 @@ class StageVoteReleasePlugin @Inject constructor(
         }
 
         // Validations should be performed before tasks start execution
-        val grgit = project.property("grgit") as Grgit
         project.gradle.taskGraph.whenReady {
             val validations = mutableListOf<Runnable>()
             if (hasTask(validateRcIndexSpecified.get())) {
@@ -323,6 +322,10 @@ class StageVoteReleasePlugin @Inject constructor(
                     // Tag won't be created as a part of the release
                     validations += Runnable {
                         if (releaseExt.release.get()) {
+                            val grgit = project.findProperty("grgit") as Grgit?
+                                ?: throw GradleException(
+                                    "Release tasks require a Git repository, but the project is not under Git version control"
+                                )
                             val repository = grgit.repository.jgit.repository
                             val tagName = releaseExt.rcTag.get()
                             repository.exactRef(Constants.R_TAGS + tagName)?.commitId
@@ -638,9 +641,12 @@ class StageVoteReleasePlugin @Inject constructor(
             val projectDir = layout.projectDirectory
             outputs.file(file(voteMailFile))
             val nexusPublish = project.the<NexusPublishExtension>()
-            val grgit = project.property("grgit") as Grgit
 
             doLast {
+                val grgit = project.findProperty("grgit") as Grgit?
+                    ?: throw GradleException(
+                        "$GENERATE_VOTE_TEXT_TASK_NAME requires a Git repository, but the project is not under Git version control"
+                    )
                 val nexusRepoName = REPOSITORY_NAME
                 val repositoryId = releaseExt.repositoryIdStore[nexusRepoName]
 
