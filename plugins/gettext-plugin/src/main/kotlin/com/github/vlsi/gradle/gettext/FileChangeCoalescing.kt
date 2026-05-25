@@ -49,8 +49,8 @@ internal fun coalesceFileChanges(
         }
         val key = change.file.absolutePath
         val existing = byPath[key]
-        if (existing == null ||
-            (existing.changeType == ChangeType.REMOVED && change.changeType != ChangeType.REMOVED)
+        if (existing?.changeType == ChangeType.REMOVED && change.changeType != ChangeType.REMOVED ||
+            existing == null
         ) {
             byPath[key] = change
         }
