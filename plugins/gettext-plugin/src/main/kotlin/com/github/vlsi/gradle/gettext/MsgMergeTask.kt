@@ -16,7 +16,6 @@
  */
 package com.github.vlsi.gradle.gettext
 
-import org.gradle.api.file.FileType
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -61,10 +60,8 @@ abstract class MsgMergeTask @Inject constructor(
         val cmd = executable.get()
         val arg = args.get()
         val pot = potFile.get().asFile.absolutePath
-        for (po in inputChanges.getFileChanges(poFiles)) {
-            if (po.fileType != FileType.FILE) {
-                continue
-            }
+        val currentPoFiles = poFiles.files
+        for (po in coalesceFileChanges(inputChanges.getFileChanges(poFiles), currentPoFiles)) {
             val outFile = File(outDir, po.file.name)
             if (po.changeType == ChangeType.REMOVED) {
                 logger.debug("Removing output {}", outFile)
