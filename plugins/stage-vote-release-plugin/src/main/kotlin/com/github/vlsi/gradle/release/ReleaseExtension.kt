@@ -272,8 +272,42 @@ open class NexusConfig @Inject constructor(
     val prodUrl = objects.property<URI>().convention(project.uri("https://repository.apache.org"))
     val testUrl = objects.property<URI>().convention(project.uri("http://127.0.0.1:8080"))
 
+    /**
+     * Snapshot repository URL. When unset, the plugin derives it from [url] using the Nexus 2
+     * layout. The Central Portal serves snapshots from a different host, so [mavenCentral] sets
+     * it for production releases.
+     */
+    val snapshotUrl = objects.property<URI>()
+
+    /**
+     * Publishes to Maven Central through the Central Portal OSSRH Staging API compatibility host.
+     *
+     * The legacy OSSRH host (`oss.sonatype.org`) was sunset in 2025. The compatibility host keeps
+     * Nexus-based publishing working without pointing the build at it by hand, and it identifies
+     * staging profiles by namespace, so [stagingProfileId] defaults to the project group.
+     *
+     * Like [apacheRepository], this only affects production releases; the test environment keeps
+     * using the local Nexus stub.
+     */
     fun mavenCentral() {
-        prodUrl.set(project.uri("https://oss.sonatype.org"))
+        prodUrl.set(project.uri("https://ossrh-staging-api.central.sonatype.com"))
+        snapshotUrl.convention(
+            ext.repositoryType.flatMap {
+                when (it) {
+                    RepositoryType.PROD ->
+                        project.provider { project.uri("https://central.sonatype.com/repository/maven-snapshots/") }
+                    RepositoryType.TEST -> project.objects.property<URI>()
+                }
+            }
+        )
+        stagingProfileId.convention(
+            ext.repositoryType.flatMap {
+                when (it) {
+                    RepositoryType.PROD -> project.provider { project.group.toString() }
+                    RepositoryType.TEST -> project.objects.property<String>()
+                }
+            }
+        )
     }
 
     fun apacheRepository() {
@@ -286,6 +320,12 @@ open class NexusConfig @Inject constructor(
         project.provider {
             project.group.toString()
         })
+
+    /**
+     * Nexus staging profile id. Setting it lets the publish plugin skip the staging-profile lookup.
+     * [mavenCentral] defaults it to the project group, which the Central Portal treats as the
+     * namespace.
+     */
     val stagingProfileId = objects.property<String>()
 }
 

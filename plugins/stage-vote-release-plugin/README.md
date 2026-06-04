@@ -116,13 +116,13 @@ releaseParams {
         }
     }
     nexus { // Configures Nexus repository
-        mavenCentral() // By default the plugin publishes to repository.apache.org, and it can be overridden
+        mavenCentral() // Publish to Maven Central via the Central Portal OSSRH Staging API compatibility host (defaults to repository.apache.org)
         prodUrl.set(uri("https://nexus.url")) // An alternative option to override Nexus URL
         credentials {
             username.set(String) // -PasfNexusUsername or -PasfTestNexusUsername
             password.set(String) // -PasfNexusPassword or -PasfTestNexusPassword
         }
-        stagingProfileId.set(String) // Specify Nexus staging profile to save Nexus roundtrip on publishing
+        stagingProfileId.set(String) // Nexus staging profile id; setting it skips the profile lookup. mavenCentral() defaults it to ${project.group}
     }
     source { // This is a Git configuration for the source code Git repository (e.g. for pushing the release tag)
         credentials {
@@ -166,6 +166,7 @@ releaseParams { // ReleaseExtension
         connectTimeout.set(Duration.ofMinutes(10))
         operationTimeout.set(Duration.ofMinutes(10))
         url.set(URI) // Defaults to https://repository.apache.org (prod) or http://127.0.0.1:8080 (test)
+        snapshotUrl.set(URI) // Defaults to the snapshot path derived from url; mavenCentral() points it at central.sonatype.com
         packageGroup.set(String) // Defaults to ${project.group}
     }
     source {
