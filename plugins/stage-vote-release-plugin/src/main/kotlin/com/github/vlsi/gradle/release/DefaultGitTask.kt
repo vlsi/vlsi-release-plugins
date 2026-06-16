@@ -25,8 +25,10 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
+import org.gradle.work.DisableCachingByDefault
 import javax.inject.Inject
 
+@DisableCachingByDefault(because = "Performs Git operations, not worth caching")
 abstract class DefaultGitTask : DefaultTask() {
     @get:Inject
     protected abstract val layout: ProjectLayout

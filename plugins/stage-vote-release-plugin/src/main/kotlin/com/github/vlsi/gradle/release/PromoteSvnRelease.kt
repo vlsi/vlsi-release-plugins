@@ -19,8 +19,10 @@ package com.github.vlsi.gradle.release
 import com.github.vlsi.gradle.release.svn.LsDepth
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.InputChanges
 
+@DisableCachingByDefault(because = "Performs SVN operations, not worth caching")
 abstract class PromoteSvnRelease : SvnmuccTask() {
     @get:Input
     abstract val useCpWorkaround : Property<Boolean>

@@ -17,6 +17,7 @@
 
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("build.java-conventions")
@@ -24,14 +25,28 @@ plugins {
     kotlin("jvm")
 }
 
-kotlin {
-    @Suppress("DEPRECATION")
-    val targetKotlinVersion = KotlinVersion.KOTLIN_1_5
+// Keep apiVersion/languageVersion as low as the current compiler allows so the published
+// Kotlin metadata stays at version 2.0, which can be consumed by Gradle 8.3+ (Kotlin 2.0).
+val targetKotlinVersion = KotlinVersion.KOTLIN_2_0
 
-    coreLibrariesVersion = "1.5.31"
+kotlin {
+    coreLibrariesVersion = "2.0.0"
     compilerOptions {
         jvmTarget = JvmTarget.JVM_1_8
         freeCompilerArgs.add("-Xjdk-release=8")
+        // Language version 2.0 is intentional (keeps metadata at mv 2.0, usable on Gradle 8.3+),
+        // so silence the "language version 2.0 is deprecated" compiler warning.
+        freeCompilerArgs.add("-Xsuppress-version-warnings")
+        apiVersion.set(targetKotlinVersion)
+        languageVersion.set(targetKotlinVersion)
+    }
+}
+
+// The kotlin-dsl plugin overrides apiVersion/languageVersion on the compile tasks, so
+// re-apply them per task to keep the metadata version low for published plugins.
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        freeCompilerArgs.add("-Xsuppress-version-warnings")
         apiVersion.set(targetKotlinVersion)
         languageVersion.set(targetKotlinVersion)
     }

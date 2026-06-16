@@ -23,7 +23,9 @@ import org.gradle.process.ExecSpec
 import java.io.File
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Runs external gettext tools, not worth caching")
 abstract class BaseGettextEditTask @Inject constructor(
     objects: ObjectFactory
 ) : BaseGettextTask(objects) {

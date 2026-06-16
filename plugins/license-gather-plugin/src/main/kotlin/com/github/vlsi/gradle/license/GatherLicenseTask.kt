@@ -55,6 +55,7 @@ import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.setProperty
 import org.gradle.kotlin.dsl.submit
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import java.util.*
@@ -99,6 +100,7 @@ enum class ErrorLanguage {
     KOTLIN, GROOVY, ENGLISH
 }
 
+@DisableCachingByDefault(because = "Gathers license metadata from the dependency graph, not worth caching")
 abstract class GatherLicenseTask @Inject constructor(
     layout: ProjectLayout,
     private val objectFactory: ObjectFactory,

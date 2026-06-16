@@ -64,8 +64,7 @@ fun Project.applyKotlinProjectConventions() {
         options.release.set(11)
     }
     kotlin {
-        @Suppress("DEPRECATION")
-        val targetKotlinVersion = KotlinVersion.KOTLIN_1_5
+        val targetKotlinVersion = KotlinVersion.KOTLIN_2_1
 
         compilerOptions {
             apiVersion.set(targetKotlinVersion)

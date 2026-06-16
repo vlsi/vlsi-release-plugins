@@ -23,7 +23,9 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Performs Git operations, not worth caching")
 abstract class GitCreateTagTask : DefaultGitTask() {
     @get:Input
     abstract val tag : Property<String>

@@ -21,7 +21,6 @@ import com.github.vlsi.gradle.styledtext.Style
 import com.github.vlsi.gradle.styledtext.StyledTextBuilder
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.UncheckedIOException
 import org.gradle.api.internal.tasks.TaskDependencyResolveException
 import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.execution.MultipleBuildFailures
@@ -87,7 +86,7 @@ class ThrowablePrinter {
                             it.message?.startsWith("Could not complete execution for") == true
                 },
                 { it is LocationAwareException && it.message == it.cause?.message },
-                { it is UncheckedException || it is UncheckedIOException },
+                { it is UncheckedException || it is java.io.UncheckedIOException },
                 { it is AssertionError &&
                         it.stackTrace.firstOrNull()?.className?.startsWith("com.github.autostyle.") == true
                 },

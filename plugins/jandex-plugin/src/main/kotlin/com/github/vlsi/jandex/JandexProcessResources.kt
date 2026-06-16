@@ -20,7 +20,9 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.SourceSet
 import org.gradle.language.jvm.tasks.ProcessResources
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Copy task that adds a Jandex index to the resources, not worth caching")
 abstract class JandexProcessResources : ProcessResources() {
     companion object {
         const val VERB = "process"

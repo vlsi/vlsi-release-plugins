@@ -21,11 +21,13 @@ import org.gradle.api.GradleException
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * This task workarounds https://github.com/gradle/gradle/issues/10008
  * Unfortunately, there's no CopySpec#with(Provider<...>)
  */
+@DisableCachingByDefault(because = "Builds a CopySpec, not worth caching")
 open class BuildLicenseCopySpec : DefaultTask() {
     @Internal
     val copySpec = project.copySpec()

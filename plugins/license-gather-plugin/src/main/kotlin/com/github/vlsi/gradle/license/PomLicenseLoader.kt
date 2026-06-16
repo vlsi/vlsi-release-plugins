@@ -24,7 +24,6 @@ import com.github.vlsi.gradle.license.api.LicenseExpressionNormalizer
 import com.github.vlsi.gradle.license.api.SimpleLicense
 import groovy.xml.XmlSlurper
 import groovy.xml.slurpersupport.GPathResult
-import kotlinx.coroutines.runBlocking
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.component.ComponentIdentifier
@@ -43,7 +42,7 @@ data class PomContents(
     val licenses: List<License>
 )
 
-typealias PomParser = suspend (ComponentIdentifier) -> PomContents
+typealias PomParser = (ComponentIdentifier) -> PomContents
 
 class LicenseDetector(
     private val overrides: LicenseOverrides,
@@ -52,7 +51,7 @@ class LicenseDetector(
 ) {
     private val licenseCache = mutableMapOf<ComponentIdentifier, LicenseExpression?>()
 
-    suspend fun detect(id: ComponentIdentifier): LicenseExpression? {
+    fun detect(id: ComponentIdentifier): LicenseExpression? {
         if (licenseCache.containsKey(id)) {
             return licenseCache[id]
         }
@@ -129,34 +128,59 @@ fun loadLicenses(
     project: Project,
     overrides: LicenseOverrides,
     normalizer: LicenseExpressionNormalizer
-) =
-    runBlocking {
-        batch<ComponentIdentifier, File, LicenseExpression?> {
-            for (id in ids) {
-                task { loader ->
-                    LicenseDetector(overrides, normalizer) { id ->
-                        loader(id).parseXml().parsePom()
-                    }.detect(id)
-                }
+): List<Result<LicenseExpression?>> {
+    // Resolving Maven POM artifacts one by one would issue a separate dependency
+    // resolution query per artifact. Instead, the POMs are fetched in waves: every POM
+    // that is currently needed is resolved in a single query, then the parent POMs the
+    // freshly parsed POMs refer to are resolved in the next wave, and so on.
+    val pomCache = mutableMapOf<ComponentIdentifier, PomContents>()
+    val pomFailures = mutableMapOf<ComponentIdentifier, Throwable>()
+
+    // A POM is not needed only when an override fully determines the effective license
+    // without verifying it against the POM contents (see LicenseDetector.detect).
+    fun pomNeeded(id: ComponentIdentifier): Boolean {
+        val override = overrides[id as ModuleComponentIdentifier]
+        return !(override?.expectedLicense == null && override?.effectiveLicense != null)
+    }
+
+    var wave = ids.filterTo(linkedSetOf()) { pomNeeded(it) }
+    while (wave.isNotEmpty()) {
+        val toResolve = wave.filter { it !in pomCache && it !in pomFailures }
+        if (toResolve.isEmpty()) {
+            break
+        }
+        val resolved = project.dependencies.createArtifactResolutionQuery()
+            .forComponents(toResolve)
+            .withArtifacts(MavenModule::class, MavenPomArtifact::class)
+            .execute()
+            .resolvedComponents
+            .associate { it.id to it.getArtifacts(MavenPomArtifact::class) }
+
+        val nextWave = linkedSetOf<ComponentIdentifier>()
+        for (id in toResolve) {
+            val artifact = resolved[id]?.firstOrNull()
+            if (artifact == null) {
+                pomFailures[id] = IllegalStateException("$id was not downloaded")
+                continue
             }
-
-            handleBatch { requests ->
-                val artifactResolutionResult = project.dependencies.createArtifactResolutionQuery()
-                    .forComponents(requests.map { it.first })
-                    .withArtifacts(MavenModule::class, MavenPomArtifact::class)
-                    .execute()
-
-                val results = artifactResolutionResult.resolvedComponents
-                    .associate { it.id to it.getArtifacts(MavenPomArtifact::class) }
-
-                for (req in requests) {
-                    val result = results[req.first]?.firstOrNull()
-                    if (result == null) {
-                        req.second.completeExceptionally(IllegalStateException("${req.first} was not downloaded"))
-                        continue
-                    }
-                    req.second.complete((result as ResolvedArtifactResult).file)
-                }
+            val pom = (artifact as ResolvedArtifactResult).file.parseXml().parsePom()
+            pomCache[id] = pom
+            val parentId = pom.parentId
+            if (pom.licenses.isEmpty() && parentId != null && pomNeeded(parentId)) {
+                nextWave.add(parentId)
             }
         }
+        wave = nextWave
     }
+
+    val parser: PomParser = { id ->
+        pomCache[id] ?: throw (pomFailures[id] ?: IllegalStateException("$id was not downloaded"))
+    }
+    return ids.map { id ->
+        try {
+            Result.success(LicenseDetector(overrides, normalizer, parser).detect(id))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}

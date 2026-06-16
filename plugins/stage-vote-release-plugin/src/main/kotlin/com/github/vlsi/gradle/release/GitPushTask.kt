@@ -27,7 +27,9 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Performs Git operations, not worth caching")
 abstract class GitPushTask : DefaultGitTask() {
     @get:Input
     abstract val refSpecs : ListProperty<RefSpec>

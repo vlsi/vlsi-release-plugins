@@ -22,8 +22,10 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.kotlin.dsl.property
 import org.gradle.process.ExecOperations
+import org.gradle.work.DisableCachingByDefault
 import javax.inject.Inject
 
+@DisableCachingByDefault(because = "Runs external gettext tools, not worth caching")
 abstract class BaseGettextTask @Inject constructor(
     objects: ObjectFactory
 ) : DefaultTask() {
