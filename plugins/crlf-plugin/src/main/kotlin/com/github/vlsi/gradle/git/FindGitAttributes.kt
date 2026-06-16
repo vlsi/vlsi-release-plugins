@@ -21,8 +21,10 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
+import org.gradle.work.DisableCachingByDefault
 import javax.inject.Inject
 
+@DisableCachingByDefault(because = "Reads .gitignore and .gitattributes from the filesystem")
 open class FindGitAttributes @Inject constructor(
     objectFactory: ObjectFactory
 ) : DefaultTask() {

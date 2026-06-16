@@ -27,8 +27,8 @@ import com.github.vlsi.gradle.styledtext.StyledTextBuilder
 import com.github.vlsi.gradle.styledtext.withStyle
 import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.TestDescriptor
+import org.gradle.api.tasks.testing.TestListener
 import org.gradle.api.tasks.testing.TestResult
-import org.gradle.kotlin.dsl.KotlinClosure2
 
 private val ERROR = StandardColor.RED.foreground + Style.BOLD
 private val WARNING = StandardColor.BLUE.foreground + Style.BOLD
@@ -181,28 +181,31 @@ fun AbstractTestTask.printTestResults(
         }
         println(sb.toString())
     }
-    afterTest(
-        KotlinClosure2<TestDescriptor, TestResult, Any>({ descriptor, result ->
+    addTestListener(object : TestListener {
+        override fun beforeSuite(suite: TestDescriptor) {}
+
+        override fun beforeTest(testDescriptor: TestDescriptor) {}
+
+        override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) {
             // There are lots of skipped tests, so it is not clear how to log them
             // without making build logs too verbose
             if (result.resultType == TestResult.ResultType.FAILURE ||
                 result.endTime - result.startTime >= slowTestLogThreshold
             ) {
-                printResult(descriptor, result)
+                printResult(testDescriptor, result)
             }
-        })
-    )
-    afterSuite(
-        KotlinClosure2<TestDescriptor, TestResult, Any>({ descriptor, result ->
-            if (descriptor.name.startsWith("Gradle Test Executor") &&
+        }
+
+        override fun afterSuite(suite: TestDescriptor, result: TestResult) {
+            if (suite.name.startsWith("Gradle Test Executor") &&
                 result.exceptions.isEmpty()) {
-                return@KotlinClosure2
+                return
             }
             if (result.resultType == TestResult.ResultType.FAILURE ||
                 result.endTime - result.startTime >= slowSuiteLogThreshold
             ) {
-                printResult(descriptor, result)
+                printResult(suite, result)
             }
-        })
-    )
+        }
+    })
 }

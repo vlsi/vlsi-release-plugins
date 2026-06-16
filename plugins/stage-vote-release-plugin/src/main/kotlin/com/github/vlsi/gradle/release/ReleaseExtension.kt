@@ -156,7 +156,7 @@ open class ReleaseExtension @Inject constructor(
     val nexus = objects.newInstance<NexusConfig>(this, project)
     fun nexus(action: Action<in NexusConfig>) = action(nexus)
 
-    private val git = project.container<GitConfig> {
+    private val git = objects.domainObjectContainer(GitConfig::class.java) {
         objects.newInstance(it, this, project)
     }
 

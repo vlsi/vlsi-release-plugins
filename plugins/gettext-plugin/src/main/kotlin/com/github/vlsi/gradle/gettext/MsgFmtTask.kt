@@ -30,12 +30,14 @@ import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.work.ChangeType
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import java.io.File
 import java.nio.charset.Charset
 import javax.inject.Inject
 
+@DisableCachingByDefault(because = "Runs external gettext tools, not worth caching")
 abstract class MsgFmtTask @Inject constructor(
     objects: ObjectFactory,
 ) : BaseGettextTask(objects) {

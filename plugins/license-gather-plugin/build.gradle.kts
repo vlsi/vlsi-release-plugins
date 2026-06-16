@@ -24,11 +24,6 @@ plugins {
     id("build.test-junit5")
 }
 
-dependencies {
-    // kotlinx-coroutines-core 1.10+ results in internal kotlinc error
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-}
-
 tasks {
     val saveLicenses by registering(EnumGeneratorTask::class) {
         licenses = layout.projectDirectory.dir("license-list-data/json")
@@ -105,6 +100,9 @@ tasks {
         outputs.dir(output)
 
         classpath(sourceSets.main.map { it.runtimeClasspath })
+        // SpdxPredictor uses Gradle API (e.g. GradleException), which the kotlin-dsl
+        // plugin keeps on the compile-only classpath, so add it here for the JavaExec run
+        classpath(sourceSets.main.map { it.compileClasspath })
         classpath(allLicenseTextsDir)
         mainClass.set("com.github.vlsi.gradle.license.SpdxPredictorKt")
         argumentProviders += CommandLineArgumentProvider {

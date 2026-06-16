@@ -31,20 +31,25 @@ import org.gradle.api.tasks.Console
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.mapProperty
 import org.gradle.kotlin.dsl.property
+import org.gradle.work.DisableCachingByDefault
 import java.lang.Math.max
 import java.util.*
 import javax.inject.Inject
 
+@DisableCachingByDefault(because = "Verification task, not worth caching")
 open class VerifyLicenseCompatibilityTask @Inject constructor(
     objectFactory: ObjectFactory,
     layout: ProjectLayout
 ) : DefaultTask() {
     @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
     val metadata = objectFactory.fileCollection()
 
     @Input

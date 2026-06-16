@@ -22,7 +22,9 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Performs Git operations, not worth caching")
 abstract class GitCommitAndPush : DefaultGitTask() {
     @get:Input
     abstract val commitMessage: Property<String>

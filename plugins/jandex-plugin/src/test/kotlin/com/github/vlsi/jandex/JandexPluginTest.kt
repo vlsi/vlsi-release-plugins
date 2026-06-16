@@ -62,6 +62,14 @@ class JandexPluginTest : BaseGradleTest() {
             repositories {
               mavenCentral()
             }
+
+            tasks.withType(Test).configureEach {
+              // Gradle 9 fails the build when a Test task discovers no tests.
+              // The sample's test source only exists to be indexed by Jandex, not executed.
+              if (it.hasProperty('failOnNoDiscoveredTests')) {
+                it.failOnNoDiscoveredTests = false
+              }
+            }
         """.trimIndent()
         )
         val result = prepare(testCase, "check", "jar", "-i").build()

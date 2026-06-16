@@ -31,7 +31,6 @@ fun Project.extraMavenPublications(configurationName: String, publicationName: S
             if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
         }
     }Publications") {
-        isVisible = false
         isCanBeResolved = false
         isCanBeConsumed = false
     }

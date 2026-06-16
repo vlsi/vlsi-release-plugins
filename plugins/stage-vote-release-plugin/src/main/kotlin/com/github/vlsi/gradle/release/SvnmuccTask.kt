@@ -34,8 +34,10 @@ import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.InputChanges
 
+@DisableCachingByDefault(because = "Performs SVN operations, not worth caching")
 abstract class SvnmuccTask @Inject constructor() : DefaultTask() {
     @get:Inject
     abstract val execOperations: ExecOperations

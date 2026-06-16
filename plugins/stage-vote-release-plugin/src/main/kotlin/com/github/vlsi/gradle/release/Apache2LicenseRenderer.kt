@@ -35,12 +35,16 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.*
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * This class converts license analysis of com.github.jk1.license to a LICENSE-compatible format
  */
+@DisableCachingByDefault(because = "Renders a LICENSE file, not worth caching")
 open class Apache2LicenseRenderer @Inject constructor(
     objectFactory: ObjectFactory,
     layout: ProjectLayout
@@ -51,6 +55,7 @@ open class Apache2LicenseRenderer @Inject constructor(
         .convention(ArtifactType.SOURCE)
 
     @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
     val metadata = objectFactory.fileCollection()
 
     @OutputFile
@@ -74,6 +79,7 @@ open class Apache2LicenseRenderer @Inject constructor(
 
     @Optional
     @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
     val mainLicenseFile = objectFactory.fileProperty()
 
     @Input

@@ -22,7 +22,9 @@ import org.eclipse.jgit.api.ResetCommand
 import org.eclipse.jgit.util.FileUtils
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Performs Git operations, not worth caching")
 abstract class GitPrepareRepo : DefaultGitTask() {
     // Tell Gradle the directory is output, so it does not clean it on Gradle upgrades
     @OutputDirectory

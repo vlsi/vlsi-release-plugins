@@ -56,27 +56,21 @@ open class BaseGradleTest {
                 // Test as a single configuration only for faster local feedback
                 return listOf(arguments(TestCase(GradleVersion.version("8.10.2"), ConfigurationCache.ON)))
             }
+            // The plugins are compiled with Kotlin metadata version 2.0, which requires
+            // Kotlin 1.9+ to consume, i.e. Gradle 8.3+.
             return mutableListOf<Arguments>().apply {
-                // Java 11 requires Gradle 5.0+
-                if (JavaVersion.current() <= JavaVersion.VERSION_11) {
-                    add(arguments(TestCase(GradleVersion.version("7.2"), ConfigurationCache.OFF)))
+                // Gradle 8.3 (the minimum supported version) runs on Java up to 20 only
+                if (JavaVersion.current() <= JavaVersion.VERSION_20) {
+                    add(arguments(TestCase(GradleVersion.version("8.3"), ConfigurationCache.ON)))
                 }
-                // Java 17 requires Gradle 7.3+
-                if (JavaVersion.current() <= JavaVersion.VERSION_17) {
-                    add(arguments(TestCase(GradleVersion.version("7.3.3"), ConfigurationCache.OFF)))
-                    add(arguments(TestCase(GradleVersion.version("7.4.2"), ConfigurationCache.OFF)))
-                    // Configuration cache supports custom caches since 7.5 only: https://github.com/gradle/gradle/issues/14874
-                    add(arguments(TestCase(GradleVersion.version("7.5"), ConfigurationCache.ON)))
-                    add(arguments(TestCase(GradleVersion.version("7.6.3"), ConfigurationCache.ON)))
-                    add(arguments(TestCase(GradleVersion.version("8.0.2"), ConfigurationCache.ON)))
-                    add(arguments(TestCase(GradleVersion.version("8.1"), ConfigurationCache.ON)))
-                }
-                // Java 21 requires Gradle 8.5+
-                if (JavaVersion.current() <= JavaVersion.VERSION_21) {
-                    add(arguments(TestCase(GradleVersion.version("8.14.2"), ConfigurationCache.ON)))
-                    add(arguments(TestCase(GradleVersion.version("8.10.2"), ConfigurationCache.ON)))
-                    add(arguments(TestCase(GradleVersion.version("8.5"), ConfigurationCache.ON)))
-                }
+                // Last 8.x and all 9.x; 9.x requires Java 17+, which the build already mandates
+                add(arguments(TestCase(GradleVersion.version("8.14.2"), ConfigurationCache.ON)))
+                add(arguments(TestCase(GradleVersion.version("9.0.0"), ConfigurationCache.ON)))
+                add(arguments(TestCase(GradleVersion.version("9.1.0"), ConfigurationCache.ON)))
+                add(arguments(TestCase(GradleVersion.version("9.2.1"), ConfigurationCache.ON)))
+                add(arguments(TestCase(GradleVersion.version("9.3.1"), ConfigurationCache.ON)))
+                add(arguments(TestCase(GradleVersion.version("9.4.1"), ConfigurationCache.ON)))
+                add(arguments(TestCase(GradleVersion.version("9.5.1"), ConfigurationCache.ON)))
             }
         }
     }

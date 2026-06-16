@@ -27,11 +27,13 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.work.ChangeType
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import java.io.File
 import javax.inject.Inject
 
+@DisableCachingByDefault(because = "Runs external gettext tools, not worth caching")
 abstract class MsgMergeTask @Inject constructor(
     objects: ObjectFactory
 ) : BaseGettextEditTask(objects) {

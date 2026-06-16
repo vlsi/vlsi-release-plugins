@@ -37,11 +37,10 @@ fun Project.licensesCopySpec(
     if (source !is TaskProvider<*>) {
         throw GradleException("'source' must be TaskProvider, got $source")
     }
-    return tasks.create<BuildLicenseCopySpec>("${source.name}CopySpec") {
+    return tasks.register<BuildLicenseCopySpec>("${source.name}CopySpec") {
         dependsOn(source)
-    }.apply {
         noticeFile?.let { copySpec.from(it) }
         copySpec.from(source)
         action?.execute(copySpec)
-    }
+    }.get()
 }

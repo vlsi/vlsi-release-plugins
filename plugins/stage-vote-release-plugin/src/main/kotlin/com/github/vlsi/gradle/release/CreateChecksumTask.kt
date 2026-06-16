@@ -21,15 +21,20 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.withGroovyBuilder
+import org.gradle.work.DisableCachingByDefault
 import javax.inject.Inject
 
+@DisableCachingByDefault(because = "Computes a checksum, not worth caching")
 abstract class CreateChecksumTask : DefaultTask() {
     @get:Inject
     protected abstract val layout: ProjectLayout
 
     @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
     abstract val archiveFile: RegularFileProperty
 
     @get:OutputFile

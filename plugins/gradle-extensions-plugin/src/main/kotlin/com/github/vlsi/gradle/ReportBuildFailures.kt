@@ -23,6 +23,10 @@ import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import java.util.concurrent.atomic.AtomicBoolean
 
+// BuildAdapter and BuildListener.buildFinished are deprecated in favour of the dataflow
+// FlowAction API (see BuildFailurePrintFlowAction), which is used for Gradle 8.1+.
+// This listener is kept only as a fallback for Gradle < 8.1, where FlowAction is unavailable.
+@Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
 class ReportBuildFailures(
     private val enableStyle: Boolean,
     private val fullTrace: Boolean

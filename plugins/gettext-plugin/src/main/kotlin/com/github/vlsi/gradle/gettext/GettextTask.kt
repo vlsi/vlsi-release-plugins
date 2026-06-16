@@ -31,8 +31,10 @@ import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
+import org.gradle.work.DisableCachingByDefault
 import javax.inject.Inject
 
+@DisableCachingByDefault(because = "Runs external gettext tools, not worth caching")
 abstract class GettextTask @Inject constructor(
     layout: ProjectLayout,
     objects: ObjectFactory

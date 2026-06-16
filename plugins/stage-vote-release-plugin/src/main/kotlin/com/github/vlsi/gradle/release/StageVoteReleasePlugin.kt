@@ -103,9 +103,15 @@ class StageVoteReleasePlugin @Inject constructor(
         const val VALIDATE_BEFORE_ARTIFACT_BUILD_TASK_NAME = "validateBeforeBuildingReleaseArtifacts"
 
         // Configurations
+        // Consumable configurations hold the produced artifacts and are selected by
+        // project(path, name) dependencies. The *Resolved companions are the resolvable
+        // aggregators, since Gradle 9 forbids a configuration from being both a resolution
+        // root and a consumable variant at the same time.
         const val RELEASE_FILES_CONFIGURATION_NAME = "releaseFiles"
         const val RELEASE_SIGNATURES_CONFIGURATION_NAME = "releaseSignatures"
         const val PREVIEW_SITE_CONFIGURATION_NAME = "previewSite"
+        const val RELEASE_FILES_RESOLVED_CONFIGURATION_NAME = "releaseFilesResolved"
+        const val RELEASE_SIGNATURES_RESOLVED_CONFIGURATION_NAME = "releaseSignaturesResolved"
     }
 
     private val Project.skipSign: Boolean get() = props.bool("skipSign")
@@ -123,17 +129,35 @@ class StageVoteReleasePlugin @Inject constructor(
 
     private fun Project.configureAll() {
         extensions.create<ReleaseArtifacts>(RELEASE_ARTIFACTS_EXTENSION_NAME, project)
-        configurations.create(RELEASE_FILES_CONFIGURATION_NAME)
-        configurations.create(RELEASE_SIGNATURES_CONFIGURATION_NAME)
+        // Consumable configurations: producers add artifacts here, and they are selected
+        // by project(path, name) dependencies from the aggregating project.
+        configurations.create(RELEASE_FILES_CONFIGURATION_NAME) {
+            isCanBeConsumed = true
+            isCanBeResolved = false
+        }
+        configurations.create(RELEASE_SIGNATURES_CONFIGURATION_NAME) {
+            isCanBeConsumed = true
+            isCanBeResolved = false
+        }
         configurations.create(PREVIEW_SITE_CONFIGURATION_NAME)
+        // Resolvable aggregators: fromProject() adds project dependencies here, and the
+        // release tasks resolve them to the actual files.
+        configurations.create(RELEASE_FILES_RESOLVED_CONFIGURATION_NAME) {
+            isCanBeConsumed = false
+            isCanBeResolved = true
+        }
+        configurations.create(RELEASE_SIGNATURES_RESOLVED_CONFIGURATION_NAME) {
+            isCanBeConsumed = false
+            isCanBeResolved = true
+        }
     }
 
     private fun Project.configureRoot() {
         apply(plugin = "org.ajoberstar.grgit")
         apply(plugin = "io.github.gradle-nexus.publish-plugin")
 
-        val releaseFilesConfiguration = configurations[RELEASE_FILES_CONFIGURATION_NAME]
-        val releaseSignaturesConfiguration = configurations[RELEASE_SIGNATURES_CONFIGURATION_NAME]
+        val releaseFilesConfiguration = configurations[RELEASE_FILES_RESOLVED_CONFIGURATION_NAME]
+        val releaseSignaturesConfiguration = configurations[RELEASE_SIGNATURES_RESOLVED_CONFIGURATION_NAME]
 
         // Save stagingRepoId. We don't know which
         val releaseExt = extensions.create<ReleaseExtension>(RELEASE_PARAMS_EXTENSION_NAME, logger, project)

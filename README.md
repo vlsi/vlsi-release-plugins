@@ -8,6 +8,7 @@ This is a set of Gradle plugins to simplify release tasks
 Gradle version compatibilty
 ===========================
 
+* 4.x requires Gradle 8.3, Kotlin 1.9, Java 8
 * 3.x requires Gradle 7.2, Kotlin 1.5, Java 8
 * 2.x requires Gradle 4.1, Kotlin 1.4, Java 8
 * 1.x requires Gradle 4.1, Kotlin 1.4, Java 8

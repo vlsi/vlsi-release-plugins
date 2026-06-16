@@ -24,8 +24,10 @@ import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.the
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.InputChanges
 
+@DisableCachingByDefault(because = "Performs SVN operations, not worth caching")
 abstract class RemoveStaleArtifactsTask @Inject constructor(
     objects: ObjectFactory
 ) : SvnmuccTask() {

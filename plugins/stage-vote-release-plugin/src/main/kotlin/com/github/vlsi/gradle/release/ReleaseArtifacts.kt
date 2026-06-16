@@ -18,7 +18,9 @@ package com.github.vlsi.gradle.release
 
 import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.PREVIEW_SITE_CONFIGURATION_NAME
 import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.RELEASE_FILES_CONFIGURATION_NAME
+import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.RELEASE_FILES_RESOLVED_CONFIGURATION_NAME
 import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.RELEASE_SIGNATURES_CONFIGURATION_NAME
+import com.github.vlsi.gradle.release.StageVoteReleasePlugin.Companion.RELEASE_SIGNATURES_RESOLVED_CONFIGURATION_NAME
 import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -39,8 +41,9 @@ open class ReleaseArtifacts @Inject constructor(
 ) {
     fun fromProject(path: String) {
         project.dependencies {
-            add(RELEASE_FILES_CONFIGURATION_NAME, project(path, RELEASE_FILES_CONFIGURATION_NAME))
-            add(RELEASE_SIGNATURES_CONFIGURATION_NAME, project(path, RELEASE_SIGNATURES_CONFIGURATION_NAME))
+            // Resolve the produced (consumable) artifacts through the resolvable aggregators
+            add(RELEASE_FILES_RESOLVED_CONFIGURATION_NAME, project(path, RELEASE_FILES_CONFIGURATION_NAME))
+            add(RELEASE_SIGNATURES_RESOLVED_CONFIGURATION_NAME, project(path, RELEASE_SIGNATURES_CONFIGURATION_NAME))
             add(PREVIEW_SITE_CONFIGURATION_NAME, project(path, PREVIEW_SITE_CONFIGURATION_NAME))
         }
     }

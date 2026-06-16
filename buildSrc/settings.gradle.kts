@@ -15,6 +15,11 @@
  *
  */
 
+// Autostyle adds .gitattributes and .gitignore to Ant's default excludes.
+// Gradle 9 forbids changing default excludes during the build, so register them here.
+org.apache.tools.ant.DirectoryScanner.addDefaultExclude("**/.gitattributes")
+org.apache.tools.ant.DirectoryScanner.addDefaultExclude("**/.gitignore")
+
 pluginManagement {
     plugins {
         id("com.github.autostyle") version "4.0.1"
