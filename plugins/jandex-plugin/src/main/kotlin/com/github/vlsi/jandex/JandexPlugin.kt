@@ -19,11 +19,7 @@ package com.github.vlsi.jandex
 import com.github.vlsi.jandex.JandexProcessResources.Companion.getTaskName
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.api.tasks.javadoc.Javadoc
-import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
@@ -69,13 +65,19 @@ open class JandexPlugin : Plugin<Project> {
                     })
                 }
 
-                val resourceDir = sourceSet.output.resourcesDir!!
+                // Build the index into a dedicated directory and register it as an extra output of
+                // the sourceSet. Gradle then makes every consumer of sourceSet.output depend on
+                // processJandexIndex automatically, so no per-task wiring is needed. It also keeps
+                // Gradle 9 from reporting an implicit dependency for consumers the plugin does not
+                // know about (e.g. the JMH bytecode generator or checkstyle on non-main sourceSets).
+                val jandexResourcesDir =
+                    project.layout.buildDirectory.dir("jandexResources/$sourceSetName")
                 val processJandexIndex = tasks.register(
                     getTaskName(sourceSet),
                     JandexProcessResources::class
                 ) {
-                    description = "Copies Jandex index for $sourceSetName to the resources"
-                    destinationDir = resourceDir
+                    description = "Copies Jandex index for $sourceSetName to the sourceSet output"
+                    destinationDir = jandexResourcesDir.get().asFile
                     jandexBuildAction.set(task.flatMap { it.jandexBuildAction })
                     onlyIf {
                         jandexBuildAction.get() != JandexBuildAction.NONE
@@ -89,41 +91,7 @@ open class JandexPlugin : Plugin<Project> {
                         })
                     }
                 }
-                if (name == SourceSet.MAIN_SOURCE_SET_NAME) {
-                    // Assume all sourceSets depend on main one, so we make ALL tasks depend on
-                    // processJandexIndex from the main sourceSet
-                    val compileJavaTaskName = sourceSet.compileJavaTaskName
-                    tasks.withType<JavaCompile>()
-                        .matching { it.name != compileJavaTaskName }
-                        .configureEach {
-                            dependsOn(processJandexIndex)
-                        }
-                    tasks.withType<Jar>().configureEach {
-                        dependsOn(processJandexIndex)
-                    }
-                    tasks.withType<Javadoc>().configureEach {
-                        dependsOn(processJandexIndex)
-                    }
-                    tasks.matching {
-                        it.name.startsWith("forbiddenApis") ||
-                                it.name.startsWith("compile") && it.name.endsWith("Kotlin") && it.name != "compileKotlin"
-                    }
-                        .configureEach {
-                            dependsOn(processJandexIndex)
-                        }
-                } else {
-                    // Non-main sourceSets depend on their processJandexIndex as well
-                    val jarTaskName = sourceSet.jarTaskName
-                    val sourcesJarTaskName = sourceSet.sourcesJarTaskName
-                    tasks.withType<Jar>().matching { it.name == jarTaskName || it.name == sourcesJarTaskName }.configureEach {
-                        dependsOn(processJandexIndex)
-                    }
-                    sourceSet.javadocTaskName.let { taskName ->
-                        tasks.withType<Javadoc>().matching { it.name == taskName }.configureEach {
-                            dependsOn(processJandexIndex)
-                        }
-                    }
-                }
+                sourceSet.output.dir(mapOf("builtBy" to processJandexIndex), jandexResourcesDir)
             }
             sourceSets.whenObjectRemoved {
                 tasks.named(getTaskName(JANDEX_TASK_NAME, null)) {
