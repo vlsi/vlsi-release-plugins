@@ -17,7 +17,6 @@
 package com.github.vlsi.gradle.gettext
 
 import org.gradle.api.GradleException
-import org.gradle.api.file.FileType
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
@@ -84,11 +83,8 @@ abstract class MsgFmtTask @Inject constructor(
         val cmd = executable.get()
         val arg = args.get()
         val targetBundle = targetBundle.get()
-        for (po in inputChanges.getFileChanges(poFiles)) {
-            if (po.fileType != FileType.FILE) {
-                continue
-            }
-
+        val currentPoFiles = poFiles.files
+        for (po in coalesceFileChanges(inputChanges.getFileChanges(poFiles), currentPoFiles)) {
             val locale = po.file.nameWithoutExtension.toJavaLocale()
 
             val outputName = when (format.get()) {
