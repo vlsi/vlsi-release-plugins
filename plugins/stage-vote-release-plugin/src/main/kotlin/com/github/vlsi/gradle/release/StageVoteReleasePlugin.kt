@@ -603,15 +603,20 @@ class StageVoteReleasePlugin @Inject constructor(
         validateBeforeBuildingReleaseArtifacts: TaskProvider<*>
     ) {
         configure<NexusPublishExtension> {
-            val repo = repositories.create(REPOSITORY_NAME) {
-                nexusUrl.set(releaseExt.nexus.url.map { it.replacePath("/service/local/") })
-                snapshotRepositoryUrl.set(releaseExt.nexus.url.map { it.replacePath("/content/repositories/snapshots/") })
-                username.set(project.provider { releaseExt.nexus.credentials.username(project) })
-                password.set(project.provider { releaseExt.nexus.credentials.password(project) })
-            }
-            connectTimeout.set(releaseExt.nexus.connectTimeout)
-            clientTimeout.set(releaseExt.nexus.operationTimeout)
             val nexus = releaseExt.nexus
+            val repo = repositories.create(REPOSITORY_NAME) {
+                nexusUrl.set(nexus.url.map { it.replacePath("/service/local/") })
+                snapshotRepositoryUrl.set(
+                    nexus.snapshotUrl.orElse(
+                        nexus.url.map { it.replacePath("/content/repositories/snapshots/") }
+                    )
+                )
+                username.set(project.provider { nexus.credentials.username(project) })
+                password.set(project.provider { nexus.credentials.password(project) })
+                stagingProfileId.set(nexus.stagingProfileId)
+            }
+            connectTimeout.set(nexus.connectTimeout)
+            clientTimeout.set(nexus.operationTimeout)
             packageGroup.set(nexus.packageGroup)
             transitionCheckOptions {
                 delayBetween.set(Duration.ofSeconds(10))
