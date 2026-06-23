@@ -17,6 +17,7 @@
 
 plugins {
     id("build.kotlin-dsl-published-gradle-plugin")
+    id("build.test-junit5")
 }
 
 dependencies {
