@@ -100,10 +100,10 @@ open class IdeExtension(private val project: Project) {
         sourceSet: NamedDomainObjectProvider<SourceSet>
     ) {
         sourceSet.configure {
-            java.srcDir(generationOutput)
-            project.tasks.named(compileJavaTaskName) {
-                dependsOn(task)
-            }
+            // builtBy attaches the generator to the source directory, so every consumer of the
+            // source set depends on it: compileJava, sourcesJar, and any other task that reads
+            // allJava. Gradle 9 turns a missing dependency on such an output into a build failure.
+            java.srcDir(project.files(generationOutput).builtBy(task))
         }
 
         project.configure<IdeaModel> {
