@@ -20,7 +20,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.21.3")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.21.3")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.21.3")
-    implementation("com.squareup:kotlinpoet:1.18.1")
+    implementation("com.squareup:kotlinpoet:2.3.0")
 }
 
 java {
