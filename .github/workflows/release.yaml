@@ -120,7 +120,7 @@ jobs:
           GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
 
       - name: Publish GitHub release
-        uses: release-drafter/release-drafter@563bf132657a13ded0b01fcb723c5a58cdd824e2 # v7
+        uses: release-drafter/release-drafter@4d75298e00d9e34c483e5ff8c68d0ea1c1940c1e # v7
         id: publish_release
         with:
           disable-autolabeler: true
